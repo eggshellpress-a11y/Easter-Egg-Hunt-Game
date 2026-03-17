@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# macOS Pages documents (design files — not tracked in repo)
+*.pages
+
+# Editor directories
+.vscode/
+.idea/
+
+# Node (if ever added)
+node_modules/
+npm-debug.log*
