@@ -276,32 +276,6 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 .upload-music-btn:hover { border-color: #a78bfa; color: #a78bfa; }
-.stream-row {
-  display: flex; gap: 8px; width: 100%; margin-top: 10px; align-items: center;
-}
-.stream-url-input {
-  flex: 1; min-width: 0;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 10px;
-  padding: 7px 10px;
-  color: #fff;
-  font-size: 0.75rem;
-  outline: none;
-}
-.stream-url-input:focus { border-color: rgba(255,255,255,0.5); }
-.stream-url-input::placeholder { color: rgba(255,255,255,0.3); }
-.stream-btn {
-  padding: 7px 13px;
-  border-radius: 10px;
-  border: 2px solid #a78bfa;
-  background: rgba(167,139,250,0.15);
-  color: #a78bfa;
-  font-size: 0.75rem; font-weight: 700;
-  cursor: pointer; white-space: nowrap; transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.stream-btn:hover { background: rgba(167,139,250,0.3); }
 .music-status {
   font-size: 0.68rem; color: rgba(255,255,255,0.45); margin-top: 6px; min-height: 14px;
 }
@@ -334,6 +308,7 @@ html, body {
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
   background: linear-gradient(135deg, #ff6b9d, #ffd93d, #6bcb77, #4ecdc4);
   background-size: 300% auto;
   color: white;
@@ -484,6 +459,11 @@ html, body {
   flex-shrink: 0;
   transition: opacity 0.3s;
   text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+/* Full-screen celebration flash overlay */
+#screenFlash {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+  opacity: 0; transition: opacity 0.05s ease-in;
 }
 
 /* Egg grid */
@@ -655,6 +635,20 @@ html, body {
   100% { transform: scale(0); opacity: 0; }
 }
 
+/* Lucky / bonus egg golden pulse */
+.egg-wrapper.bonus-egg .egg {
+  box-shadow:
+    0 0 14px #ffd93d,
+    0 0 30px #ffd93daa,
+    inset -5px -8px 20px rgba(0,0,0,0.18),
+    inset 4px 6px 15px rgba(255,255,255,0.4) !important;
+  animation: eggDance 1.4s ease-in-out infinite, bonusGlow 1.2s ease-in-out infinite alternate !important;
+}
+@keyframes bonusGlow {
+  from { box-shadow: 0 0 14px #ffd93d, 0 0 30px #ffd93daa, inset -5px -8px 20px rgba(0,0,0,0.18), inset 4px 6px 15px rgba(255,255,255,0.4); }
+  to   { box-shadow: 0 0 28px #ffd93d, 0 0 60px #ffb300cc, 0 0 90px #ffd93d55, inset -5px -8px 20px rgba(0,0,0,0.18), inset 4px 6px 15px rgba(255,255,255,0.4); }
+}
+
 /* Slide-in animation */
 .egg-wrapper.slide-in {
   animation: eggSlideIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards !important;
@@ -789,6 +783,7 @@ html, body {
 
 <!-- Confetti Canvas -->
 <canvas id="confettiCanvas"></canvas>
+<div id="screenFlash"></div>
 
 <!-- ========== HOME SCREEN ========== -->
 <div class="screen" id="homeScreen">
@@ -832,7 +827,7 @@ html, body {
     <div class="diff-cards">
       <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectDiff('easy',this)">
         <span class="diff-name">Easy</span>
-        <span class="diff-info">16 eggs · 60s</span>
+        <span class="diff-info">15 eggs · 60s</span>
       </div>
       <div class="diff-card diff-med" data-diff="medium" onclick="selectDiff('medium',this)">
         <span class="diff-name">Medium</span>
@@ -840,7 +835,7 @@ html, body {
       </div>
       <div class="diff-card diff-hard" data-diff="hard" onclick="selectDiff('hard',this)">
         <span class="diff-name">Hard</span>
-        <span class="diff-info">24 eggs · 30s</span>
+        <span class="diff-info">25 eggs · 30s</span>
       </div>
     </div>
   </div>
@@ -882,10 +877,6 @@ html, body {
         📂 Upload Song
       </button>
       <input type="file" id="musicUploadInput" accept="audio/*" style="display:none" onchange="loadCustomMusic(this)">
-    </div>
-    <div class="stream-row">
-      <input type="url" id="streamURLInput" class="stream-url-input" placeholder="Or paste a stream URL (MP3, radio…)" />
-      <button class="stream-btn" onclick="loadMusicFromURL()">▶ Stream</button>
     </div>
     <div class="music-status" id="musicStatus"></div>
   </div>
@@ -976,14 +967,14 @@ const EGG_COLORS = [
   { light:'#DCEDC8', mid:'#AED581', dark:'#558B2F', accent:'#689F38' }, // Sage
 ];
 const ITEMS_BY_DIFF = {
-  easy:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕'],                          // 8 pairs = 16 eggs
+  easy:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋'],                               // 7 pairs = 14 eggs + 1 lucky egg = 15
   medium: ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
-  hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀','🎁','👑'],      // 12 pairs = 24 eggs
+  hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀','🎁','👑'],      // 12 pairs = 24 eggs + 1 lucky egg = 25
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 16, time: 60 },
+  easy:   { eggs: 15, time: 60 },
   medium: { eggs: 20, time: 45 },
-  hard:   { eggs: 24, time: 30 },
+  hard:   { eggs: 25, time: 30 },
 };
 
 let cfg = {
@@ -995,7 +986,6 @@ let cfg = {
   musicOn: true,
   sfxOn: true,
   customMusic: null,
-  streamURL: null,
 };
 
 let game = {
@@ -1021,7 +1011,6 @@ let game = {
 let audioCtx = null;
 let bgmNode = null, bgmGain = null;
 let bgmSourceNode = null; // custom uploaded audio source
-let bgmAudio = null;      // HTML Audio element for URL streaming
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1046,54 +1035,77 @@ function sfxPop() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  playTone(880, 'sine', t, 0.1, 0.4, ctx);
-  playTone(1200, 'sine', t + 0.05, 0.08, 0.2, ctx);
+  // Punchy layered pop: thump + chirp + sparkle
+  const osc1 = ctx.createOscillator(), g1 = ctx.createGain();
+  osc1.type = 'sine'; osc1.frequency.setValueAtTime(180, t);
+  osc1.frequency.exponentialRampToValueAtTime(60, t + 0.12);
+  g1.gain.setValueAtTime(0.7, t); g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
+  osc1.connect(g1); g1.connect(ctx.destination); osc1.start(t); osc1.stop(t + 0.15);
+
+  const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
+  osc2.type = 'triangle'; osc2.frequency.setValueAtTime(1400, t + 0.02);
+  osc2.frequency.exponentialRampToValueAtTime(600, t + 0.1);
+  g2.gain.setValueAtTime(0.35, t + 0.02); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+  osc2.connect(g2); g2.connect(ctx.destination); osc2.start(t + 0.02); osc2.stop(t + 0.15);
+
+  playTone(2400, 'sine', t + 0.04, 0.06, 0.2, ctx);
+  playTone(3200, 'sine', t + 0.06, 0.04, 0.12, ctx);
 }
 
 function sfxMatch() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  playTone(523.25, 'sine', t,       0.2, 0.4, ctx); // C5
-  playTone(659.25, 'sine', t + 0.18, 0.2, 0.4, ctx); // E5
-  playTone(783.99, 'sine', t + 0.36, 0.3, 0.5, ctx); // G5
+  // Bright ascending chord + sparkle shimmer
+  [[523.25,0],[659.25,0.12],[783.99,0.24],[1046.5,0.38]].forEach(([f, dt]) => {
+    playTone(f, 'sine', t + dt, 0.35, 0.55, ctx);
+    playTone(f * 2, 'sine', t + dt + 0.02, 0.15, 0.18, ctx); // octave sparkle
+  });
+  // Final shimmer burst
+  [1318.5, 1568, 2093].forEach((f, i) => playTone(f, 'sine', t + 0.55 + i * 0.07, 0.2, 0.3, ctx));
 }
 
 function sfxNoMatch() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  playTone(220, 'sawtooth', t,       0.3, 0.3, ctx);
-  playTone(185, 'sawtooth', t + 0.25, 0.3, 0.25, ctx);
+  // Warbly sad descend
+  [[280, 0],[210, 0.18],[160, 0.36]].forEach(([f, dt]) => {
+    playTone(f, 'sawtooth', t + dt, 0.25, 0.32, ctx);
+    playTone(f * 1.5, 'square', t + dt, 0.12, 0.12, ctx);
+  });
+  playTone(100, 'sine', t + 0.5, 0.3, 0.28, ctx);
 }
 
 function sfxTick() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  playTone(1000, 'square', t, 0.05, 0.15, ctx);
+  // Sharp mechanical click + high ping
+  playTone(1800, 'square', t, 0.03, 0.4, ctx);
+  playTone(900, 'square', t + 0.01, 0.04, 0.25, ctx);
+  playTone(3600, 'sine', t, 0.025, 0.2, ctx);
 }
 
 function sfxWhoosh() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.4, ctx.sampleRate);
+  // Filtered noise with rising then falling sweep
+  const dur = 0.7;
+  const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
   const data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
-  }
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
   const src = ctx.createBufferSource();
+  const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.5;
+  f.frequency.setValueAtTime(200, t);
+  f.frequency.exponentialRampToValueAtTime(2400, t + dur * 0.35);
+  f.frequency.exponentialRampToValueAtTime(180, t + dur);
   const g = ctx.createGain();
-  const f = ctx.createBiquadFilter();
-  f.type = 'bandpass';
-  f.frequency.setValueAtTime(800, t);
-  f.frequency.exponentialRampToValueAtTime(200, t + 0.4);
-  f.Q.value = 0.5;
-  src.buffer = buf;
-  src.connect(f); f.connect(g); g.connect(ctx.destination);
-  g.gain.setValueAtTime(0.4, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(0.6, t + dur * 0.2);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.buffer = buf; src.connect(f); f.connect(g); g.connect(ctx.destination);
   src.start(t);
 }
 
@@ -1101,28 +1113,35 @@ function sfxFanfare() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C5 E5 G5 C6 E6
+  // Triumphant ascending fanfare with harmonics
+  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 2093];
   notes.forEach((f, i) => {
-    playTone(f, 'sine', t + i * 0.15, 0.4, 0.4, ctx);
+    playTone(f, 'sine', t + i * 0.13, 0.45, 0.5, ctx);
+    playTone(f * 1.5, 'sine', t + i * 0.13 + 0.03, 0.2, 0.2, ctx);
   });
+  // Final chord stab
+  [523.25, 659.25, 783.99].forEach(f => playTone(f, 'triangle', t + 0.9, 0.6, 0.4, ctx));
 }
 
 function sfxConfettiBurst() {
   if (!cfg.sfxOn) return;
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
-  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.12, ctx.sampleRate);
+  // Crisp crack + high sizzle
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.18, ctx.sampleRate);
   const data = buf.getChannelData(0);
   for (let i = 0; i < data.length; i++) {
-    data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const env = i < data.length * 0.1 ? i / (data.length * 0.1) : 1 - (i - data.length * 0.1) / (data.length * 0.9);
+    data[i] = (Math.random() * 2 - 1) * env;
   }
   const src = ctx.createBufferSource();
+  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 3000;
   const g = ctx.createGain();
-  src.buffer = buf;
-  src.connect(g); g.connect(ctx.destination);
-  g.gain.setValueAtTime(0.2, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+  g.gain.setValueAtTime(0.55, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+  src.buffer = buf; src.connect(hpf); hpf.connect(g); g.connect(ctx.destination);
   src.start(t);
+  playTone(1800, 'sine', t, 0.08, 0.3, ctx);
+  playTone(2400, 'sine', t + 0.03, 0.06, 0.2, ctx);
 }
 
 // ---- BGM ----
@@ -1139,9 +1158,6 @@ function stopBGM() {
   if (bgmSourceNode) {
     try { bgmSourceNode.stop(); } catch(e){}
     bgmSourceNode = null;
-  }
-  if (bgmAudio && !bgmAudio.paused) {
-    bgmAudio.pause();
   }
 }
 
@@ -1163,39 +1179,6 @@ function startCustomBGM() {
   bgmSourceNode = src;
 }
 
-function startStreamBGM(url) {
-  if (!bgmAudio) {
-    bgmAudio = new Audio();
-    bgmAudio.loop = true;
-    bgmAudio.volume = 0.75;
-  }
-  if (bgmAudio.src !== url) bgmAudio.src = url;
-  bgmAudio.play().catch(() => {
-    setMusicStatus('⚠ Cannot play — check the URL or CORS policy');
-  });
-}
-
-function loadMusicFromURL() {
-  const input = document.getElementById('streamURLInput');
-  const url = input.value.trim();
-  if (!url) return;
-  cfg.streamURL = url;
-  cfg.customMusic = null;
-  document.getElementById('musicStatus').textContent = '';
-  // Clear the upload label if any
-  const uploadInput = document.getElementById('musicUploadInput');
-  if (uploadInput) uploadInput.value = '';
-  setMusicStatus('⏳ Connecting…');
-  if (cfg.musicOn) {
-    stopBGM();
-    startStreamBGM(url);
-    if (bgmAudio) {
-      bgmAudio.oncanplay = () => setMusicStatus('▶ Streaming: ' + url.split('/').pop().slice(0, 30));
-      bgmAudio.onerror   = () => setMusicStatus('⚠ Cannot play — check the URL or CORS policy');
-    }
-  }
-}
-
 function setMusicStatus(msg) {
   const el = document.getElementById('musicStatus');
   if (el) el.textContent = msg;
@@ -1207,9 +1190,8 @@ function toggleMusic() {
   document.querySelectorAll('#musicToggleHome, #musicToggleGame').forEach(btn => {
     btn.classList.toggle('on', cfg.musicOn);
   });
-  if (cfg.musicOn) {
-    if (cfg.streamURL)    startStreamBGM(cfg.streamURL);
-    else if (cfg.customMusic) startCustomBGM();
+  if (cfg.musicOn && cfg.customMusic) {
+    startCustomBGM();
   } else {
     stopBGM();
   }
@@ -1229,7 +1211,11 @@ const confettiCanvas = document.getElementById('confettiCanvas');
 const confettiCtx = confettiCanvas.getContext('2d');
 let confettiParticles = [];
 let confettiRAF = null;
-const CONFETTI_COLORS = ['#ff6b9d','#ffd93d','#6bcb77','#4ecdc4','#a78bfa','#ff6b6b','#74b9ff','#fd79a8'];
+const CONFETTI_COLORS = [
+  '#ff6b9d','#ff4081','#ffd93d','#ffb300','#6bcb77','#00e676',
+  '#4ecdc4','#00bcd4','#a78bfa','#7c4dff','#ff6b6b','#ff1744',
+  '#74b9ff','#2196f3','#fd79a8','#ffffff','#ffe082','#b9f6ca',
+];
 
 function resizeConfettiCanvas() {
   confettiCanvas.width = window.innerWidth;
@@ -1238,25 +1224,39 @@ function resizeConfettiCanvas() {
 resizeConfettiCanvas();
 window.addEventListener('resize', resizeConfettiCanvas);
 
-function burstConfetti(x, y, count = 30) {
+function burstConfetti(x, y, count = 50) {
   sfxConfettiBurst();
   for (let i = 0; i < count; i++) {
     const angle = (Math.random() * Math.PI * 2);
-    const speed = 2 + Math.random() * 6;
+    const speed = 4 + Math.random() * 12;
+    const shapes = ['rect','circle','star','triangle'];
     confettiParticles.push({
       x, y,
-      vx: Math.cos(angle) * speed * 0.8,
-      vy: -Math.abs(Math.sin(angle)) * speed - 2,
+      vx: Math.cos(angle) * speed,
+      vy: -Math.abs(Math.sin(angle)) * speed - 3,
       color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      size: 4 + Math.random() * 6,
+      size: 5 + Math.random() * 9,
       life: 1,
-      decay: 0.015 + Math.random() * 0.015,
+      decay: 0.012 + Math.random() * 0.014,
       rot: Math.random() * Math.PI * 2,
-      rotV: (Math.random() - 0.5) * 0.2,
-      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      rotV: (Math.random() - 0.5) * 0.35,
+      shape: shapes[Math.floor(Math.random() * shapes.length)],
+      glowing: Math.random() > 0.6,
     });
   }
   if (!confettiRAF) animateConfetti();
+}
+
+function drawStar(ctx, r) {
+  const spikes = 5, inner = r * 0.45;
+  ctx.beginPath();
+  for (let i = 0; i < spikes * 2; i++) {
+    const radius = i % 2 === 0 ? r : inner;
+    const a = (i * Math.PI) / spikes - Math.PI / 2;
+    i === 0 ? ctx.moveTo(Math.cos(a) * radius, Math.sin(a) * radius)
+             : ctx.lineTo(Math.cos(a) * radius, Math.sin(a) * radius);
+  }
+  ctx.closePath();
 }
 
 function animateConfetti() {
@@ -1266,21 +1266,37 @@ function animateConfetti() {
   confettiParticles.forEach(p => {
     p.x += p.vx;
     p.y += p.vy;
-    p.vy += 0.18; // gravity
-    p.vx *= 0.99;
+    p.vy += 0.22; // gravity
+    p.vx *= 0.985;
     p.life -= p.decay;
     p.rot += p.rotV;
 
     confettiCtx.save();
-    confettiCtx.globalAlpha = Math.max(0, p.life);
-    confettiCtx.fillStyle = p.color;
+    confettiCtx.globalAlpha = Math.min(1, p.life * 1.4);
     confettiCtx.translate(p.x, p.y);
     confettiCtx.rotate(p.rot);
+
+    if (p.glowing) {
+      confettiCtx.shadowColor = p.color;
+      confettiCtx.shadowBlur = 10;
+    }
+    confettiCtx.fillStyle = p.color;
+
     if (p.shape === 'rect') {
-      confettiCtx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
-    } else {
+      confettiCtx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+    } else if (p.shape === 'circle') {
       confettiCtx.beginPath();
-      confettiCtx.arc(0, 0, p.size/2, 0, Math.PI*2);
+      confettiCtx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+      confettiCtx.fill();
+    } else if (p.shape === 'star') {
+      drawStar(confettiCtx, p.size / 2);
+      confettiCtx.fill();
+    } else { // triangle
+      confettiCtx.beginPath();
+      confettiCtx.moveTo(0, -p.size / 2);
+      confettiCtx.lineTo(p.size / 2, p.size / 2);
+      confettiCtx.lineTo(-p.size / 2, p.size / 2);
+      confettiCtx.closePath();
       confettiCtx.fill();
     }
     confettiCtx.restore();
@@ -1413,9 +1429,6 @@ function loadCustomMusic(input) {
   reader.onload = (e) => {
     ctx.decodeAudioData(e.target.result, (buffer) => {
       cfg.customMusic = buffer;
-      cfg.streamURL = null;
-      const urlInput = document.getElementById('streamURLInput');
-      if (urlInput) urlInput.value = '';
       setMusicStatus('🎵 ' + file.name.slice(0, 28));
       if (cfg.musicOn) { stopBGM(); startCustomBGM(); }
     });
@@ -1436,9 +1449,8 @@ function startGame() {
   }
 
   // Start BGM
-  if (cfg.musicOn) {
-    if (cfg.streamURL)    startStreamBGM(cfg.streamURL);
-    else if (cfg.customMusic) startCustomBGM();
+  if (cfg.musicOn && cfg.customMusic) {
+    startCustomBGM();
   }
 
   // Init game state
@@ -1454,23 +1466,28 @@ function startGame() {
   game.paused = false;
   game.shuffling = false;
   game.matchedPairs = 0;
-  game.totalPairs = diffCfg.eggs / 2;
   game.aiMemory = {};
 
-  // Create card data (pairs of each item)
-  let cardItems = [...items, ...items]; // each item twice = pairs
-  // For hard: items has 10, eggs has 20 → already 20 total
+  // Create card data (pairs of each item); odd egg counts get one lucky bonus egg
+  let cardItems = [...items, ...items];
+  const hasBonus = diffCfg.eggs % 2 === 1;
+  if (hasBonus) cardItems.push('__LUCKY__');
   shuffle(cardItems);
+  game.totalPairs = Math.ceil(diffCfg.eggs / 2); // pairs + 1 if bonus egg present
 
-  game.cards = cardItems.map((emoji, idx) => ({
-    id: idx,
-    emoji,
-    colorIdx: idx % EGG_COLORS.length,
-    matched: false,
-    revealed: false,
-    el: null,
-    wrapEl: null,
-  }));
+  game.cards = cardItems.map((emoji, idx) => {
+    const isBonus = emoji === '__LUCKY__';
+    return {
+      id: idx,
+      emoji: isBonus ? '🌟' : emoji,
+      colorIdx: isBonus ? 4 : idx % EGG_COLORS.length, // index 4 = Lemon/gold
+      matched: false,
+      revealed: false,
+      bonus: isBonus,
+      el: null,
+      wrapEl: null,
+    };
+  });
 
   // Build screens
   buildGameHeader();
@@ -1582,6 +1599,7 @@ function buildEggGrid() {
 
     card.wrapEl = wrapper;
     card.el = wrapper.querySelector('.egg-body');
+    if (card.bonus) wrapper.classList.add('bonus-egg');
 
     cell.appendChild(wrapper);
     grid.appendChild(cell);
@@ -1764,12 +1782,44 @@ function onEggClick(idx) {
   sfxPop();
   revealCard(idx);
   updateAIMemory(idx);
-
   game.current.push(idx);
+
+  if (card.bonus) {
+    game.locked = true;
+    setTimeout(() => handleBonusEgg(idx), 650);
+    return;
+  }
 
   if (game.current.length === 2) {
     checkMatch();
   }
+}
+
+function handleBonusEgg(idx) {
+  const card = game.cards[idx];
+  const p = game.currentPlayer;
+  sfxMatch();
+  setFlash('🌟 LUCKY EGG! +1 BONUS!', '#ffd93d');
+  const pos = getEggCenter(card.wrapEl);
+  burstConfetti(pos.x, pos.y, 80);
+  burstConfetti(pos.x - 50, pos.y - 40, 40);
+  burstConfetti(pos.x + 50, pos.y - 40, 40);
+  flashScreen('#ffd93d', 0.45, 350);
+  game.scores[p]++;
+  game.items[p].push('🌟');
+  updateBaskets();
+  card.wrapEl.classList.add('matched');
+  setTimeout(() => {
+    card.matched = true;
+    card.wrapEl.style.visibility = 'hidden';
+    game.matchedPairs++;
+    game.current = [];
+    game.locked = false;
+    clearFlash();
+    updateTurnIndicator();
+    if (game.matchedPairs >= game.totalPairs) { onGameComplete(); return; }
+    if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 900);
+  }, 900);
 }
 
 function revealCard(idx) {
@@ -1783,7 +1833,7 @@ function revealCard(idx) {
     card.wrapEl.classList.remove('squishing');
     openEgg(card);
     const pos = getEggCenter(card.wrapEl);
-    burstConfetti(pos.x, pos.y, 18);
+    burstConfetti(pos.x, pos.y, 45);
   }, { once: true });
 }
 
@@ -1819,8 +1869,11 @@ function checkMatch() {
       // Animate match
       const posA = getEggCenter(cardA.wrapEl);
       const posB = getEggCenter(cardB.wrapEl);
-      burstConfetti(posA.x, posA.y, 30);
-      burstConfetti(posB.x, posB.y, 30);
+      const midX = (posA.x + posB.x) / 2, midY = (posA.y + posB.y) / 2;
+      burstConfetti(posA.x, posA.y, 70);
+      burstConfetti(posB.x, posB.y, 70);
+      burstConfetti(midX, midY, 55);
+      flashScreen('#ffffff', 0.55, 280);
 
       cardA.wrapEl.classList.remove('dancing');
       cardB.wrapEl.classList.remove('dancing');
@@ -2026,11 +2079,8 @@ function goHome() {
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  if (cfg.musicOn) {
-    setTimeout(() => {
-      if (cfg.streamURL)    startStreamBGM(cfg.streamURL);
-      else if (cfg.customMusic) startCustomBGM();
-    }, 300);
+  if (cfg.musicOn && cfg.customMusic) {
+    setTimeout(() => startCustomBGM(), 300);
   }
 }
 
@@ -2124,6 +2174,15 @@ function setFlash(msg, color = '#fff') {
 function clearFlash() {
   const el = document.getElementById('flashMsg');
   if (el) { el.style.opacity = '0'; }
+}
+
+function flashScreen(color, alpha, durationMs) {
+  const el = document.getElementById('screenFlash');
+  if (!el) return;
+  el.style.background = color;
+  el.style.opacity = alpha;
+  setTimeout(() => { el.style.transition = `opacity ${durationMs}ms ease-out`; el.style.opacity = 0; }, 40);
+  setTimeout(() => { el.style.transition = ''; }, durationMs + 60);
 }
 
 // ============================================================
