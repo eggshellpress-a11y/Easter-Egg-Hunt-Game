@@ -1091,80 +1091,8 @@ function sfxConfettiBurst() {
 }
 
 // ---- BGM ----
-let bgmScheduled = false;
-let bgmStopFlag = false;
-
-function startBGM() {
-  if (!cfg.musicOn) return;
-  const ctx = getAudioCtx();
-
-  if (cfg.customMusic) {
-    startCustomBGM();
-    return;
-  }
-
-  bgmStopFlag = false;
-  bgmScheduled = true;
-
-  // Melody: E4 G4 A4 C5 A4 G4 E4 D4 E4 G4 rest
-  const melody = [
-    [329.63, 0.3], [392, 0.3], [440, 0.3], [523.25, 0.6],
-    [440, 0.3], [392, 0.3], [329.63, 0.6], [293.66, 0.3],
-    [329.63, 0.3], [392, 0.6], [0, 0.3]
-  ];
-  const bass = [
-    [130.81, 1.2], [164.81, 0.9], [130.81, 0.6], [98, 0.9],
-    [130.81, 1.2], [164.81, 0.6], [130.81, 0.3]
-  ];
-
-  if (bgmGain) { bgmGain.gain.setValueAtTime(0.0001, ctx.currentTime); }
-
-  bgmGain = ctx.createGain();
-  bgmGain.gain.setValueAtTime(0.18, ctx.currentTime);
-  bgmGain.connect(ctx.destination);
-
-  function scheduleMelody(startTime) {
-    if (bgmStopFlag) return;
-    let t = startTime;
-    melody.forEach(([freq, dur]) => {
-      if (freq > 0) playToneToGain(freq, 'sine', t, dur * 0.8, 0.55, bgmGain, ctx);
-      t += dur;
-    });
-    const totalDur = melody.reduce((s, [,d]) => s + d, 0);
-    setTimeout(() => scheduleMelody(ctx.currentTime + 0.05), (totalDur - 0.3) * 1000);
-  }
-
-  function scheduleBass(startTime) {
-    if (bgmStopFlag) return;
-    let t = startTime;
-    bass.forEach(([freq, dur]) => {
-      playToneToGain(freq, 'triangle', t, dur * 0.7, 0.2, bgmGain, ctx);
-      t += dur;
-    });
-    const totalDur = bass.reduce((s, [,d]) => s + d, 0);
-    setTimeout(() => scheduleBass(ctx.currentTime + 0.05), (totalDur - 0.3) * 1000);
-  }
-
-  scheduleMelody(ctx.currentTime + 0.05);
-  scheduleBass(ctx.currentTime + 0.05);
-}
-
-function playToneToGain(freq, type, startTime, duration, gainVal, gainNode, ctx) {
-  const osc = ctx.createOscillator();
-  const g = ctx.createGain();
-  osc.connect(g); g.connect(gainNode);
-  osc.type = type;
-  osc.frequency.setValueAtTime(freq, startTime);
-  g.gain.setValueAtTime(0, startTime);
-  g.gain.linearRampToValueAtTime(gainVal, startTime + 0.02);
-  g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-  osc.start(startTime);
-  osc.stop(startTime + duration + 0.05);
-}
 
 function stopBGM() {
-  bgmStopFlag = true;
-  bgmScheduled = false;
   if (bgmGain) {
     try {
       const ctx = getAudioCtx();
@@ -1181,7 +1109,6 @@ function stopBGM() {
 
 function startCustomBGM() {
   const ctx = getAudioCtx();
-  bgmStopFlag = false;
   if (bgmGain) {
     try { bgmGain.gain.setValueAtTime(0.0001, ctx.currentTime); } catch(e){}
     bgmGain = null;
@@ -1204,8 +1131,8 @@ function toggleMusic() {
   document.querySelectorAll('#musicToggleHome, #musicToggleGame').forEach(btn => {
     btn.classList.toggle('on', cfg.musicOn);
   });
-  if (cfg.musicOn) {
-    startBGM();
+  if (cfg.musicOn && cfg.customMusic) {
+    startCustomBGM();
   } else {
     stopBGM();
   }
@@ -1410,7 +1337,7 @@ function loadCustomMusic(input) {
     ctx.decodeAudioData(e.target.result, (buffer) => {
       cfg.customMusic = buffer;
       document.getElementById('customMusicLabel').textContent = file.name.slice(0, 18);
-      if (cfg.musicOn) { stopBGM(); startBGM(); }
+      if (cfg.musicOn) { stopBGM(); startCustomBGM(); }
     });
   };
   reader.readAsArrayBuffer(file);
@@ -1429,8 +1356,8 @@ function startGame() {
   }
 
   // Start BGM
-  if (cfg.musicOn && !bgmScheduled) {
-    startBGM();
+  if (cfg.musicOn && cfg.customMusic) {
+    startCustomBGM();
   }
 
   // Init game state
@@ -2013,15 +1940,13 @@ function confirmExit() {
 function goHome() {
   clearInterval(game.timerInterval);
   stopBGM();
-  bgmScheduled = false;
   document.getElementById('gameScreen').classList.add('hidden');
   document.getElementById('homeScreen').classList.remove('hidden');
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  // Restart BGM for home screen
-  if (cfg.musicOn) {
-    setTimeout(() => startBGM(), 300);
+  if (cfg.musicOn && cfg.customMusic) {
+    setTimeout(() => startCustomBGM(), 300);
   }
 }
 
