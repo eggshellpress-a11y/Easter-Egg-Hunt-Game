@@ -162,9 +162,9 @@ html, body {
 .mode-card.mode-2p { background: linear-gradient(135deg, #4ecdc422, #4ecdc444); border-color: #4ecdc466; }
 .mode-card.mode-ai { background: linear-gradient(135deg, #a78bfa22, #a78bfa44); border-color: #a78bfa66; }
 .mode-card.selected { border-color: currentColor; transform: scale(1.04); }
-.mode-card.mode-1p.selected { border-color: #ff6b9d; box-shadow: 0 0 20px #ff6b9d55; }
-.mode-card.mode-2p.selected { border-color: #4ecdc4; box-shadow: 0 0 20px #4ecdc455; }
-.mode-card.mode-ai.selected { border-color: #a78bfa; box-shadow: 0 0 20px #a78bfa55; }
+.mode-card.mode-1p.selected { border-color: #ff6b9d; box-shadow: 0 0 12px #ff6b9d, 0 0 30px #ff6b9dcc, 0 0 55px #ff6b9d77; }
+.mode-card.mode-2p.selected { border-color: #4ecdc4; box-shadow: 0 0 12px #4ecdc4, 0 0 30px #4ecdc4cc, 0 0 55px #4ecdc477; }
+.mode-card.mode-ai.selected { border-color: #a78bfa; box-shadow: 0 0 12px #a78bfa, 0 0 30px #a78bfacc, 0 0 55px #a78bfa77; }
 .mode-card .mode-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
 .mode-card .mode-name { font-size: 0.8rem; font-weight: 700; color: #fff; display: block; }
 
@@ -186,9 +186,9 @@ html, body {
 .diff-card.diff-med  { background: linear-gradient(135deg, #ffd93d22, #ffd93d44); border-color: #ffd93d66; }
 .diff-card.diff-hard { background: linear-gradient(135deg, #ff6b6b22, #ff6b6b44); border-color: #ff6b6b66; }
 .diff-card.selected { transform: scale(1.04); }
-.diff-card.diff-easy.selected { border-color: #6bcb77; box-shadow: 0 0 20px #6bcb7755; }
-.diff-card.diff-med.selected  { border-color: #ffd93d; box-shadow: 0 0 20px #ffd93d55; }
-.diff-card.diff-hard.selected { border-color: #ff6b6b; box-shadow: 0 0 20px #ff6b6b55; }
+.diff-card.diff-easy.selected { border-color: #6bcb77; box-shadow: 0 0 12px #6bcb77, 0 0 30px #6bcb77cc, 0 0 55px #6bcb7777; }
+.diff-card.diff-med.selected  { border-color: #ffd93d; box-shadow: 0 0 12px #ffd93d, 0 0 30px #ffd93dcc, 0 0 55px #ffd93d77; }
+.diff-card.diff-hard.selected { border-color: #ff6b6b; box-shadow: 0 0 12px #ff6b6b, 0 0 30px #ff6b6bcc, 0 0 55px #ff6b6b77; }
 .diff-name { font-size: 0.85rem; font-weight: 700; color: #fff; display: block; }
 .diff-info { font-size: 0.7rem; color: rgba(255,255,255,0.6); display: block; margin-top: 2px; }
 
@@ -276,6 +276,35 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 .upload-music-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+.stream-row {
+  display: flex; gap: 8px; width: 100%; margin-top: 10px; align-items: center;
+}
+.stream-url-input {
+  flex: 1; min-width: 0;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 7px 10px;
+  color: #fff;
+  font-size: 0.75rem;
+  outline: none;
+}
+.stream-url-input:focus { border-color: rgba(255,255,255,0.5); }
+.stream-url-input::placeholder { color: rgba(255,255,255,0.3); }
+.stream-btn {
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 2px solid #a78bfa;
+  background: rgba(167,139,250,0.15);
+  color: #a78bfa;
+  font-size: 0.75rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.stream-btn:hover { background: rgba(167,139,250,0.3); }
+.music-status {
+  font-size: 0.68rem; color: rgba(255,255,255,0.45); margin-top: 6px; min-height: 14px;
+}
 
 /* AI difficulty sub-option */
 .ai-diff-row {
@@ -803,15 +832,15 @@ html, body {
     <div class="diff-cards">
       <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectDiff('easy',this)">
         <span class="diff-name">Easy</span>
-        <span class="diff-info">6 eggs · 60s</span>
+        <span class="diff-info">16 eggs · 60s</span>
       </div>
       <div class="diff-card diff-med" data-diff="medium" onclick="selectDiff('medium',this)">
         <span class="diff-name">Medium</span>
-        <span class="diff-info">12 eggs · 45s</span>
+        <span class="diff-info">20 eggs · 45s</span>
       </div>
       <div class="diff-card diff-hard" data-diff="hard" onclick="selectDiff('hard',this)">
         <span class="diff-name">Hard</span>
-        <span class="diff-info">20 eggs · 30s</span>
+        <span class="diff-info">24 eggs · 30s</span>
       </div>
     </div>
   </div>
@@ -850,11 +879,15 @@ html, body {
         <span class="tog-dot"></span> 🔊 SFX
       </button>
       <button class="upload-music-btn" onclick="document.getElementById('musicUploadInput').click()">
-        📂 Custom Music
+        📂 Upload Song
       </button>
       <input type="file" id="musicUploadInput" accept="audio/*" style="display:none" onchange="loadCustomMusic(this)">
-      <span id="customMusicLabel" style="font-size:0.7rem;color:rgba(255,255,255,0.5);"></span>
     </div>
+    <div class="stream-row">
+      <input type="url" id="streamURLInput" class="stream-url-input" placeholder="Or paste a stream URL (MP3, radio…)" />
+      <button class="stream-btn" onclick="loadMusicFromURL()">▶ Stream</button>
+    </div>
+    <div class="music-status" id="musicStatus"></div>
   </div>
 
   <!-- Start button -->
@@ -943,14 +976,14 @@ const EGG_COLORS = [
   { light:'#DCEDC8', mid:'#AED581', dark:'#558B2F', accent:'#689F38' }, // Sage
 ];
 const ITEMS_BY_DIFF = {
-  easy:   ['🐰','🐣','🌸'],
-  medium: ['🐰','🐣','🌸','🌈','⭐','💖'],
-  hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],
+  easy:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕'],                          // 8 pairs = 16 eggs
+  medium: ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
+  hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀','🎁','👑'],      // 12 pairs = 24 eggs
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 6,  time: 60 },
-  medium: { eggs: 12, time: 45 },
-  hard:   { eggs: 20, time: 30 },
+  easy:   { eggs: 16, time: 60 },
+  medium: { eggs: 20, time: 45 },
+  hard:   { eggs: 24, time: 30 },
 };
 
 let cfg = {
@@ -962,6 +995,7 @@ let cfg = {
   musicOn: true,
   sfxOn: true,
   customMusic: null,
+  streamURL: null,
 };
 
 let game = {
@@ -987,6 +1021,7 @@ let game = {
 let audioCtx = null;
 let bgmNode = null, bgmGain = null;
 let bgmSourceNode = null; // custom uploaded audio source
+let bgmAudio = null;      // HTML Audio element for URL streaming
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1105,6 +1140,9 @@ function stopBGM() {
     try { bgmSourceNode.stop(); } catch(e){}
     bgmSourceNode = null;
   }
+  if (bgmAudio && !bgmAudio.paused) {
+    bgmAudio.pause();
+  }
 }
 
 function startCustomBGM() {
@@ -1125,14 +1163,53 @@ function startCustomBGM() {
   bgmSourceNode = src;
 }
 
+function startStreamBGM(url) {
+  if (!bgmAudio) {
+    bgmAudio = new Audio();
+    bgmAudio.loop = true;
+    bgmAudio.volume = 0.75;
+  }
+  if (bgmAudio.src !== url) bgmAudio.src = url;
+  bgmAudio.play().catch(() => {
+    setMusicStatus('⚠ Cannot play — check the URL or CORS policy');
+  });
+}
+
+function loadMusicFromURL() {
+  const input = document.getElementById('streamURLInput');
+  const url = input.value.trim();
+  if (!url) return;
+  cfg.streamURL = url;
+  cfg.customMusic = null;
+  document.getElementById('musicStatus').textContent = '';
+  // Clear the upload label if any
+  const uploadInput = document.getElementById('musicUploadInput');
+  if (uploadInput) uploadInput.value = '';
+  setMusicStatus('⏳ Connecting…');
+  if (cfg.musicOn) {
+    stopBGM();
+    startStreamBGM(url);
+    if (bgmAudio) {
+      bgmAudio.oncanplay = () => setMusicStatus('▶ Streaming: ' + url.split('/').pop().slice(0, 30));
+      bgmAudio.onerror   = () => setMusicStatus('⚠ Cannot play — check the URL or CORS policy');
+    }
+  }
+}
+
+function setMusicStatus(msg) {
+  const el = document.getElementById('musicStatus');
+  if (el) el.textContent = msg;
+}
+
 function toggleMusic() {
   cfg.musicOn = !cfg.musicOn;
   // Update all buttons
   document.querySelectorAll('#musicToggleHome, #musicToggleGame').forEach(btn => {
     btn.classList.toggle('on', cfg.musicOn);
   });
-  if (cfg.musicOn && cfg.customMusic) {
-    startCustomBGM();
+  if (cfg.musicOn) {
+    if (cfg.streamURL)    startStreamBGM(cfg.streamURL);
+    else if (cfg.customMusic) startCustomBGM();
   } else {
     stopBGM();
   }
@@ -1336,7 +1413,10 @@ function loadCustomMusic(input) {
   reader.onload = (e) => {
     ctx.decodeAudioData(e.target.result, (buffer) => {
       cfg.customMusic = buffer;
-      document.getElementById('customMusicLabel').textContent = file.name.slice(0, 18);
+      cfg.streamURL = null;
+      const urlInput = document.getElementById('streamURLInput');
+      if (urlInput) urlInput.value = '';
+      setMusicStatus('🎵 ' + file.name.slice(0, 28));
       if (cfg.musicOn) { stopBGM(); startCustomBGM(); }
     });
   };
@@ -1356,8 +1436,9 @@ function startGame() {
   }
 
   // Start BGM
-  if (cfg.musicOn && cfg.customMusic) {
-    startCustomBGM();
+  if (cfg.musicOn) {
+    if (cfg.streamURL)    startStreamBGM(cfg.streamURL);
+    else if (cfg.customMusic) startCustomBGM();
   }
 
   // Init game state
@@ -1945,8 +2026,11 @@ function goHome() {
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  if (cfg.musicOn && cfg.customMusic) {
-    setTimeout(() => startCustomBGM(), 300);
+  if (cfg.musicOn) {
+    setTimeout(() => {
+      if (cfg.streamURL)    startStreamBGM(cfg.streamURL);
+      else if (cfg.customMusic) startCustomBGM();
+    }, 300);
   }
 }
 
