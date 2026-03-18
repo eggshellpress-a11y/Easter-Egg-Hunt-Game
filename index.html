@@ -4,14 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Easter Egg Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
 <style>
 /* ========== RESET & BASE ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   width: 100%; height: 100%; overflow: hidden;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #1a0a2e;
+  font-family: 'Fredoka', 'Fredoka One', 'Segoe UI', system-ui, sans-serif;
+  background: #3cd8f3;
   touch-action: manipulation;
+  color: #fff;
 }
 
 /* ========== SCREENS ========== */
@@ -27,32 +31,19 @@ html, body {
 
 /* ========== HOME SCREEN ========== */
 #homeScreen {
-  background: linear-gradient(160deg, #1a0a2e 0%, #2d1b5e 30%, #1a3a5c 60%, #0d2b1e 100%);
+  background: transparent;
   min-height: 100%;
   padding: 20px 16px 40px;
   align-items: center;
   gap: 24px;
 }
 
-/* Stars bg */
-#homeScreen::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image:
-    radial-gradient(circle, #fff 1px, transparent 1px),
-    radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1px);
-  background-size: 120px 80px, 80px 100px;
-  background-position: 0 0, 40px 50px;
-  opacity: 0.15;
-  pointer-events: none;
-  z-index: 0;
-}
-
 #homeScreen > * { position: relative; z-index: 1; }
 
 /* Title */
 .home-title {
-  font-size: clamp(2.2rem, 10vw, 3.8rem);
+  font-family: 'Fredoka One', 'Fredoka', system-ui, sans-serif;
+  font-size: clamp(2.4rem, 10vw, 4rem);
   font-weight: 900;
   text-align: center;
   background: linear-gradient(90deg, #ff6b9d, #ffd93d, #6bcb77, #4ecdc4, #a78bfa, #ff6b9d);
@@ -62,8 +53,9 @@ html, body {
   background-clip: text;
   animation: titleShimmer 3s linear infinite, titleBounce 2s ease-in-out infinite;
   text-shadow: none;
-  line-height: 1.1;
-  letter-spacing: -1px;
+  line-height: 1.15;
+  letter-spacing: 1px;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.15));
 }
 @keyframes titleShimmer {
   0% { background-position: 0% center; }
@@ -71,21 +63,25 @@ html, body {
 }
 @keyframes titleBounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-7px); }
 }
 .home-subtitle {
+  font-family: 'Fredoka', system-ui, sans-serif;
   font-size: clamp(1rem, 4vw, 1.3rem);
-  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  color: #fff;
   text-align: center;
-  margin-top: -8px;
-  letter-spacing: 3px;
+  margin-top: -6px;
+  letter-spacing: 5px;
   text-transform: uppercase;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 
 /* Decorative eggs row */
 .deco-eggs {
   display: flex; gap: 12px; justify-content: center;
   flex-wrap: wrap;
+  padding-top: 80px;
 }
 .deco-egg {
   width: 52px; height: 68px;
@@ -119,19 +115,72 @@ html, body {
 /* Cards / Sections */
 .home-section {
   width: 100%; max-width: 440px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 20px;
+  border-radius: 22px;
   padding: 18px 16px;
-  backdrop-filter: blur(10px);
+  position: relative;
+  isolation: isolate;
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.15);
 }
+/* Per-section colors — fully opaque Easter palette */
+#sectionMode   { background: #e0cdff; }
+#sectionDiff   { background: #c1f0fb; }
+#avatarSection { background: #dcf9a8; }
+#sectionAudio  { background: #ffebaf; padding-bottom: 8px; }
+/* Polkadots on section widgets — two independent layers, each with its own flicker */
+.home-section::before,
+.home-section::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  background-image: radial-gradient(circle, white 4px, transparent 4px);
+  background-size: 32px 64px;
+}
+/* Odd rows — flicker group A */
+.home-section::before {
+  background-position: 16px 16px;
+  animation: sectionDotA 5.5s ease-in-out infinite;
+}
+/* Even rows (offset) — flicker group B, different rhythm */
+.home-section::after {
+  background-position: 32px 48px;
+  animation: sectionDotB 7.0s ease-in-out infinite 1.8s;
+}
+@keyframes sectionDotA {
+  0%   { opacity: 0.30; }
+  18%  { opacity: 0.65; }
+  34%  { opacity: 0.28; }
+  55%  { opacity: 0.62; }
+  74%  { opacity: 0.32; }
+  88%  { opacity: 0.58; }
+  100% { opacity: 0.30; }
+}
+@keyframes sectionDotB {
+  0%   { opacity: 0.24; }
+  14%  { opacity: 0.58; }
+  33%  { opacity: 0.63; }
+  50%  { opacity: 0.22; }
+  68%  { opacity: 0.60; }
+  84%  { opacity: 0.26; }
+  100% { opacity: 0.24; }
+}
+
 .section-label {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 12px;
+  letter-spacing: 3px;
+  color: #ffffff;
+  background: #ff8eea;
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  padding: 8px 16px;
+  text-align: center;
+  display: block;
+  margin-bottom: 14px;
 }
 
 /* Mode cards */
@@ -158,15 +207,15 @@ html, body {
   transition: opacity 0.2s;
 }
 .mode-card:hover::before { opacity: 1; }
-.mode-card.mode-1p { background: linear-gradient(135deg, #ff6b9d22, #ff6b9d44); border-color: #ff6b9d66; }
-.mode-card.mode-2p { background: linear-gradient(135deg, #4ecdc422, #4ecdc444); border-color: #4ecdc466; }
-.mode-card.mode-ai { background: linear-gradient(135deg, #a78bfa22, #a78bfa44); border-color: #a78bfa66; }
-.mode-card.selected { border-color: currentColor; transform: scale(1.04); }
-.mode-card.mode-1p.selected { border-color: #ff6b9d; box-shadow: 0 0 12px #ff6b9d, 0 0 30px #ff6b9dcc, 0 0 55px #ff6b9d77; }
-.mode-card.mode-2p.selected { border-color: #4ecdc4; box-shadow: 0 0 12px #4ecdc4, 0 0 30px #4ecdc4cc, 0 0 55px #4ecdc477; }
-.mode-card.mode-ai.selected { border-color: #a78bfa; box-shadow: 0 0 12px #a78bfa, 0 0 30px #a78bfacc, 0 0 55px #a78bfa77; }
-.mode-card .mode-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
-.mode-card .mode-name { font-size: 0.8rem; font-weight: 700; color: #fff; display: block; }
+.mode-card.mode-1p { background: linear-gradient(135deg, #ff6b9d, #ff326e); border-color: #ff6b9d; }
+.mode-card.mode-2p { background: linear-gradient(135deg, #4ecdc4, #14aaa0); border-color: #4ecdc4; }
+.mode-card.mode-ai { background: linear-gradient(135deg, #a78bfa, #7850e6); border-color: #a78bfa; }
+.mode-card.selected { animation: selectedPulse 1.6s ease-in-out infinite; }
+.mode-card.mode-1p.selected { border: 4px solid #ffffff; box-shadow: none; }
+.mode-card.mode-2p.selected { border: 4px solid #ffffff; box-shadow: none; }
+.mode-card.mode-ai.selected { border: 4px solid #ffffff; box-shadow: none; }
+.mode-card .mode-icon { font-size: 1.9rem; display: block; margin-bottom: 4px; }
+.mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
 /* Difficulty */
 .diff-cards {
@@ -182,26 +231,26 @@ html, body {
   transition: all 0.25s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.diff-card.diff-easy { background: linear-gradient(135deg, #6bcb7722, #6bcb7744); border-color: #6bcb7766; }
-.diff-card.diff-med  { background: linear-gradient(135deg, #ffd93d22, #ffd93d44); border-color: #ffd93d66; }
-.diff-card.diff-hard { background: linear-gradient(135deg, #ff6b6b22, #ff6b6b44); border-color: #ff6b6b66; }
-.diff-card.selected { transform: scale(1.04); }
-.diff-card.diff-easy.selected { border-color: #6bcb77; box-shadow: 0 0 12px #6bcb77, 0 0 30px #6bcb77cc, 0 0 55px #6bcb7777; }
-.diff-card.diff-med.selected  { border-color: #ffd93d; box-shadow: 0 0 12px #ffd93d, 0 0 30px #ffd93dcc, 0 0 55px #ffd93d77; }
-.diff-card.diff-hard.selected { border-color: #ff6b6b; box-shadow: 0 0 12px #ff6b6b, 0 0 30px #ff6b6bcc, 0 0 55px #ff6b6b77; }
-.diff-name { font-size: 0.85rem; font-weight: 700; color: #fff; display: block; }
-.diff-info { font-size: 0.7rem; color: rgba(255,255,255,0.6); display: block; margin-top: 2px; }
+.diff-card.diff-easy { background: linear-gradient(135deg, #6bcb77, #32a046); border-color: #6bcb77; }
+.diff-card.diff-med  { background: linear-gradient(135deg, #ffd93d, #dca000); border-color: #ffd93d; }
+.diff-card.diff-hard { background: linear-gradient(135deg, #ff6b6b, #d22828); border-color: #ff6b6b; }
+.diff-card.selected { animation: selectedPulse 1.6s ease-in-out infinite; }
+.diff-card.diff-easy.selected { border: 4px solid #ffffff; box-shadow: none; }
+.diff-card.diff-med.selected  { border: 4px solid #ffffff; box-shadow: none; }
+.diff-card.diff-hard.selected { border: 4px solid #ffffff; box-shadow: none; }
+.diff-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+.diff-info { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.95); display: block; margin-top: 3px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
 /* Avatar picker */
 .avatar-section { display: flex; flex-direction: column; gap: 14px; }
 .avatar-player { display: flex; flex-direction: column; gap: 8px; }
-.avatar-player-label { font-size: 0.8rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+.avatar-player-label { font-size: 1.0rem; color: #3a5c28; font-weight: 700; }
 .avatar-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .avatar-btn {
   width: 42px; height: 42px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
+  border: 2px solid #bbb;
+  background: #ffffff;
   font-size: 1.3rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -209,21 +258,21 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
 }
-.avatar-btn:hover { transform: scale(1.15); border-color: rgba(255,255,255,0.6); }
-.avatar-btn.selected { border-color: #ffd93d; box-shadow: 0 0 14px #ffd93d88; background: rgba(255,217,61,0.2); transform: scale(1.15); }
+.avatar-btn:hover { transform: scale(1.15); border-color: #888; }
+.avatar-btn.selected { border: 4px solid #e6a800; box-shadow: none; background: #ffd93d; transform: scale(1.15); }
 .avatar-upload-btn {
-  padding: 6px 12px;
+  padding: 10px 18px;
   border-radius: 20px;
-  border: 2px dashed rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.6);
-  font-size: 0.72rem;
+  border: 2px dashed #aaa;
+  background: #ffffff;
+  color: #555;
+  font-size: 0.92rem;
   cursor: pointer;
   transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
   white-space: nowrap;
 }
-.avatar-upload-btn:hover { border-color: rgba(255,255,255,0.6); color: #fff; }
+.avatar-upload-btn:hover { border-color: #a78bfa; color: #7850e6; }
 .avatar-preview {
   width: 42px; height: 42px;
   border-radius: 50%;
@@ -232,17 +281,17 @@ html, body {
   display: none;
 }
 .player-name-input {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: #ffffff;
+  border: 1px solid #bbb;
   border-radius: 10px;
   padding: 6px 10px;
-  color: #fff;
-  font-size: 0.85rem;
+  color: #333;
+  font-size: 1.0rem;
   width: 160px;
   outline: none;
 }
-.player-name-input:focus { border-color: rgba(255,255,255,0.5); }
-.player-name-input::placeholder { color: rgba(255,255,255,0.3); }
+.player-name-input:focus { border-color: #888; }
+.player-name-input::placeholder { color: #aaa; }
 
 /* Audio controls */
 .audio-row {
@@ -252,32 +301,32 @@ html, body {
   display: flex; align-items: center; gap: 7px;
   padding: 8px 14px;
   border-radius: 20px;
-  border: 2px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.7);
-  font-size: 0.8rem; font-weight: 600;
+  border: 2px solid #bbb;
+  background: #ffffff;
+  color: #555;
+  font-size: 1.0rem; font-weight: 600;
   cursor: pointer; transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.toggle-btn.on { border-color: #6bcb77; color: #6bcb77; background: rgba(107,203,119,0.15); }
+.toggle-btn.on { border-color: #6bcb77; color: #ffffff; background: #6bcb77; }
 .toggle-btn .tog-dot {
   width: 10px; height: 10px; border-radius: 50%;
-  background: rgba(255,255,255,0.3); transition: background 0.2s;
+  background: #bbb; transition: background 0.2s;
 }
-.toggle-btn.on .tog-dot { background: #6bcb77; }
+.toggle-btn.on .tog-dot { background: #ffffff; }
 .upload-music-btn {
   padding: 8px 14px;
   border-radius: 20px;
-  border: 2px dashed rgba(255,255,255,0.3);
-  background: rgba(255,255,255,0.05);
-  color: rgba(255,255,255,0.6);
-  font-size: 0.8rem;
+  border: 2px dashed #aaa;
+  background: #ffffff;
+  color: #555;
+  font-size: 1.0rem;
   cursor: pointer; transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.upload-music-btn:hover { border-color: #a78bfa; color: #a78bfa; }
+.upload-music-btn:hover { border-color: #a78bfa; color: #7850e6; }
 .music-status {
-  font-size: 0.68rem; color: rgba(255,255,255,0.45); margin-top: 6px; min-height: 14px;
+  font-size: 0.8rem; color: #888; margin-top: 3px; min-height: 14px;
 }
 
 /* AI difficulty sub-option */
@@ -287,47 +336,111 @@ html, body {
 .ai-diff-btn {
   padding: 5px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.6);
-  font-size: 0.75rem; font-weight: 600;
+  border: 1px solid #bbb;
+  background: #ffffff;
+  color: #555;
+  font-size: 0.95rem; font-weight: 600;
   cursor: pointer; transition: all 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-.ai-diff-btn.selected { border-color: #a78bfa; color: #a78bfa; background: rgba(167,139,250,0.15); }
+.ai-diff-btn.selected { border-color: #a78bfa; color: #ffffff; background: #a78bfa; animation: selectedPulse 1.6s ease-in-out infinite; }
 
 /* START button */
 .start-btn {
   width: 100%; max-width: 440px;
-  padding: 18px;
-  border-radius: 24px;
-  border: none;
-  font-size: 1.4rem; font-weight: 900;
-  letter-spacing: 2px;
+  min-height: 80px;
+  padding: 26px 18px;
+  border-radius: 28px;
+  border: 3px solid #ffffff;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.8rem; font-weight: 900;
+  letter-spacing: 4px;
   text-transform: uppercase;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  background: linear-gradient(135deg, #ff6b9d, #ffd93d, #6bcb77, #4ecdc4);
-  background-size: 300% auto;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  /* Solid pink base + evenly-spaced polkadots (two layers = offset rows) */
+  background-color: #ff8eea;
+  background-image: none;
   color: white;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  box-shadow: 0 8px 30px rgba(255,107,157,0.5), 0 4px 15px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 32px rgba(255,142,234,0.6), 0 4px 16px rgba(0,0,0,0.2);
   transition: transform 0.15s, box-shadow 0.15s;
-  animation: startBtnShimmer 3s linear infinite;
+  animation: startBtnPulse 2s ease-in-out infinite;
   -webkit-tap-highlight-color: transparent;
+  z-index: 0;
 }
-@keyframes startBtnShimmer {
-  0% { background-position: 0% center; }
-  100% { background-position: 300% center; }
+/* Shining sweep */
+.start-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 25%, rgba(255,255,255,0.45) 50%, transparent 75%);
+  animation: startBtnSweep 2.4s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
 }
-.start-btn:active { transform: scale(0.97); }
-.start-btn:hover { transform: scale(1.02); box-shadow: 0 12px 40px rgba(255,107,157,0.6), 0 6px 20px rgba(0,0,0,0.3); }
+/* Polkadot overlay (4 rows, evenly spaced, offset alternating rows, flashing) */
+.start-btn::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background-image:
+    radial-gradient(circle, white 3px, transparent 3px),
+    radial-gradient(circle, white 3px, transparent 3px),
+    radial-gradient(circle, white 3px, transparent 3px),
+    radial-gradient(circle, white 3px, transparent 3px);
+  /* 4 rows per 80px tile — rows at y=10, 28, 46, 64 — odd rows offset 16px */
+  background-size: 32px 80px, 32px 80px, 32px 80px, 32px 80px;
+  background-position: 0px 10px, 16px 28px, 0px 46px, 16px 64px;
+  animation: btnDotFlash 2.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+/* Button text/content needs to sit above pseudo-elements */
+.start-btn > * { position: relative; z-index: 2; }
+.start-btn span, .start-btn em { position: relative; z-index: 2; }
+
+@keyframes startBtnPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 8px 32px rgba(255,142,234,0.55), 0 4px 16px rgba(0,0,0,0.2);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 14px 52px rgba(255,142,234,0.95), 0 6px 24px rgba(0,0,0,0.25), 0 0 44px 14px rgba(255,142,234,0.45);
+  }
+}
+/* Pulse for selected widget buttons */
+@keyframes selectedPulse {
+  0%, 100% { transform: scale(1.04); box-shadow: none; }
+  50%       { transform: scale(1.10); box-shadow: 0 4px 18px rgba(0,0,0,0.2); }
+}
+@keyframes startBtnSweep {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(250%); }
+}
+@keyframes btnDotFlash {
+  0%   { opacity: 0.15; }
+  11%  { opacity: 0.50; }
+  19%  { opacity: 0.20; }
+  34%  { opacity: 0.52; }
+  43%  { opacity: 0.17; }
+  58%  { opacity: 0.48; }
+  67%  { opacity: 0.22; }
+  80%  { opacity: 0.54; }
+  90%  { opacity: 0.16; }
+  100% { opacity: 0.42; }
+}
+/* slow the animation duration on the ::after element */
+.start-btn::after { animation-duration: 6.5s; }
+.start-btn:active { transform: scale(0.96); }
+.start-btn:hover  { transform: scale(1.025); }
 
 /* ========== GAME SCREEN ========== */
 #gameScreen {
-  background: linear-gradient(160deg, #1a0a2e 0%, #2d1b5e 30%, #1a3a5c 60%, #0d2b1e 100%);
+  background: transparent;
   min-height: 100%;
   padding: 0;
   justify-content: flex-start;
@@ -337,36 +450,46 @@ html, body {
 /* Header */
 .game-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px;
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 52px 12px 10px;
+  background: none;
   flex-shrink: 0;
   gap: 8px;
   flex-wrap: wrap;
 }
-.header-left, .header-right {
+.header-left {
   display: flex; align-items: center; gap: 6px;
+  flex: 1; justify-content: flex-end;
+}
+.header-right {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; justify-content: flex-start;
 }
 .header-center {
   display: flex; flex-direction: column; align-items: center;
+  flex: 0 0 auto; padding: 0 24px;
 }
 .game-title-small {
-  font-size: 0.7rem;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 /* Timer */
 .timer-display {
-  font-size: 2rem; font-weight: 900;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 2.5rem; font-weight: 900;
   color: #ffd93d;
-  text-shadow: 0 0 20px rgba(255,217,61,0.6);
+  text-shadow: 0 0 20px rgba(255,217,61,0.7), 0 2px 4px rgba(0,0,0,0.4);
   font-variant-numeric: tabular-nums;
-  min-width: 48px; text-align: center;
+  min-width: 56px; text-align: center;
   transition: color 0.3s;
+  background: #c1f0fb;
+  border-radius: 12px;
+  padding: 4px 12px;
 }
 .timer-display.urgent { color: #ff6b6b; animation: timerPulse 1s ease infinite; text-shadow: 0 0 20px rgba(255,107,107,0.8); }
 @keyframes timerPulse {
@@ -376,62 +499,103 @@ html, body {
 
 /* Control buttons */
 .ctrl-btn {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  color: rgba(255,255,255,0.8);
-  font-size: 1rem;
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.5);
+  background: #c1f0fb;
+  color: #fff;
+  font-size: 1.3rem;
   cursor: pointer; transition: all 0.2s;
   display: flex; align-items: center; justify-content: center;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
 }
-.ctrl-btn:hover { background: rgba(255,255,255,0.2); }
-.ctrl-btn.on { background: rgba(107,203,119,0.2); border-color: #6bcb77; }
+.ctrl-btn:hover { background: #a8e8f7; }
+.ctrl-btn.on { background: #c1f0fb; border-color: rgba(255,255,255,0.5); color: #fff; }
 
 /* Baskets */
 .baskets-row {
-  display: flex; gap: 8px;
-  padding: 10px 12px 6px;
+  display: flex; gap: 16px;
+  padding: 52px 12px 6px; /* extra top padding for basket handle */
   flex-shrink: 0;
+  justify-content: center;
 }
+
+/* Easter Basket */
 .basket {
-  flex: 1;
-  background: rgba(255,255,255,0.07);
-  border: 2px solid rgba(255,255,255,0.12);
-  border-radius: 16px;
-  padding: 8px 10px;
+  flex: 0 0 148px;
+  position: relative;
+  border-radius: 10px 10px 22px 22px;
+  border: 3px solid #7a4a10;
+  overflow: visible;
   transition: all 0.3s;
-  min-width: 0;
+  /* Thick basket weave: crosshatch diagonals + horizontal slat bands */
+  background-color: #c8892a;
+  background-image:
+    repeating-linear-gradient( 45deg, transparent 0, transparent 7px, rgba(0,0,0,0.22) 7px, rgba(0,0,0,0.22) 10px),
+    repeating-linear-gradient(-45deg, transparent 0, transparent 7px, rgba(255,255,255,0.18) 7px, rgba(255,255,255,0.18) 10px),
+    repeating-linear-gradient(  0deg, transparent 0, transparent 17px, rgba(0,0,0,0.15) 17px, rgba(0,0,0,0.15) 20px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+/* Basket handle arc */
+.basket::before {
+  content: '';
+  position: absolute;
+  top: -28px; left: 14%; right: 14%;
+  height: 32px;
+  border: 7px solid #7a4a10;
+  border-radius: 50% 50% 0 0;
+  border-bottom: none;
+  background: transparent;
+  pointer-events: none;
 }
 .basket.active {
   border-color: #ffd93d;
-  background: rgba(255,217,61,0.1);
-  box-shadow: 0 0 20px rgba(255,217,61,0.3);
+  box-shadow: 0 0 24px rgba(255,217,61,0.65), 0 4px 14px rgba(0,0,0,0.25);
 }
+.basket.active::before { border-color: #ffd93d; }
+
+/* Basket header strip */
 .basket-top {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px 5px;
+  background: rgba(0,0,0,0.28);
+  border-radius: 7px 7px 0 0;
 }
 .basket-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(255,255,255,0.15);
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem; flex-shrink: 0;
+  font-size: 1rem; flex-shrink: 0;
   overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.4);
 }
 .basket-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .basket-name {
-  font-size: 0.8rem; font-weight: 700; color: #fff;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.82rem; font-weight: 700; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 .basket-score {
-  font-size: 1.2rem; font-weight: 900; color: #ffd93d;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.25rem; font-weight: 900; color: #ffd93d;
   margin-left: auto; flex-shrink: 0;
+  text-shadow: 0 0 8px rgba(255,217,61,0.7), 0 1px 3px rgba(0,0,0,0.4);
 }
+
+/* Grass strip — hidden, no dirt or grass */
+.basket-grass { display: none; }
+.grass-blade  { display: none; }
+
+/* Items sit directly on the woven basket body */
 .basket-items {
-  display: flex; flex-wrap: wrap; gap: 3px; min-height: 20px;
-  font-size: 1rem; line-height: 1;
+  background: transparent;
+  border-radius: 0 0 18px 18px;
+  display: flex; flex-wrap: wrap; gap: 3px;
+  padding: 6px 6px 10px;
+  min-height: 32px;
+  font-size: 1.05rem; line-height: 1;
 }
 .basket-item { animation: itemPop 0.3s cubic-bezier(0.34,1.56,0.64,1); }
 @keyframes itemPop {
@@ -442,24 +606,20 @@ html, body {
 /* Turn indicator */
 .turn-indicator {
   text-align: center;
-  padding: 4px 12px;
-  font-size: 0.8rem; font-weight: 700;
-  color: rgba(255,255,255,0.8);
-  flex-shrink: 0;
-}
-.turn-indicator span { color: #ffd93d; }
-
-/* Flash message */
-.flash-msg {
-  text-align: center;
-  padding: 6px 12px;
-  font-size: 1.1rem; font-weight: 800;
+  padding: 8px 20px;
+  margin-top: 14px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.25rem; font-weight: 700;
   color: #fff;
-  min-height: 32px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.35);
   flex-shrink: 0;
-  transition: opacity 0.3s;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  background: #ff8eea;
+  border: 3px solid #ffffff;
+  border-radius: 14px;
+  align-self: center;
 }
+.turn-indicator span { color: #ffd93d; font-weight: 700; }
+
 /* Full-screen celebration flash overlay */
 #screenFlash {
   position: fixed; inset: 0; pointer-events: none; z-index: 9998;
@@ -649,6 +809,74 @@ html, body {
   to   { box-shadow: 0 0 28px #ffd93d, 0 0 60px #ffb300cc, 0 0 90px #ffd93d55, inset -5px -8px 20px rgba(0,0,0,0.18), inset 4px 6px 15px rgba(255,255,255,0.4); }
 }
 
+/* ========== BONUS EGG OVERLAY ========== */
+#bonusEggOverlay {
+  position: fixed; inset: 0;
+  background: radial-gradient(circle at center, #fffde7 0%, #ffd93d 30%, #f9a825 55%, rgba(0,0,0,0.72) 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 24px;
+  z-index: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+  overflow: hidden;
+}
+#bonusEggOverlay.visible { opacity: 1; }
+#bonusEggOverlay::before {
+  content: '';
+  position: absolute; inset: -50%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,0.18) 10%, transparent 20%,
+    transparent 30%, rgba(255,255,255,0.12) 40%, transparent 50%,
+    transparent 60%, rgba(255,255,255,0.18) 70%, transparent 80%,
+    transparent 90%, rgba(255,255,255,0.1) 95%, transparent 100%);
+  animation: bonusShineRotate 2s linear infinite;
+}
+@keyframes bonusShineRotate { to { transform: rotate(360deg); } }
+.bonus-egg-giant {
+  width: 150px; height: 192px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  background: radial-gradient(ellipse at 35% 30%, #fffde7 0%, #ffd93d 28%, #f9a825 60%, #e65100 100%);
+  box-shadow:
+    0 0 40px #ffd93d,
+    0 0 80px #ffb300bb,
+    0 0 130px #ffd93d66,
+    inset -10px -14px 35px rgba(0,0,0,0.2),
+    inset 10px 12px 30px rgba(255,255,255,0.55);
+  position: relative; z-index: 1;
+  animation: bonusEggPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.bonus-egg-giant::before {
+  content: '';
+  position: absolute; top: 10%; left: 18%;
+  width: 35%; height: 28%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.bonus-egg-giant::after {
+  content: '🌟';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3.2rem;
+}
+.bonus-egg-label {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 2rem; font-weight: 900;
+  color: #fff;
+  text-shadow: 0 3px 14px rgba(0,0,0,0.55);
+  z-index: 1;
+  opacity: 0;
+  transform: scale(0.6);
+  animation: bonusLabelPop 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.2s forwards;
+}
+@keyframes bonusEggPop {
+  from { transform: scale(0) rotate(-12deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+}
+@keyframes bonusLabelPop {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
 /* Slide-in animation */
 .egg-wrapper.slide-in {
   animation: eggSlideIn 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards !important;
@@ -752,11 +980,11 @@ html, body {
 }
 .overlay-btn.primary:hover { transform: scale(1.03); }
 .overlay-btn.secondary {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.5);
+  color: #ffffff;
 }
-.overlay-btn.secondary:hover { background: rgba(255,255,255,0.15); }
+.overlay-btn.secondary:hover { background: rgba(255,255,255,0.28); }
 
 /* Winner badge */
 .winner-badge {
@@ -777,26 +1005,435 @@ html, body {
 
 /* ========== UTILITY ========== */
 .hidden { display: none !important; }
+
+/* ========== POLKADOT CANVAS ========== */
+#polkadotCanvas {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ========== CASINO CELEBRATION OVERLAY ========== */
+#casinoOverlay {
+  position: fixed; inset: 0;
+  background: #3cd8f3;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: space-between;
+  z-index: 850;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#casinoOverlay.visible { opacity: 1; pointer-events: all; }
+
+.casino-lights-row {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+  flex-shrink: 0;
+}
+.casino-bulb {
+  width: 22px; height: 22px; border-radius: 50%;
+  flex-shrink: 0;
+  animation: bulbFlash 0.55s ease-in-out infinite;
+}
+@keyframes bulbFlash {
+  0%, 100% { opacity: 0.25; transform: scale(0.75); }
+  50%       { opacity: 1;    transform: scale(1.15); filter: brightness(1.4); }
+}
+
+.casino-content {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 22px;
+  z-index: 1;
+}
+
+.casino-jackpot-text {
+  font-size: clamp(2.4rem, 9vw, 4rem);
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #ff1744, #ffd93d, #ff6b9d, #ffd93d, #ff1744);
+  background-size: 300% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: casinoTextShimmer 0.35s linear infinite, casinoTextPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+  text-shadow: none;
+}
+@keyframes casinoTextShimmer {
+  0%   { background-position: 0%; }
+  100% { background-position: 300%; }
+}
+@keyframes casinoTextPop {
+  0%   { transform: scale(0) rotate(-12deg); opacity: 0; }
+  55%  { transform: scale(1.25) rotate(4deg); }
+  80%  { transform: scale(0.93) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+.casino-reels-wrap {
+  background: rgba(0,0,0,0.3);
+  border-radius: 20px;
+  padding: 14px;
+  border: 3px solid rgba(255,255,255,0.45);
+  box-shadow:
+    0 0 0 3px rgba(255,217,61,0.4),
+    0 0 30px rgba(255,217,61,0.3),
+    inset 0 0 20px rgba(0,0,0,0.25);
+  animation: reelWrapGlow 0.8s ease-in-out infinite alternate;
+}
+@keyframes reelWrapGlow {
+  from { box-shadow: 0 0 0 3px rgba(255,217,61,0.3), 0 0 25px rgba(255,217,61,0.25), inset 0 0 20px rgba(0,0,0,0.25); }
+  to   { box-shadow: 0 0 0 5px rgba(255,107,157,0.5), 0 0 50px rgba(255,107,157,0.4), inset 0 0 20px rgba(0,0,0,0.25); }
+}
+
+.casino-reels {
+  display: flex; gap: 10px;
+}
+.casino-reel {
+  width: 88px; height: 88px; border-radius: 14px;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; line-height: 1;
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+}
+.casino-reel.spinning {
+  animation: reelBlur 0.09s steps(1) infinite;
+}
+@keyframes reelBlur {
+  0%   { transform: translateY(0);   }
+  50%  { transform: translateY(-5px); }
+  100% { transform: translateY(0);   }
+}
+.casino-reel.landed {
+  background: rgba(255,217,61,0.28);
+  border-color: #ffd93d;
+  box-shadow: 0 0 22px #ffd93daa, inset 0 0 10px rgba(255,217,61,0.2);
+  animation: reelLand 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes reelLand {
+  0%   { transform: scale(1.35); }
+  55%  { transform: scale(0.88); }
+  78%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.casino-sub-text {
+  font-size: 1.25rem; font-weight: 800; color: white;
+  letter-spacing: 8px; text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  animation: casinoSubPulse 0.6s ease-in-out infinite;
+}
+@keyframes casinoSubPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.04); }
+}
+.casino-sub-text.ready {
+  animation: casinoSubReady 0.25s ease-in-out infinite alternate;
+  color: #ffd93d;
+  letter-spacing: 10px;
+}
+@keyframes casinoSubReady {
+  from { opacity: 0.8; transform: scale(1); }
+  to   { opacity: 1;   transform: scale(1.06); text-shadow: 0 0 20px #ffd93d, 0 2px 8px rgba(0,0,0,0.3); }
+}
+
+/* ========== VOLUME CONTROLS ========== */
+.volume-row {
+  display: flex; align-items: center; gap: 8px; margin-top: 8px;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 8px 12px;
+  opacity: 1;
+}
+.vol-label {
+  font-size: 1.4rem;
+  min-width: 36px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: #ffffff;
+  border-radius: 10px;
+  border: 2px solid #bbb;
+}
+.vol-slider {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 4px; border-radius: 2px;
+  background: rgba(0,0,0,0.15);
+  outline: none; cursor: pointer;
+}
+.vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #6bcb77; box-shadow: 0 0 6px #6bcb7788;
+  cursor: pointer; transition: transform 0.15s;
+}
+.vol-slider::-webkit-slider-thumb:active { transform: scale(1.3); }
+.vol-slider.sfx-vol::-webkit-slider-thumb { background: #4ecdc4; box-shadow: 0 0 6px #4ecdc488; }
+.vol-slider.game-vol { width: 52px; flex: none; }
+.music-play-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.5); background: transparent;
+  color: #fff; font-size: 0.7rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; -webkit-tap-highlight-color: transparent; flex-shrink: 0;
+}
+.music-play-btn:hover { background: rgba(255,255,255,0.15); }
+.music-play-btn.playing { background: transparent; border-color: rgba(255,255,255,0.5); color: #fff; }
+/* Home screen music play/pause — larger, fully opaque, bordered */
+#musicPlayBtnHome {
+  width: 46px; height: 46px;
+  font-size: 1.2rem;
+  background: #c1f0fb;
+  border: 2px solid #bbb;
+  border-radius: 12px;
+  opacity: 1 !important;
+}
+#musicPlayBtnHome:hover { background: #f0f0f0; border-color: #888; }
+#musicPlayBtnHome.playing { background: #6bcb77; border-color: #4aaa5a; color: #fff; }
+
+/* ========== EGG WIGGLE & CRACK ========== */
+.egg-wrapper.wiggling {
+  animation: eggWiggle 0.45s ease-out forwards !important;
+}
+@keyframes eggWiggle {
+  0%   { transform: rotate(0) scale(1); }
+  15%  { transform: rotate(-9deg) scale(1.06); }
+  30%  { transform: rotate(9deg) scale(1.1); }
+  45%  { transform: rotate(-6deg) scale(1.07); }
+  60%  { transform: rotate(6deg) scale(1.04); }
+  75%  { transform: rotate(-3deg) scale(1.02); }
+  100% { transform: rotate(0) scale(1); }
+}
+.egg-body.egg-cracking .egg-top {
+  transform: translateY(-22%) rotate(-4deg) !important;
+}
+.egg-body.egg-cracking .egg-crack-line {
+  opacity: 1 !important;
+  box-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 20px rgba(255,200,100,0.5);
+}
+
+/* Item floating above egg with glow */
+.egg-float-item {
+  position: absolute;
+  left: 50%; bottom: 62%;
+  transform: translateX(-50%) translateY(15px) scale(0);
+  font-size: 2rem; z-index: 22;
+  pointer-events: none; opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+  filter: drop-shadow(0 0 8px #fffbe0) drop-shadow(0 0 18px #ffd93d) drop-shadow(0 0 36px rgba(255,150,0,0.65));
+}
+.egg-float-item.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-10px) scale(1.2);
+  animation: floatBob 1.4s ease-in-out infinite 0.35s;
+}
+@keyframes floatBob {
+  0%, 100% { transform: translateX(-50%) translateY(-10px) scale(1.2); }
+  50%       { transform: translateX(-50%) translateY(-18px) scale(1.2); }
+}
+
+/* Volumetric light cone */
+.egg-light-cone {
+  position: absolute;
+  left: 50%; bottom: 56%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 26px solid transparent;
+  border-right: 26px solid transparent;
+  border-bottom: 52px solid rgba(255,220,100,0.22);
+  filter: blur(7px);
+  z-index: 16; pointer-events: none;
+  opacity: 0; transition: opacity 0.35s;
+}
+.egg-light-cone.visible { opacity: 1; }
+
+/* ========== MID-SCREEN ITEM POPUP ========== */
+#itemPopup {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 650; pointer-events: none;
+  opacity: 0; transition: opacity 0.25s;
+}
+#itemPopup.visible { opacity: 1; }
+.item-popup-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, rgba(255,217,61,0.13) 0%, transparent 65%);
+  pointer-events: none;
+}
+.item-popup-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  position: relative; z-index: 1;
+}
+.item-popup-emoji {
+  font-size: 6rem; line-height: 1;
+  filter: drop-shadow(0 0 25px #ffd93d) drop-shadow(0 0 60px rgba(255,150,0,0.6));
+}
+.item-popup-emoji.pop-in {
+  animation: itemPopIn 0.45s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes itemPopIn {
+  0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: scale(1.25) rotate(5deg); opacity: 1; }
+  80%  { transform: scale(0.92) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* ========== RESULT MODAL ========== */
+#resultModal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82);
+  backdrop-filter: blur(14px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 700;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#resultModal.visible { opacity: 1; pointer-events: all; }
+.result-card {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  padding: 20px;
+}
+.result-items-row {
+  display: flex; align-items: center; gap: 32px; position: relative;
+}
+.result-item-emoji {
+  font-size: 5.5rem; line-height: 1;
+  animation: resultEmojiIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.result-item-emoji:nth-child(2) { animation-delay: 0.12s; }
+@keyframes resultEmojiIn {
+  0%   { transform: scale(0) translateY(-30px); opacity: 0; }
+  65%  { transform: scale(1.2) translateY(4px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.result-x-overlay {
+  position: absolute; top: 50%; left: 50%;
+  font-size: 8rem; line-height: 1;
+  color: #ff1744;
+  text-shadow: 0 0 30px #ff1744, 0 0 60px rgba(255,23,68,0.5);
+  z-index: 5; pointer-events: none;
+  animation: bigXIn 0.4s 0.22s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes bigXIn {
+  0%   { transform: translate(-50%,-50%) scale(0) rotate(-20deg); opacity: 0; }
+  60%  { transform: translate(-50%,-50%) scale(1.3) rotate(5deg); opacity: 1; }
+  100% { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 1; }
+}
+.result-label {
+  font-size: 2.8rem; font-weight: 900; text-align: center; letter-spacing: 1px;
+  animation: resultLabelIn 0.4s 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes resultLabelIn {
+  0%   { transform: scale(0); opacity: 0; }
+  65%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.result-label.match {
+  background: linear-gradient(90deg, #6bcb77, #4ecdc4, #ffd93d, #6bcb77);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: resultLabelIn 0.4s 0.28s cubic-bezier(0.34,1.56,0.64,1) both, titleShimmer 1.5s linear infinite;
+}
+.result-label.no-match {
+  color: #ff4444;
+  -webkit-text-fill-color: #ff4444;
+  text-shadow: 0 0 25px rgba(255,68,68,0.7);
+}
+
+/* ========== EASTER START ANIMATION ========== */
+.easter-eggs-row {
+  display: flex; gap: 24px; align-items: flex-end; justify-content: center;
+}
+.easter-start-egg {
+  font-size: 5.5rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+  animation: easterEggBounce 0.65s ease-in-out infinite;
+}
+.easter-start-egg:nth-child(2) { animation-delay: 0.22s; font-size: 6.5rem; }
+.easter-start-egg:nth-child(3) { animation-delay: 0.44s; }
+@keyframes easterEggBounce {
+  0%, 100% { transform: translateY(0) scale(1) rotate(-4deg); }
+  50%       { transform: translateY(-22px) scale(1.08) rotate(4deg); }
+}
+.easter-start-egg.cracking {
+  animation: easterEggCrack 0.38s ease-in-out forwards !important;
+}
+@keyframes easterEggCrack {
+  0%   { transform: scale(1) rotate(0); }
+  18%  { transform: scale(1.15) rotate(-10deg); }
+  36%  { transform: scale(1.2) rotate(10deg); }
+  54%  { transform: scale(1.12) rotate(-6deg); }
+  72%  { transform: scale(1.06) rotate(4deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.easter-start-egg.hatched {
+  animation: easterEggHatch 0.55s cubic-bezier(0.34,1.56,0.64,1) forwards !important;
+  filter: drop-shadow(0 0 18px #ffd93d) drop-shadow(0 0 36px rgba(255,150,0,0.55));
+}
+@keyframes easterEggHatch {
+  0%   { transform: scale(0.6) rotate(-15deg); opacity: 0.5; }
+  55%  { transform: scale(1.45) rotate(8deg);  opacity: 1; }
+  80%  { transform: scale(0.95) rotate(-3deg); }
+  100% { transform: scale(1.15) rotate(0);     opacity: 1; }
+}
 </style>
+
 </head>
 <body>
 
 <!-- Confetti Canvas -->
+<!-- Polkadot background canvas -->
+<canvas id="polkadotCanvas"></canvas>
+
 <canvas id="confettiCanvas"></canvas>
 <div id="screenFlash"></div>
+
+<!-- Easter start celebration overlay -->
+<div id="casinoOverlay">
+  <div class="casino-lights-row" id="casinoLightsTop"></div>
+  <div class="casino-content">
+    <div class="casino-jackpot-text">🌸 🌸</div>
+    <div class="easter-eggs-row">
+      <div class="easter-start-egg" id="startEgg0">🥚</div>
+      <div class="easter-start-egg" id="startEgg1">🥚</div>
+      <div class="easter-start-egg" id="startEgg2">🥚</div>
+    </div>
+    <div class="casino-sub-text" id="casinoSubText">Get ready to hunt!</div>
+  </div>
+  <div class="casino-lights-row" id="casinoLightsBottom"></div>
+</div>
+
+<!-- Mid-screen item popup -->
+<div id="itemPopup">
+  <div class="item-popup-bg"></div>
+  <div class="item-popup-inner">
+    <div class="item-popup-emoji"></div>
+  </div>
+</div>
+
+<!-- Match / no-match result modal -->
+<div id="resultModal">
+  <div class="result-card">
+    <div class="result-items-row" id="resultItemsRow"></div>
+    <div class="result-label" id="resultLabel"></div>
+  </div>
+</div>
 
 <!-- ========== HOME SCREEN ========== -->
 <div class="screen" id="homeScreen">
 
   <!-- Title -->
-  <h1 class="home-title">🥚 Easter Egg Hunt</h1>
-  <p class="home-subtitle">Memory Match</p>
 
   <!-- Decorative eggs -->
   <div class="deco-eggs" id="decoEggs"></div>
 
   <!-- Mode selection -->
-  <div class="home-section">
+  <div class="home-section" id="sectionMode">
     <div class="section-label">Game Mode</div>
     <div class="mode-cards">
       <div class="mode-card mode-1p selected" data-mode="1p" onclick="selectMode('1p',this)">
@@ -822,7 +1459,7 @@ html, body {
   </div>
 
   <!-- Difficulty -->
-  <div class="home-section">
+  <div class="home-section" id="sectionDiff">
     <div class="section-label">Difficulty</div>
     <div class="diff-cards">
       <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectDiff('easy',this)">
@@ -864,12 +1501,13 @@ html, body {
   </div>
 
   <!-- Audio -->
-  <div class="home-section">
+  <div class="home-section" id="sectionAudio">
     <div class="section-label">Audio</div>
     <div class="audio-row">
       <button class="toggle-btn on" id="musicToggleHome" onclick="toggleMusic()">
         <span class="tog-dot"></span> 🎵 Music
       </button>
+      <button class="music-play-btn" id="musicPlayBtnHome" onclick="playPauseMusic()" title="Play / Pause music">▶</button>
       <button class="toggle-btn on" id="sfxToggleHome" onclick="toggleSFX()">
         <span class="tog-dot"></span> 🔊 SFX
       </button>
@@ -877,6 +1515,16 @@ html, body {
         📂 Upload Song
       </button>
       <input type="file" id="musicUploadInput" accept="audio/*" style="display:none" onchange="loadCustomMusic(this)">
+    </div>
+    <div class="volume-row">
+      <span class="vol-label">🎵</span>
+      <input type="range" class="vol-slider" id="musicVolHome" min="0" max="1" step="0.01" value="0.7"
+        oninput="setMusicVolume(+this.value)">
+    </div>
+    <div class="volume-row">
+      <span class="vol-label">🔊</span>
+      <input type="range" class="vol-slider sfx-vol" id="sfxVolHome" min="0" max="1" step="0.01" value="1"
+        oninput="setSFXVolume(+this.value)">
     </div>
     <div class="music-status" id="musicStatus"></div>
   </div>
@@ -896,7 +1544,7 @@ html, body {
       <button class="ctrl-btn" onclick="togglePause()" id="pauseBtn" title="Pause">⏸</button>
     </div>
     <div class="header-center">
-      <div class="game-title-small">Easter Egg Hunt</div>
+      <div class="game-title-small"></div>
       <div class="timer-display" id="timerDisplay">60</div>
     </div>
     <div class="header-right">
@@ -910,7 +1558,7 @@ html, body {
 
   <!-- Turn + Flash -->
   <div class="turn-indicator" id="turnIndicator"></div>
-  <div class="flash-msg" id="flashMsg"></div>
+
 
   <!-- Egg grid -->
   <div class="egg-grid-container">
@@ -951,6 +1599,12 @@ html, body {
   </div>
 </div>
 
+<!-- ========== BONUS EGG OVERLAY ========== -->
+<div id="bonusEggOverlay">
+  <div class="bonus-egg-giant"></div>
+  <div class="bonus-egg-label">🌟 Lucky Egg! +1 Bonus!</div>
+</div>
+
 <script>
 // ============================================================
 //  STATE
@@ -972,9 +1626,9 @@ const ITEMS_BY_DIFF = {
   hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀','🎁','👑'],      // 12 pairs = 24 eggs + 1 lucky egg = 25
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 15, time: 60 },
-  medium: { eggs: 20, time: 45 },
-  hard:   { eggs: 25, time: 30 },
+  easy:   { eggs: 15, time: 40 },
+  medium: { eggs: 20, time: 30 },
+  hard:   { eggs: 25, time: 20 },
 };
 
 let cfg = {
@@ -986,6 +1640,8 @@ let cfg = {
   musicOn: true,
   sfxOn: true,
   customMusic: null,
+  musicVolume: 0.7,
+  sfxVolume: 1.0,
 };
 
 let game = {
@@ -1011,6 +1667,8 @@ let game = {
 let audioCtx = null;
 let bgmNode = null, bgmGain = null;
 let bgmSourceNode = null; // custom uploaded audio source
+let sfxMasterGain = null;
+let musicPaused = false;
 
 function getAudioCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1018,10 +1676,20 @@ function getAudioCtx() {
   return audioCtx;
 }
 
+function getSFXDestination() {
+  const ctx = getAudioCtx();
+  if (!sfxMasterGain || sfxMasterGain.context.state === 'closed') {
+    sfxMasterGain = ctx.createGain();
+    sfxMasterGain.gain.value = cfg.sfxVolume;
+    sfxMasterGain.connect(ctx.destination);
+  }
+  return sfxMasterGain;
+}
+
 function playTone(freq, type, startTime, duration, gainVal, ctx) {
   const osc = ctx.createOscillator();
   const g = ctx.createGain();
-  osc.connect(g); g.connect(ctx.destination);
+  osc.connect(g); g.connect(getSFXDestination());
   osc.type = type;
   osc.frequency.setValueAtTime(freq, startTime);
   g.gain.setValueAtTime(0, startTime);
@@ -1040,13 +1708,13 @@ function sfxPop() {
   osc1.type = 'sine'; osc1.frequency.setValueAtTime(180, t);
   osc1.frequency.exponentialRampToValueAtTime(60, t + 0.12);
   g1.gain.setValueAtTime(0.7, t); g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
-  osc1.connect(g1); g1.connect(ctx.destination); osc1.start(t); osc1.stop(t + 0.15);
+  osc1.connect(g1); g1.connect(getSFXDestination()); osc1.start(t); osc1.stop(t + 0.15);
 
   const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
   osc2.type = 'triangle'; osc2.frequency.setValueAtTime(1400, t + 0.02);
   osc2.frequency.exponentialRampToValueAtTime(600, t + 0.1);
   g2.gain.setValueAtTime(0.35, t + 0.02); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-  osc2.connect(g2); g2.connect(ctx.destination); osc2.start(t + 0.02); osc2.stop(t + 0.15);
+  osc2.connect(g2); g2.connect(getSFXDestination()); osc2.start(t + 0.02); osc2.stop(t + 0.15);
 
   playTone(2400, 'sine', t + 0.04, 0.06, 0.2, ctx);
   playTone(3200, 'sine', t + 0.06, 0.04, 0.12, ctx);
@@ -1105,7 +1773,7 @@ function sfxWhoosh() {
   g.gain.setValueAtTime(0.0001, t);
   g.gain.linearRampToValueAtTime(0.6, t + dur * 0.2);
   g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.buffer = buf; src.connect(f); f.connect(g); g.connect(ctx.destination);
+  src.buffer = buf; src.connect(f); f.connect(g); g.connect(getSFXDestination());
   src.start(t);
 }
 
@@ -1138,7 +1806,7 @@ function sfxConfettiBurst() {
   const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 3000;
   const g = ctx.createGain();
   g.gain.setValueAtTime(0.55, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-  src.buffer = buf; src.connect(hpf); hpf.connect(g); g.connect(ctx.destination);
+  src.buffer = buf; src.connect(hpf); hpf.connect(g); g.connect(getSFXDestination());
   src.start(t);
   playTone(1800, 'sine', t, 0.08, 0.3, ctx);
   playTone(2400, 'sine', t + 0.03, 0.06, 0.2, ctx);
@@ -1168,7 +1836,7 @@ function startCustomBGM() {
     bgmGain = null;
   }
   bgmGain = ctx.createGain();
-  bgmGain.gain.setValueAtTime(0.7, ctx.currentTime);
+  bgmGain.gain.setValueAtTime(cfg.musicVolume, ctx.currentTime);
   bgmGain.connect(ctx.destination);
 
   const src = ctx.createBufferSource();
@@ -1186,15 +1854,16 @@ function setMusicStatus(msg) {
 
 function toggleMusic() {
   cfg.musicOn = !cfg.musicOn;
-  // Update all buttons
   document.querySelectorAll('#musicToggleHome, #musicToggleGame').forEach(btn => {
     btn.classList.toggle('on', cfg.musicOn);
   });
   if (cfg.musicOn && cfg.customMusic) {
+    musicPaused = false;
     startCustomBGM();
   } else {
     stopBGM();
   }
+  syncMusicPlayBtns();
 }
 
 function toggleSFX() {
@@ -1202,6 +1871,63 @@ function toggleSFX() {
   document.querySelectorAll('#sfxToggleHome, #sfxToggleGame').forEach(btn => {
     btn.classList.toggle('on', cfg.sfxOn);
   });
+}
+
+function setMusicVolume(v) {
+  cfg.musicVolume = v;
+  if (bgmGain && !musicPaused) bgmGain.gain.value = v;
+  updateVolSliderStyle();
+}
+
+function setSFXVolume(v) {
+  cfg.sfxVolume = v;
+  if (sfxMasterGain) sfxMasterGain.gain.value = v;
+  updateVolSliderStyle();
+}
+
+function playPauseMusic() {
+  if (!cfg.customMusic || !cfg.musicOn) return;
+  const ctx = getAudioCtx();
+  if (!bgmSourceNode) {
+    // Nothing playing yet — start it
+    musicPaused = false;
+    startCustomBGM();
+  } else {
+    musicPaused = !musicPaused;
+    if (musicPaused) {
+      bgmGain.gain.setValueAtTime(bgmGain.gain.value, ctx.currentTime);
+      bgmGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+    } else {
+      bgmGain.gain.setValueAtTime(bgmGain.gain.value, ctx.currentTime);
+      bgmGain.gain.linearRampToValueAtTime(cfg.musicVolume, ctx.currentTime + 0.2);
+    }
+  }
+  syncMusicPlayBtns();
+}
+
+function syncMusicPlayBtns() {
+  const hasMusic = !!cfg.customMusic && cfg.musicOn;
+  document.querySelectorAll('.music-play-btn').forEach(btn => {
+    btn.textContent = musicPaused ? '▶' : '⏸';
+    btn.classList.toggle('playing', hasMusic && !musicPaused);
+    // Keep home button always full opacity; dim only the compact in-game button when inactive
+    if (btn.id !== 'musicPlayBtnHome') {
+      btn.style.opacity = hasMusic ? '1' : '0.35';
+    } else {
+      btn.style.opacity = '1';
+    }
+  });
+}
+
+function updateVolSliderStyle() {
+  document.querySelectorAll('.vol-slider').forEach(s => {
+    const pct = (+s.value / +s.max * 100).toFixed(1) + '%';
+    const color = s.classList.contains('sfx-vol') ? '#4ecdc4' : '#6bcb77';
+    s.style.background = `linear-gradient(to right, ${color} ${pct}, rgba(255,255,255,0.15) ${pct})`;
+  });
+  // Sync all slider values to cfg
+  document.querySelectorAll('#musicVolHome, #musicVolGame').forEach(s => { s.value = cfg.musicVolume; });
+  document.querySelectorAll('#sfxVolHome, #sfxVolGame').forEach(s => { s.value = cfg.sfxVolume; });
 }
 
 // ============================================================
@@ -1316,12 +2042,174 @@ function getEggCenter(el) {
 }
 
 // ============================================================
+//  POLKADOT BACKGROUND
+// ============================================================
+const polkadotCanvas = document.getElementById('polkadotCanvas');
+const pkCtx = polkadotCanvas.getContext('2d');
+let polkadots = [];
+
+function initPolkadots() {
+  polkadotCanvas.width  = window.innerWidth;
+  polkadotCanvas.height = window.innerHeight;
+  polkadots = [];
+
+  const SPACING = 60;  // uniform gap between dot centers
+  const R       = 9;   // all dots same radius
+  let row = 0;
+  // Add one full spacing of margin so dots wrap nicely past edges
+  for (let y = SPACING / 2; y < window.innerHeight + SPACING; y += SPACING) {
+    const xOffset = (row % 2 === 1) ? SPACING / 2 : 0;   // offset odd rows by half spacing
+    for (let x = SPACING / 2 + xOffset; x < window.innerWidth + SPACING; x += SPACING) {
+      polkadots.push({
+        x, y, r: R,
+        phase:    Math.random() * Math.PI * 2,
+        speed:    0.006 + Math.random() * 0.007,  // slight speed variation for organic feel
+        maxAlpha: 0.65,                            // all same max opacity
+      });
+    }
+    row++;
+  }
+}
+
+function drawPolkadots() {
+  pkCtx.clearRect(0, 0, polkadotCanvas.width, polkadotCanvas.height);
+  polkadots.forEach(d => {
+    d.phase += d.speed;
+    const alpha = d.maxAlpha * (0.55 + 0.45 * Math.sin(d.phase));
+    pkCtx.beginPath();
+    pkCtx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+    pkCtx.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
+    pkCtx.fill();
+  });
+  requestAnimationFrame(drawPolkadots);
+}
+
+window.addEventListener('resize', initPolkadots);
+initPolkadots();
+drawPolkadots();
+
+// ============================================================
+//  CASINO CELEBRATION
+// ============================================================
+const REEL_ITEMS = ['🥚','🐰','🌸','⭐','💖','🌈','🐣','🦋','🎀','🥕','🎁','👑'];
+const BULB_COLORS = ['#ff6b9d','#ffd93d','#6bcb77','#4ecdc4','#a78bfa','#ff6b6b','#ffffff','#74b9ff'];
+
+function buildCasinoLights() {
+  ['casinoLightsTop', 'casinoLightsBottom'].forEach((id, row) => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    const n = Math.max(10, Math.floor(window.innerWidth / 26));
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('div');
+      b.className = 'casino-bulb';
+      const col = BULB_COLORS[(i + row * 3) % BULB_COLORS.length];
+      b.style.cssText = `background:${col}; box-shadow:0 0 12px ${col}; width:${Math.floor(window.innerWidth/n)}px; animation-delay:${(i * 0.055 % 0.55).toFixed(3)}s`;
+      el.appendChild(b);
+    }
+  });
+}
+
+function sfxCasinoSpin() {
+  if (!cfg.sfxOn) return;
+  const ctx = getAudioCtx();
+  const t = ctx.currentTime;
+  // Fast ascending arpeggio
+  const notes = [261.63, 329.63, 392, 523.25, 659.25, 783.99, 1046.5, 1318.5];
+  notes.forEach((f, i) => {
+    playTone(f, 'sine',     t + i * 0.065, 0.18, 0.45, ctx);
+    playTone(f * 2, 'sine', t + i * 0.065 + 0.02, 0.10, 0.18, ctx);
+  });
+}
+
+function sfxReelClick() {
+  if (!cfg.sfxOn) return;
+  const ctx = getAudioCtx();
+  const t = ctx.currentTime;
+  playTone(1200, 'square', t,       0.05, 0.55, ctx);
+  playTone(2400, 'sine',   t + 0.02, 0.04, 0.30, ctx);
+  playTone(600,  'sine',   t,        0.08, 0.35, ctx);
+}
+
+function sfxJackpot() {
+  if (!cfg.sfxOn) return;
+  const ctx = getAudioCtx();
+  const t = ctx.currentTime;
+  // Bright triumphant chord burst + shimmer
+  [[523.25,0],[659.25,0.07],[783.99,0.14],[1046.5,0.21],[1318.5,0.28],[1567.98,0.35],[2093,0.42]].forEach(([f, dt]) => {
+    playTone(f,     'sine',     t + dt,        0.5,  0.6, ctx);
+    playTone(f * 2, 'sine',     t + dt + 0.03, 0.2,  0.22, ctx);
+    playTone(f * 1.5,'triangle',t + dt + 0.01, 0.12, 0.18, ctx);
+  });
+  // Coin shower noise
+  const buf = ctx.createBuffer(1, ctx.sampleRate * 0.6, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.15));
+  const src = ctx.createBufferSource();
+  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 4000;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.35, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+  src.buffer = buf; src.connect(hpf); hpf.connect(g); g.connect(getSFXDestination());
+  src.start(t);
+}
+
+function playCasinoCelebration() {
+  getAudioCtx();
+  const overlay = document.getElementById('casinoOverlay');
+  const subText = document.getElementById('casinoSubText');
+  const eggs    = [0, 1, 2].map(i => document.getElementById(`startEgg${i}`));
+
+  buildCasinoLights();
+
+  // Reset eggs to closed
+  eggs.forEach(e => { e.textContent = '🥚'; e.className = 'easter-start-egg'; });
+  subText.className = 'casino-sub-text';
+  subText.textContent = 'Get ready to hunt! 🌸';
+
+  overlay.classList.add('visible');
+  sfxCasinoSpin();
+
+  // Crack each egg open one by one: 480ms, 820ms, 1160ms
+  const HATCH_EMOJIS = ['🐣', '🐰', '🌸'];
+  [480, 820, 1160].forEach((delay, i) => {
+    setTimeout(() => {
+      eggs[i].className = 'easter-start-egg cracking';
+      sfxReelClick();
+
+      // After crack animation finishes, switch to hatched emoji
+      eggs[i].addEventListener('animationend', function onCrack() {
+        eggs[i].removeEventListener('animationend', onCrack);
+        eggs[i].textContent = HATCH_EMOJIS[i];
+        eggs[i].className = 'easter-start-egg hatched';
+
+        if (i === 2) {
+          // All hatched — celebrate and go!
+          sfxJackpot();
+          subText.textContent = '🌟 LET\'S GO HUNT! 🌟';
+          subText.className = 'casino-sub-text ready';
+
+          for (let j = 0; j < 7; j++) {
+            setTimeout(() => {
+              burstConfetti(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.6, 55);
+            }, j * 110);
+          }
+          flashScreen('#ffd93d', 0.5, 200);
+
+          setTimeout(() => {
+            overlay.classList.remove('visible');
+            setTimeout(() => startGame(), 320);
+          }, 950);
+        }
+      }, { once: true });
+    }, delay);
+  });
+}
+
+// ============================================================
 //  HOME SCREEN SETUP
 // ============================================================
 function buildDecoEggs() {
   const container = document.getElementById('decoEggs');
   container.innerHTML = '';
-  EGG_COLORS.slice(0, 6).forEach((c, i) => {
+  EGG_COLORS.slice(0, 5).forEach((c, i) => {
     const el = document.createElement('div');
     el.className = 'deco-egg';
     el.style.cssText = `
@@ -1430,7 +2318,8 @@ function loadCustomMusic(input) {
     ctx.decodeAudioData(e.target.result, (buffer) => {
       cfg.customMusic = buffer;
       setMusicStatus('🎵 ' + file.name.slice(0, 28));
-      if (cfg.musicOn) { stopBGM(); startCustomBGM(); }
+      if (cfg.musicOn) { stopBGM(); musicPaused = false; startCustomBGM(); }
+      syncMusicPlayBtns();
     });
   };
   reader.readAsArrayBuffer(file);
@@ -1524,31 +2413,53 @@ function shuffle(arr) {
 //  GRID BUILD
 // ============================================================
 function buildGameHeader() {
-  const numPlayers = cfg.mode === '1p' ? 1 : 2;
   const basketsRow = document.getElementById('basketsRow');
   basketsRow.innerHTML = '';
 
-  for (let i = 0; i < numPlayers; i++) {
-    const p = i === 0 ? cfg.p1 : cfg.p2;
+  // Always build 2 baskets — in 1p mode basket 1 shows "Pairs Left" countdown
+  for (let i = 0; i < 2; i++) {
     const basket = document.createElement('div');
     basket.className = 'basket' + (i === 0 ? ' active' : '');
     basket.id = `basket${i}`;
 
     let avatarHtml = '';
-    if (i === 1 && cfg.mode === 'ai') {
+    let nameStr    = '';
+    let initScore  = 0;
+
+    if (cfg.mode === '1p' && i === 1) {
+      // Second basket = remaining pairs tracker
+      avatarHtml = `<div class="basket-avatar">🥚</div>`;
+      nameStr    = 'Pairs Left';
+      initScore  = game.totalPairs;
+    } else if (i === 1 && cfg.mode === 'ai') {
       avatarHtml = `<div class="basket-avatar">🤖</div>`;
-    } else if (p.photo) {
-      avatarHtml = `<div class="basket-avatar"><img src="${p.photo}" alt=""></div>`;
+      nameStr    = 'Easter AI';
     } else {
-      avatarHtml = `<div class="basket-avatar">${p.avatar}</div>`;
+      const p = i === 0 ? cfg.p1 : cfg.p2;
+      if (p.photo) {
+        avatarHtml = `<div class="basket-avatar"><img src="${escHtml(p.photo)}" alt=""></div>`;
+      } else {
+        avatarHtml = `<div class="basket-avatar">${p.avatar}</div>`;
+      }
+      nameStr = escHtml(p.name);
     }
+
+    // Generate grass blades with staggered heights/timing
+    const bladeCount = 22;
+    const grassHtml = Array.from({length: bladeCount}, (_, j) => {
+      const h = 10 + (j % 5) * 2;
+      const s = (1.3 + (j * 0.13) % 0.9).toFixed(2);
+      const d = ((j * 0.09) % 0.72).toFixed(2);
+      return `<div class="grass-blade" style="--h:${h}px;--s:${s}s;--d:${d}s"></div>`;
+    }).join('');
 
     basket.innerHTML = `
       <div class="basket-top">
         ${avatarHtml}
-        <span class="basket-name">${escHtml(p.name)}</span>
-        <span class="basket-score" id="score${i}">0</span>
+        <span class="basket-name">${nameStr}</span>
+        <span class="basket-score" id="score${i}">${initScore}</span>
       </div>
+      <div class="basket-grass">${grassHtml}</div>
       <div class="basket-items" id="items${i}"></div>
     `;
     basketsRow.appendChild(basket);
@@ -1672,8 +2583,6 @@ function onTimerExpired() {
 function doShuffle() {
   game.shuffling = true;
   sfxWhoosh();
-  setFlash('🔀 Shuffling!', '#a78bfa');
-
   // Close any open cards first
   game.current.forEach(idx => closeCard(idx));
   game.current = [];
@@ -1753,7 +2662,6 @@ function doShuffle() {
             updateTimerDisplay();
             game.locked = false;
             game.shuffling = false;
-            clearFlash();
             startTimer();
             updateTurnIndicator();
             if (cfg.mode === 'ai' && game.currentPlayer === 1) {
@@ -1775,65 +2683,100 @@ function onEggClick(idx) {
   const card = game.cards[idx];
   if (!card || card.matched || card.revealed) return;
   if (game.current.length >= 2) return;
-
-  // In 2p/ai mode, only current player can click (ai is locked)
   if (cfg.mode === 'ai' && game.currentPlayer === 1) return;
 
+  game.locked = true;
   sfxPop();
-  revealCard(idx);
   updateAIMemory(idx);
   game.current.push(idx);
 
-  if (card.bonus) {
-    game.locked = true;
-    setTimeout(() => handleBonusEgg(idx), 650);
-    return;
-  }
-
-  if (game.current.length === 2) {
-    checkMatch();
-  }
+  revealCard(idx, () => {
+    if (card.bonus) {
+      handleBonusEgg(idx);
+      return;
+    }
+    if (game.current.length === 2) {
+      checkMatch();
+    } else {
+      // First card done — unlock for second pick
+      game.locked = false;
+    }
+  });
 }
 
 function handleBonusEgg(idx) {
   const card = game.cards[idx];
   const p = game.currentPlayer;
   sfxMatch();
-  setFlash('🌟 LUCKY EGG! +1 BONUS!', '#ffd93d');
-  const pos = getEggCenter(card.wrapEl);
-  burstConfetti(pos.x, pos.y, 80);
-  burstConfetti(pos.x - 50, pos.y - 40, 40);
-  burstConfetti(pos.x + 50, pos.y - 40, 40);
-  flashScreen('#ffd93d', 0.45, 350);
+
+  // Show golden egg overlay
+  const overlay = document.getElementById('bonusEggOverlay');
+  // Re-trigger animations by replacing the animated child
+  const eggEl = overlay.querySelector('.bonus-egg-giant');
+  const labelEl = overlay.querySelector('.bonus-egg-label');
+  eggEl.style.animation = 'none'; labelEl.style.animation = 'none';
+  void eggEl.offsetWidth; void labelEl.offsetWidth;
+  eggEl.style.animation = ''; labelEl.style.animation = '';
+  overlay.classList.add('visible');
+
+  // Confetti burst at screen center
+  burstConfetti(window.innerWidth / 2, window.innerHeight / 2, 120);
+  burstConfetti(window.innerWidth / 2 - 80, window.innerHeight / 3, 50);
+  burstConfetti(window.innerWidth / 2 + 80, window.innerHeight / 3, 50);
+  flashScreen('#ffd93d', 0.4, 400);
+
   game.scores[p]++;
   game.items[p].push('🌟');
   updateBaskets();
+  hideItemGlow(card);
   card.wrapEl.classList.add('matched');
+
   setTimeout(() => {
+    overlay.classList.remove('visible');
     card.matched = true;
     card.wrapEl.style.visibility = 'hidden';
     game.matchedPairs++;
     game.current = [];
     game.locked = false;
-    clearFlash();
     updateTurnIndicator();
     if (game.matchedPairs >= game.totalPairs) { onGameComplete(); return; }
     if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 900);
-  }, 900);
+  }, 1800);
 }
 
-function revealCard(idx) {
+function revealCard(idx, callback) {
   const card = game.cards[idx];
   card.revealed = true;
   card.wrapEl.classList.remove('dancing');
-  card.wrapEl.classList.add('squishing');
 
-  card.wrapEl.addEventListener('animationend', function onSquish() {
-    card.wrapEl.removeEventListener('animationend', onSquish);
-    card.wrapEl.classList.remove('squishing');
-    openEgg(card);
-    const pos = getEggCenter(card.wrapEl);
-    burstConfetti(pos.x, pos.y, 45);
+  // Step 1: Wiggle
+  card.wrapEl.classList.add('wiggling');
+  card.wrapEl.addEventListener('animationend', function onWiggle() {
+    card.wrapEl.removeEventListener('animationend', onWiggle);
+    card.wrapEl.classList.remove('wiggling');
+
+    // Step 2: Half-crack
+    card.el.classList.add('egg-cracking');
+
+    setTimeout(() => {
+      // Step 3: Full open
+      card.el.classList.remove('egg-cracking');
+      card.el.classList.add('egg-opened');
+
+      // Floating item glow above egg
+      showItemGlow(card);
+
+      // Small confetti burst
+      const pos = getEggCenter(card.wrapEl);
+      burstConfetti(pos.x, pos.y, 35);
+
+      // Brief pause then mid-screen popup
+      setTimeout(() => {
+        showItemPopup(card.emoji, () => {
+          if (callback) callback();
+        });
+      }, 250);
+    }, 300);
   }, { once: true });
 }
 
@@ -1844,36 +2787,124 @@ function openEgg(card) {
 function closeCard(idx) {
   const card = game.cards[idx];
   card.revealed = false;
-  card.el.classList.remove('egg-opened');
+  card.el.classList.remove('egg-opened', 'egg-cracking');
   card.wrapEl.classList.add('dancing');
+  hideItemGlow(card);
+}
+
+function showItemGlow(card) {
+  // Remove any existing glow
+  hideItemGlow(card);
+
+  const floatEl = document.createElement('div');
+  floatEl.className = 'egg-float-item';
+  floatEl.textContent = card.emoji;
+
+  const coneEl = document.createElement('div');
+  coneEl.className = 'egg-light-cone';
+
+  card.wrapEl.appendChild(coneEl);
+  card.wrapEl.appendChild(floatEl);
+  card.glowEl = floatEl;
+  card.coneEl = coneEl;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      floatEl.classList.add('visible');
+      coneEl.classList.add('visible');
+    });
+  });
+}
+
+function hideItemGlow(card) {
+  if (card.glowEl) { card.glowEl.remove(); card.glowEl = null; }
+  if (card.coneEl) { card.coneEl.remove(); card.coneEl = null; }
+}
+
+function showItemPopup(emoji, callback) {
+  const popup = document.getElementById('itemPopup');
+  const emojiEl = popup.querySelector('.item-popup-emoji');
+
+  // Reset animation by replacing element
+  const fresh = emojiEl.cloneNode(false);
+  fresh.className = 'item-popup-emoji';
+  fresh.textContent = emoji;
+  emojiEl.parentNode.replaceChild(fresh, emojiEl);
+
+  popup.classList.add('visible');
+  // Trigger pop-in animation next frame
+  requestAnimationFrame(() => fresh.classList.add('pop-in'));
+
+  setTimeout(() => {
+    popup.classList.remove('visible');
+    setTimeout(callback, 220);
+  }, 900);
+}
+
+function showResultModal(emojiA, emojiB, isMatch, callback) {
+  const modal = document.getElementById('resultModal');
+  const row = document.getElementById('resultItemsRow');
+  const label = document.getElementById('resultLabel');
+
+  // Build emoji elements fresh (re-triggers CSS animations)
+  row.innerHTML = '';
+  const e1 = document.createElement('span');
+  e1.className = 'result-item-emoji';
+  e1.textContent = emojiA;
+  const e2 = document.createElement('span');
+  e2.className = 'result-item-emoji';
+  e2.textContent = emojiB;
+  row.appendChild(e1);
+  row.appendChild(e2);
+
+  if (isMatch) {
+    label.className = 'result-label match';
+    label.textContent = '🎉 MATCH! 🎉';
+    // Confetti burst during modal
+    burstConfetti(window.innerWidth / 2, window.innerHeight / 2, 80);
+    setTimeout(() => burstConfetti(window.innerWidth / 2 - 120, window.innerHeight / 3, 50), 250);
+    setTimeout(() => burstConfetti(window.innerWidth / 2 + 120, window.innerHeight / 3, 50), 450);
+    flashScreen('#ffffff', 0.4, 300);
+  } else {
+    // Add big X overlay
+    const x = document.createElement('div');
+    x.className = 'result-x-overlay';
+    x.textContent = '✕';
+    row.appendChild(x);
+
+    label.className = 'result-label no-match';
+    label.textContent = '✕ Incorrect!';
+  }
+
+  modal.classList.add('visible');
+  setTimeout(() => {
+    modal.classList.remove('visible');
+    setTimeout(callback, 300);
+  }, 2200);
 }
 
 function checkMatch() {
   const [a, b] = game.current;
   const cardA = game.cards[a];
   const cardB = game.cards[b];
-  game.locked = true;
+  // game.locked is already true from second egg reveal
 
   if (cardA.emoji === cardB.emoji) {
-    // MATCH!
-    setTimeout(() => {
-      sfxMatch();
-      setFlash('🎉 MATCH!', '#6bcb77');
-
-      // Add to basket
+    sfxMatch();
+    showResultModal(cardA.emoji, cardB.emoji, true, () => {
       const p = game.currentPlayer;
       game.scores[p]++;
       game.items[p].push(cardA.emoji);
       updateBaskets();
 
-      // Animate match
+      hideItemGlow(cardA);
+      hideItemGlow(cardB);
+
       const posA = getEggCenter(cardA.wrapEl);
       const posB = getEggCenter(cardB.wrapEl);
-      const midX = (posA.x + posB.x) / 2, midY = (posA.y + posB.y) / 2;
-      burstConfetti(posA.x, posA.y, 70);
-      burstConfetti(posB.x, posB.y, 70);
-      burstConfetti(midX, midY, 55);
-      flashScreen('#ffffff', 0.55, 280);
+      burstConfetti(posA.x, posA.y, 55);
+      burstConfetti(posB.x, posB.y, 55);
+      flashScreen('#ffffff', 0.45, 250);
 
       cardA.wrapEl.classList.remove('dancing');
       cardB.wrapEl.classList.remove('dancing');
@@ -1888,64 +2919,51 @@ function checkMatch() {
         game.matchedPairs++;
         game.current = [];
         game.locked = false;
-        clearFlash();
         updateTurnIndicator();
-
-        // Check win
-        if (game.matchedPairs >= game.totalPairs) {
-          onGameComplete();
-          return;
-        }
-
-        // Same player goes again on match
-        if (cfg.mode === 'ai' && game.currentPlayer === 1) {
-          setTimeout(doAITurn, 800);
-        }
-      }, 500);
-    }, 400);
+        if (game.matchedPairs >= game.totalPairs) { onGameComplete(); return; }
+        if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
+      }, 450);
+    });
   } else {
-    // NO MATCH
-    setTimeout(() => {
-      sfxNoMatch();
-      setFlash('💔 Try again…', '#ff6b6b');
-
-      setTimeout(() => {
-        closeCard(a);
-        closeCard(b);
-        game.current = [];
-        game.locked = false;
-        clearFlash();
-
-        // Switch player
-        if (cfg.mode !== '1p') {
-          game.currentPlayer = 1 - game.currentPlayer;
-          updateBaskets();
-          updateTurnIndicator();
-          if (cfg.mode === 'ai' && game.currentPlayer === 1) {
-            setTimeout(doAITurn, 800);
-          }
-        } else {
-          updateTurnIndicator();
-        }
-      }, 1200);
-    }, 400);
+    sfxNoMatch();
+    showResultModal(cardA.emoji, cardB.emoji, false, () => {
+      hideItemGlow(cardA);
+      hideItemGlow(cardB);
+      closeCard(a);
+      closeCard(b);
+      game.current = [];
+      game.locked = false;
+      if (cfg.mode !== '1p') {
+        game.currentPlayer = 1 - game.currentPlayer;
+        updateBaskets();
+        updateTurnIndicator();
+        if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
+      } else {
+        updateTurnIndicator();
+      }
+    });
   }
 }
 
 function updateBaskets() {
-  const numPlayers = cfg.mode === '1p' ? 1 : 2;
-  for (let i = 0; i < numPlayers; i++) {
-    const scoreEl = document.getElementById(`score${i}`);
-    const itemsEl = document.getElementById(`items${i}`);
+  for (let i = 0; i < 2; i++) {
+    const scoreEl  = document.getElementById(`score${i}`);
+    const itemsEl  = document.getElementById(`items${i}`);
     const basketEl = document.getElementById(`basket${i}`);
-    if (scoreEl) scoreEl.textContent = game.scores[i];
-    if (itemsEl) {
-      itemsEl.innerHTML = game.items[i].map(em =>
-        `<span class="basket-item">${em}</span>`
-      ).join('');
-    }
-    if (basketEl) {
-      basketEl.classList.toggle('active', i === game.currentPlayer);
+
+    if (cfg.mode === '1p' && i === 1) {
+      // Show remaining pairs in the second basket
+      if (scoreEl) scoreEl.textContent = game.totalPairs - game.matchedPairs;
+      if (itemsEl) itemsEl.innerHTML = '';
+      if (basketEl) basketEl.classList.remove('active');
+    } else {
+      if (scoreEl) scoreEl.textContent = game.scores[i];
+      if (itemsEl) {
+        itemsEl.innerHTML = game.items[i].map(em =>
+          `<span class="basket-item">${em}</span>`
+        ).join('');
+      }
+      if (basketEl) basketEl.classList.toggle('active', i === game.currentPlayer);
     }
   }
 }
@@ -2002,22 +3020,22 @@ function doAITurn() {
     pick2 = picks[1];
   }
 
-  // Animate AI picks with delay
+  // Animate AI picks sequentially through the new reveal flow
   game.locked = true;
   setTimeout(() => {
     sfxPop();
-    revealCard(pick1);
-    updateAIMemory(pick1);
     game.current.push(pick1);
-
-    setTimeout(() => {
-      sfxPop();
-      revealCard(pick2);
-      updateAIMemory(pick2);
-      game.current.push(pick2);
-      game.locked = false;
-      checkMatch();
-    }, 800);
+    updateAIMemory(pick1);
+    revealCard(pick1, () => {
+      setTimeout(() => {
+        sfxPop();
+        game.current.push(pick2);
+        updateAIMemory(pick2);
+        revealCard(pick2, () => {
+          checkMatch();
+        });
+      }, 400);
+    });
   }, 500);
 }
 
@@ -2025,6 +3043,7 @@ function doAITurn() {
 //  PAUSE
 // ============================================================
 function togglePause() {
+  if (document.getElementById('resultModal').classList.contains('visible')) return;
   game.paused = !game.paused;
   const pauseBtn = document.getElementById('pauseBtn');
   const overlay = document.getElementById('pauseOverlay');
@@ -2159,22 +3178,6 @@ function restartGame() {
   startGame();
 }
 
-// ============================================================
-//  FLASH MESSAGE
-// ============================================================
-let flashTimeout = null;
-function setFlash(msg, color = '#fff') {
-  const el = document.getElementById('flashMsg');
-  el.textContent = msg;
-  el.style.color = color;
-  el.style.opacity = '1';
-  clearTimeout(flashTimeout);
-  flashTimeout = setTimeout(clearFlash, 2000);
-}
-function clearFlash() {
-  const el = document.getElementById('flashMsg');
-  if (el) { el.style.opacity = '0'; }
-}
 
 function flashScreen(color, alpha, durationMs) {
   const el = document.getElementById('screenFlash');
@@ -2206,6 +3209,10 @@ cfg.p2.avatar = AVATARS[0]; // 🐰
 // Toggle btn sync
 document.getElementById('musicToggleHome').classList.toggle('on', cfg.musicOn);
 document.getElementById('sfxToggleHome').classList.toggle('on', cfg.sfxOn);
+
+// Init volume sliders
+updateVolSliderStyle();
+syncMusicPlayBtns();
 
 </script>
 </body>
