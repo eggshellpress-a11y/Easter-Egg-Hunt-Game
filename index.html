@@ -450,7 +450,7 @@ html, body {
 /* Header */
 .game-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 52px 12px 10px;
+  padding: 72px 12px 10px;
   background: none;
   flex-shrink: 0;
   gap: 8px;
@@ -604,29 +604,6 @@ html, body {
 }
 
 /* Turn indicator */
-.turn-indicator {
-  text-align: center;
-  padding: 8px 20px;
-  margin-top: 14px;
-  margin-bottom: 16px;
-  font-family: 'Fredoka', sans-serif;
-  font-size: 1.25rem; font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.35);
-  flex-shrink: 0;
-  background: #ff8eea;
-  border: 3px solid #ffffff;
-  border-radius: 14px;
-  align-self: center;
-  opacity: 0;
-  transform: scale(0);
-}
-.turn-indicator span { color: #ffd93d; font-weight: 700; }
-@keyframes turnPop {
-  0%   { transform: scale(0.5); opacity: 0; }
-  70%  { transform: scale(1.12); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
 
 /* Full-screen celebration flash overlay */
 #screenFlash {
@@ -1563,10 +1540,6 @@ html, body {
 
   <!-- Baskets -->
   <div class="baskets-row" id="basketsRow"></div>
-
-  <!-- Turn + Flash -->
-  <div class="turn-indicator" id="turnIndicator"></div>
-
 
   <!-- Egg grid -->
   <div class="egg-grid-container">
