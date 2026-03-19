@@ -24,22 +24,23 @@ The script is organized into clearly labeled sections (`// ===...===` comments):
 
 | Section | Lines | Purpose |
 |---|---|---|
-| STATE | ~1556 | `cfg` (pre-game settings) and `game` (live game state) objects, plus all constants |
-| AUDIO ENGINE | ~1611 | Web Audio API — procedural SFX functions + BGM scheduler + custom music upload |
-| CONFETTI | ~1880 | Canvas overlay particle system |
-| POLKADOT BACKGROUND | ~1991 | Animated polkadot canvas drawn behind game content |
-| CASINO CELEBRATION | ~2038 | `playCasinoCelebration()` — slot-reel animation overlay (not triggered by start button; retained for potential use) |
-| HOME SCREEN SETUP | ~2153 | `buildDecoEggs()`, avatar pickers, mode/difficulty selection builders |
-| GAME START | ~2275 | `startGame()` — resets state, builds the grid, transitions screens |
-| GRID BUILD | ~2359 | `buildGameHeader()`, `buildEggGrid()` — DOM construction for game screen |
-| TIMER | ~2497 | `startTimer()`, `onTimerExpired()` — setInterval countdown |
-| SHUFFLE | ~2527 | `doShuffle()` — burrow-out → reorder → pop-in sequence |
-| EGG CLICK & GAME LOGIC | ~2628 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
-| AI | ~2923 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
-| PAUSE | ~2983 | `togglePause()` — freezes timer and dims BGM gain |
-| EXIT / GAME OVER | ~3024 | `confirmExit()`, `goHome()`, `onGameComplete()`, `restartGame()` |
-| UTILS | ~3148 | `escHtml()` and other small helpers |
-| INIT | ~3155 | One-time startup — default selections, toggle sync, volume slider init |
+| STATE | ~1591 | `cfg` (pre-game settings) and `game` (live game state) objects, plus all constants |
+| AUDIO ENGINE | ~1646 | Web Audio API — procedural SFX functions + BGM scheduler + custom music upload |
+| CONFETTI | ~1915 | Canvas overlay particle system |
+| POLKADOT BACKGROUND | ~2026 | Animated polkadot canvas drawn behind game content |
+| CASINO CELEBRATION | ~2073 | `playCasinoCelebration()` — slot-reel animation overlay (retained for potential use) |
+| HOME SCREEN SETUP | ~2188 | `buildDecoEggs()`, avatar pickers, mode/difficulty selection builders |
+| GAME START | ~2310 | `startGame()` — resets state, builds the grid, transitions screens |
+| GRID BUILD | ~2395 | `buildGameHeader()`, `buildEggGrid()` — DOM construction for game screen |
+| SLIDE IN ANIMATION | ~2503 | CSS-driven screen transition animation for game start |
+| TIMER | ~2533 | `startTimer()`, `onTimerExpired()` — setInterval countdown |
+| SHUFFLE | ~2563 | `doShuffle()` — burrow-out → reorder → pop-in sequence |
+| EGG CLICK & GAME LOGIC | ~2661 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
+| AI | ~2969 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
+| PAUSE | ~3029 | `togglePause()` — freezes timer and dims BGM gain |
+| EXIT / GAME OVER | ~3070 | `confirmExit()`, `goHome()`, `onGameComplete()`, `restartGame()` |
+| UTILS | ~3178 | `escHtml()` and other small helpers |
+| INIT | ~3185 | One-time startup — default selections, toggle sync, volume slider init |
 
 ## Key State Objects
 
@@ -108,6 +109,5 @@ When a `__LUCKY__` egg is clicked, `handleBonusEgg()` fires: gameplay locks, the
 ## UI Layout Notes
 
 - Game header (`.game-header`) uses a three-column flex layout: `.header-left` (home + pause), `.header-center` (timer), `.header-right` (audio controls). Left and right each have `flex: 1` so the timer stays truly centered. The header has no background — buttons use `#c1f0fb` fill.
-- The `.turn-indicator` (player turn display) sits between the baskets row and the egg grid, styled with a `#ff8eea` background and white border.
 - Volume/SFX sliders on the home screen are wrapped in `.volume-row` divs with a solid white background. In-game audio controls live in `.header-right`.
 - There is no flash message system — it was removed. Do not re-add `setFlash`/`clearFlash`.

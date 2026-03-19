@@ -22,7 +22,7 @@ html, body {
 .screen {
   position: fixed; inset: 0;
   display: flex; flex-direction: column; align-items: center;
-  overflow-y: auto; overflow-x: hidden;
+  overflow-y: auto; overflow-x: clip;
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .screen.hidden {
@@ -81,7 +81,7 @@ html, body {
 .deco-eggs {
   display: flex; gap: 12px; justify-content: center;
   flex-wrap: wrap;
-  padding-top: 80px;
+  padding-top: 0;
 }
 .deco-egg {
   width: 52px; height: 68px;
@@ -332,6 +332,7 @@ html, body {
 /* AI difficulty sub-option */
 .ai-diff-row {
   display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+  justify-content: center;
 }
 .ai-diff-btn {
   padding: 5px 12px;
@@ -364,8 +365,8 @@ html, body {
   background-color: #ff8eea;
   background-image: none;
   color: white;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  box-shadow: 0 8px 32px rgba(255,142,234,0.6), 0 4px 16px rgba(0,0,0,0.2);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 14px rgba(255,142,234,0.25), 0 3px 10px rgba(0,0,0,0.15);
   transition: transform 0.15s, box-shadow 0.15s;
   animation: startBtnPulse 2s ease-in-out infinite;
   -webkit-tap-highlight-color: transparent;
@@ -405,11 +406,11 @@ html, body {
 @keyframes startBtnPulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 8px 32px rgba(255,142,234,0.55), 0 4px 16px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 14px rgba(255,142,234,0.22), 0 3px 10px rgba(0,0,0,0.15);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 14px 52px rgba(255,142,234,0.95), 0 6px 24px rgba(0,0,0,0.25), 0 0 44px 14px rgba(255,142,234,0.45);
+    box-shadow: 0 6px 22px rgba(255,142,234,0.38), 0 4px 14px rgba(0,0,0,0.18);
   }
 }
 /* Pulse for selected widget buttons */
@@ -449,24 +450,17 @@ html, body {
 
 /* Header */
 .game-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 72px 12px 10px;
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 8px 12px 10px;
   background: none;
   flex-shrink: 0;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 12px;
 }
-.header-left {
-  display: flex; align-items: center; gap: 6px;
-  flex: 1; justify-content: flex-end;
-}
-.header-right {
-  display: flex; align-items: center; gap: 6px;
-  flex: 1; justify-content: flex-start;
-}
+.header-left { display: flex; align-items: center; padding-top: 20px; }
+.header-right { display: none; }
 .header-center {
   display: flex; flex-direction: column; align-items: center;
-  flex: 0 0 auto; padding: 0 24px;
+  flex: 0 0 auto;
 }
 .game-title-small {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
@@ -478,20 +472,32 @@ html, body {
   text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
-/* Timer */
-.timer-display {
-  font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 2.5rem; font-weight: 900;
-  color: #ffd93d;
-  text-shadow: 0 0 20px rgba(255,217,61,0.7), 0 2px 4px rgba(0,0,0,0.4);
-  font-variant-numeric: tabular-nums;
-  min-width: 56px; text-align: center;
-  transition: color 0.3s;
-  background: #c1f0fb;
-  border-radius: 12px;
-  padding: 4px 12px;
+/* Clock face */
+.clock-face {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
-.timer-display.urgent { color: #ff6b6b; animation: timerPulse 1s ease infinite; text-shadow: 0 0 20px rgba(255,107,107,0.8); }
+.clock-label {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(60,30,100,0.65);
+}
+.timer-display {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 2.4rem; font-weight: 900;
+  color: #3d1a6e;
+  text-shadow: none;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 3px;
+  min-width: 110px; text-align: center;
+  transition: color 0.3s;
+  background: #e0cdff;
+  border: 3px solid rgba(100,60,180,0.3);
+  border-radius: 16px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.timer-display.urgent { color: #cc1a1a; animation: timerPulse 1s ease infinite; text-shadow: none; }
 @keyframes timerPulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.12); }
@@ -513,12 +519,42 @@ html, body {
 .ctrl-btn:hover { background: #a8e8f7; }
 .ctrl-btn.on { background: #c1f0fb; border-color: rgba(255,255,255,0.5); color: #fff; }
 
+/* Home button egg shape */
+.home-egg-btn {
+  width: 44px; height: 57px;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  border: none;
+  background: radial-gradient(ellipse at 35% 30%, #FFB3D9 0%, #FF6BAD 45%, #C9185B 100%);
+  box-shadow:
+    inset -3px -5px 14px rgba(0,0,0,0.18),
+    inset 3px 4px 10px rgba(255,255,255,0.38),
+    0 5px 16px rgba(0,0,0,0.22);
+  position: relative;
+  overflow: hidden;
+  font-size: 1.15rem;
+}
+.home-egg-btn::before {
+  content: '';
+  position: absolute;
+  top: 10%; left: 18%;
+  width: 35%; height: 28%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.72) 0%, transparent 70%);
+  border-radius: 50%;
+  transform: rotate(-15deg);
+  pointer-events: none;
+}
+.home-egg-btn:hover {
+  background: radial-gradient(ellipse at 35% 30%, #ffc8e8 0%, #ff9ccc 45%, #d9205f 100%);
+  transform: scale(1.08);
+}
+
 /* Baskets */
 .baskets-row {
   display: flex; gap: 16px;
-  padding: 52px 12px 6px; /* extra top padding for basket handle */
+  padding: 38px 12px 22px; /* top: basket handle clearance, bottom: spacing before grid */
   flex-shrink: 0;
   justify-content: center;
+  overflow: visible;
 }
 
 /* Easter Basket */
@@ -528,7 +564,7 @@ html, body {
   border-radius: 10px 10px 22px 22px;
   border: 3px solid #7a4a10;
   overflow: visible;
-  transition: all 0.3s;
+  transition: border-color 0.3s;
   /* Thick basket weave: crosshatch diagonals + horizontal slat bands */
   background-color: #c8892a;
   background-image:
@@ -551,9 +587,19 @@ html, body {
 }
 .basket.active {
   border-color: #ffd93d;
-  box-shadow: 0 0 24px rgba(255,217,61,0.65), 0 4px 14px rgba(0,0,0,0.25);
+  animation: basketPulse 1.2s ease-in-out infinite;
 }
 .basket.active::before { border-color: #ffd93d; }
+@keyframes basketPulse {
+  0%, 100% {
+    box-shadow: 0 0 14px rgba(255,217,61,0.5), 0 4px 14px rgba(0,0,0,0.25);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 44px rgba(255,217,61,1), 0 6px 18px rgba(0,0,0,0.3);
+    transform: scale(1.04);
+  }
+}
 
 /* Basket header strip */
 .basket-top {
@@ -563,23 +609,23 @@ html, body {
   border-radius: 7px 7px 0 0;
 }
 .basket-avatar {
-  width: 30px; height: 30px; border-radius: 50%;
+  width: 34px; height: 34px; border-radius: 50%;
   background: rgba(255,255,255,0.2);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; flex-shrink: 0;
+  font-size: 1.2rem; flex-shrink: 0;
   overflow: hidden;
   border: 2px solid rgba(255,255,255,0.4);
 }
 .basket-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .basket-name {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 0.82rem; font-weight: 700; color: #fff;
+  font-size: 0.88rem; font-weight: 700; color: #fff;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   text-shadow: 0 1px 3px rgba(0,0,0,0.4);
 }
 .basket-score {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 1.25rem; font-weight: 900; color: #ffd93d;
+  font-size: 1.3rem; font-weight: 900; color: #ffd93d;
   margin-left: auto; flex-shrink: 0;
   text-shadow: 0 0 8px rgba(255,217,61,0.7), 0 1px 3px rgba(0,0,0,0.4);
 }
@@ -595,7 +641,7 @@ html, body {
   display: flex; flex-wrap: wrap; gap: 3px;
   padding: 6px 6px 10px;
   min-height: 32px;
-  font-size: 1.05rem; line-height: 1;
+  font-size: 1.2rem; line-height: 1;
 }
 .basket-item { animation: itemPop 0.3s cubic-bezier(0.34,1.56,0.64,1); }
 @keyframes itemPop {
@@ -619,21 +665,32 @@ html, body {
   overflow: visible;
 }
 .egg-grid {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
 }
 
 /* ========== EGG ========== */
 .egg-cell {
   display: flex; align-items: center; justify-content: center;
-  aspect-ratio: 3/4;
+  aspect-ratio: 5/6;
+  padding: 5px;
+  flex-shrink: 0;
+  overflow: visible;
+  transition: width 0.38s ease, padding 0.38s ease, opacity 0.25s ease;
+}
+.egg-cell.removing {
+  width: 0 !important;
+  padding: 0 !important;
+  opacity: 0;
+  overflow: hidden;
 }
 .egg-wrapper {
   width: 100%; height: 100%;
   display: flex; align-items: center; justify-content: center;
   position: relative;
+  overflow: visible;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transform-origin: bottom center;
@@ -658,9 +715,9 @@ html, body {
 
 /* Egg body */
 .egg-body {
-  width: 80%; height: 90%;
-  max-width: 75px; max-height: 95px;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  width: 85%; height: 86%;
+  max-width: 86px; max-height: 96px;
+  border-radius: 50% 50% 50% 50% / 56% 56% 44% 44%;
   background: radial-gradient(ellipse at 35% 30%,
     var(--egg-light) 0%, var(--egg-mid) 45%, var(--egg-dark) 100%);
   box-shadow:
@@ -669,7 +726,7 @@ html, body {
     0 8px 25px rgba(0,0,0,0.3),
     0 3px 8px rgba(0,0,0,0.2);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: opacity 0.3s;
   flex-shrink: 0;
 }
@@ -688,7 +745,7 @@ html, body {
 .egg-body::after {
   content: '';
   position: absolute;
-  top: 45%; left: 0; right: 0; height: 4px;
+  top: 45%; left: 8%; right: 8%; height: 4px;
   background: linear-gradient(90deg,
     transparent 0%, var(--egg-accent) 15%, transparent 30%,
     var(--egg-accent) 50%, transparent 65%,
@@ -1266,67 +1323,128 @@ html, body {
   100% { transform: scale(1) rotate(0); opacity: 1; }
 }
 
-/* ========== RESULT MODAL ========== */
-#resultModal {
+/* ========== DUAL TIMERS ========== */
+.timers-row {
+  display: flex; flex-direction: row; gap: 10px; align-items: center;
+}
+.shuffle-clock-face {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.shuffle-clock-label {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(10,60,80,0.65);
+}
+.shuffle-timer-display {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.55rem; font-weight: 900;
+  color: #0a5a72;
+  background: #c1f0fb;
+  border: 3px solid rgba(0,120,160,0.25);
+  border-radius: 16px;
+  padding: 8px 12px;
+  min-width: 80px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: color 0.3s;
+}
+.shuffle-timer-display.soon { color: #c02060; }
+
+/* ========== SCREEN BLUR OVERLAY ========== */
+#screenBlurOverlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.82);
+  z-index: 799;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  background: rgba(0,0,0,0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+#screenBlurOverlay.show { opacity: 1; }
+
+/* ========== FIREWORKS ========== */
+.fw-particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 850;
+  transform: translate(-50%, -50%);
+}
+@keyframes fwParticle {
+  0%   { transform: translate(-50%,-50%) translate(0,0) scale(1); opacity: 1; }
+  75%  { opacity: 1; }
+  100% { transform: translate(-50%,-50%) translate(var(--fw-dx), calc(var(--fw-dy) + 55px)) scale(0); opacity: 0; }
+}
+.fw-trail {
+  position: fixed;
+  width: 3px;
+  pointer-events: none;
+  z-index: 849;
+  border-radius: 2px;
+  transform-origin: top center;
+  transform: translate(-50%, 0);
+}
+@keyframes fwTrail {
+  0%   { height: 0; opacity: 0.9; }
+  40%  { height: var(--trail-h); opacity: 0.6; }
+  100% { height: var(--trail-h); opacity: 0; }
+}
+
+/* ========== GAME MESSAGE (match / no-match toast) ========== */
+#gameMessage {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 800;
+  pointer-events: none;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 3.8rem; font-weight: 900;
+  text-align: center;
+  white-space: nowrap;
+  padding: 18px 36px;
+  border-radius: 24px;
   backdrop-filter: blur(14px);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  z-index: 700;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s;
+  -webkit-backdrop-filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
 }
-#resultModal.visible { opacity: 1; pointer-events: all; }
-.result-card {
-  display: flex; flex-direction: column; align-items: center; gap: 20px;
-  padding: 20px;
+#gameMessage.show { opacity: 1; }
+
+/* Match — rainbow pop with shimmer */
+#gameMessage.msg-match {
+  color: #fff;
+  font-size: 4.6rem;
+  background: linear-gradient(135deg, #ff6b9d, #ffd93d, #6bcb77, #4ecdc4, #a78bfa, #ff6b9d);
+  background-size: 300% 300%;
+  border: 4px solid rgba(255,255,255,0.9);
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.5);
+  box-shadow: 0 0 40px rgba(255,217,61,0.6), 0 8px 32px rgba(0,0,0,0.4);
 }
-.result-items-row {
-  display: flex; align-items: center; gap: 32px; position: relative;
+#gameMessage.msg-match.show {
+  animation: msgMatchPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both,
+             matchBgShimmer 1.8s ease-in-out 0.2s infinite;
 }
-.result-item-emoji {
-  font-size: 5.5rem; line-height: 1;
-  animation: resultEmojiIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+@keyframes msgMatchPop {
+  0%   { transform: translate(-50%,-50%) scale(0.15) rotate(-8deg); opacity: 0; }
+  55%  { transform: translate(-50%,-50%) scale(1.22) rotate(3deg);  opacity: 1; }
+  75%  { transform: translate(-50%,-50%) scale(0.95) rotate(-1deg); }
+  100% { transform: translate(-50%,-50%) scale(1)    rotate(0deg);  opacity: 1; }
 }
-.result-item-emoji:nth-child(2) { animation-delay: 0.12s; }
-@keyframes resultEmojiIn {
-  0%   { transform: scale(0) translateY(-30px); opacity: 0; }
-  65%  { transform: scale(1.2) translateY(4px); opacity: 1; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+@keyframes matchBgShimmer {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
 }
-.result-x-overlay {
-  position: absolute; top: 50%; left: 50%;
-  font-size: 8rem; line-height: 1;
-  color: #ff1744;
-  text-shadow: 0 0 30px #ff1744, 0 0 60px rgba(255,23,68,0.5);
-  z-index: 5; pointer-events: none;
-  animation: bigXIn 0.4s 0.22s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes bigXIn {
-  0%   { transform: translate(-50%,-50%) scale(0) rotate(-20deg); opacity: 0; }
-  60%  { transform: translate(-50%,-50%) scale(1.3) rotate(5deg); opacity: 1; }
-  100% { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 1; }
-}
-.result-label {
-  font-size: 2.8rem; font-weight: 900; text-align: center; letter-spacing: 1px;
-  animation: resultLabelIn 0.4s 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
-}
-@keyframes resultLabelIn {
-  0%   { transform: scale(0); opacity: 0; }
-  65%  { transform: scale(1.15); }
-  100% { transform: scale(1); opacity: 1; }
-}
-.result-label.match {
-  background: linear-gradient(90deg, #6bcb77, #4ecdc4, #ffd93d, #6bcb77);
-  background-size: 200% auto;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: resultLabelIn 0.4s 0.28s cubic-bezier(0.34,1.56,0.64,1) both, titleShimmer 1.5s linear infinite;
-}
-.result-label.no-match {
-  color: #ff4444;
-  -webkit-text-fill-color: #ff4444;
-  text-shadow: 0 0 25px rgba(255,68,68,0.7);
+
+/* No-match — simple fade */
+#gameMessage.msg-nomatch {
+  color: #fff;
+  background: rgba(220, 50, 50, 0.78);
+  border: 3px solid rgba(255,255,255,0.55);
 }
 
 /* ========== EASTER START ANIMATION ========== */
@@ -1401,14 +1519,6 @@ html, body {
   </div>
 </div>
 
-<!-- Match / no-match result modal -->
-<div id="resultModal">
-  <div class="result-card">
-    <div class="result-items-row" id="resultItemsRow"></div>
-    <div class="result-label" id="resultLabel"></div>
-  </div>
-</div>
-
 <!-- ========== HOME SCREEN ========== -->
 <div class="screen" id="homeScreen">
 
@@ -1457,7 +1567,7 @@ html, body {
       </div>
       <div class="diff-card diff-hard" data-diff="hard" onclick="selectDiff('hard',this)">
         <span class="diff-name">Hard</span>
-        <span class="diff-info">25 eggs · 20s</span>
+        <span class="diff-info">20 eggs · 20s</span>
       </div>
     </div>
   </div>
@@ -1525,17 +1635,21 @@ html, body {
   <!-- Header -->
   <div class="game-header">
     <div class="header-left">
-      <button class="ctrl-btn" onclick="confirmExit()" title="Exit">🏠</button>
-      <button class="ctrl-btn" onclick="togglePause()" id="pauseBtn" title="Pause">⏸</button>
+      <button class="ctrl-btn home-egg-btn" onclick="confirmExit()" title="Exit">🏠</button>
     </div>
     <div class="header-center">
-      <div class="game-title-small"></div>
-      <div class="timer-display" id="timerDisplay">60</div>
+      <div class="timers-row">
+        <div class="clock-face">
+          <div class="clock-label">⏱ Time</div>
+          <div class="timer-display" id="timerDisplay">2:00</div>
+        </div>
+        <div class="shuffle-clock-face">
+          <div class="shuffle-clock-label">🔀 Shuffle</div>
+          <div class="shuffle-timer-display" id="shuffleTimerDisplay">0:40</div>
+        </div>
+      </div>
     </div>
-    <div class="header-right">
-      <button class="ctrl-btn on" id="musicToggleGame" onclick="toggleMusic()" title="Music">🎵</button>
-      <button class="ctrl-btn on" id="sfxToggleGame" onclick="toggleSFX()" title="SFX">🔊</button>
-    </div>
+    <div class="header-right"></div>
   </div>
 
   <!-- Baskets -->
@@ -1547,6 +1661,11 @@ html, body {
   </div>
 
 </div><!-- /gameScreen -->
+
+<!-- Screen blur backdrop for match / no-match messages -->
+<div id="screenBlurOverlay"></div>
+<!-- Floating match / no-match message -->
+<div id="gameMessage"></div>
 
 <!-- ========== PAUSE OVERLAY ========== -->
 <div class="overlay hidden" id="pauseOverlay">
@@ -1564,7 +1683,7 @@ html, body {
     <div class="overlay-title">Leave?</div>
     <div class="overlay-subtitle">Your progress will be lost.</div>
     <button class="overlay-btn primary" onclick="goHome()">🏠 Yes, Exit</button>
-    <button class="overlay-btn secondary" onclick="document.getElementById('exitOverlay').classList.add('hidden')">← Stay</button>
+    <button class="overlay-btn secondary" onclick="cancelExit()">← Stay</button>
   </div>
 </div>
 
@@ -1604,12 +1723,12 @@ const EGG_COLORS = [
 const ITEMS_BY_DIFF = {
   easy:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋'],                               // 7 pairs = 14 eggs + 1 lucky egg = 15
   medium: ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
-  hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀','🎁','👑'],      // 12 pairs = 24 eggs + 1 lucky egg = 25
+  hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 15, time: 40 },
-  medium: { eggs: 20, time: 30 },
-  hard:   { eggs: 25, time: 20 },
+  easy:   { eggs: 15, time: 120, shuffleTime: 40 },
+  medium: { eggs: 20, time: 120, shuffleTime: 30 },
+  hard:   { eggs: 20, time: 120, shuffleTime: 20 },
 };
 
 let cfg = {
@@ -1632,8 +1751,11 @@ let game = {
   scores: [0, 0],
   items:  [[], []],
   timer: 0,
-  maxTime: 60,
+  maxTime: 120,
   timerInterval: null,
+  shuffleTimer: 0,
+  shuffleMaxTime: 40,
+  shuffleTimerInterval: null,
   paused: false,
   locked: false,     // prevent clicks during animation
   aiMemory: {},      // emoji -> [cardId, cardId]
@@ -2328,6 +2450,8 @@ function startGame() {
   const items = ITEMS_BY_DIFF[cfg.diff];
   game.maxTime = diffCfg.time;
   game.timer = diffCfg.time;
+  game.shuffleMaxTime = diffCfg.shuffleTime;
+  game.shuffleTimer = diffCfg.shuffleTime;
   updateTimerDisplay();
   game.scores = [0, 0];
   game.items = [[], []];
@@ -2376,6 +2500,7 @@ function startGame() {
   // Animate eggs sliding in
   animateEggsIn(() => {
     startTimer();
+    startShuffleTimer();
     updateTurnIndicator();
     if (cfg.mode === 'ai' && game.currentPlayer === 1) {
       setTimeout(doAITurn, 1200);
@@ -2459,11 +2584,12 @@ function buildEggGrid() {
   else if (total <= 12) cols = 4;
   else cols = 5;
 
-  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  const cellWidth = `calc(${100 / cols}%)`;
 
   game.cards.forEach((card, idx) => {
     const cell = document.createElement('div');
     cell.className = 'egg-cell';
+    cell.style.width = cellWidth;
 
     const wrapper = document.createElement('div');
     wrapper.className = 'egg-wrapper';
@@ -2536,10 +2662,10 @@ function startTimer() {
   clearInterval(game.timerInterval);
   updateTimerDisplay();
   game.timerInterval = setInterval(() => {
-    if (game.paused || game.shuffling) return;
+    if (game.paused) return;
     game.timer--;
     updateTimerDisplay();
-    if (game.timer <= 5 && game.timer > 0) sfxTick();
+    if (game.timer <= 10 && game.timer > 0) sfxTick();
     if (game.timer <= 0) {
       onTimerExpired();
     }
@@ -2548,15 +2674,43 @@ function startTimer() {
 
 function updateTimerDisplay() {
   const el = document.getElementById('timerDisplay');
-  el.textContent = Math.max(0, game.timer);
-  el.classList.toggle('urgent', game.timer <= 5 && game.timer > 0);
+  const secs = Math.max(0, game.timer);
+  const mins = Math.floor(secs / 60);
+  const s = secs % 60;
+  el.textContent = mins + ':' + String(s).padStart(2, '0');
+  el.classList.toggle('urgent', secs <= 15 && secs > 0);
 }
 
 function onTimerExpired() {
-  if (game.matchedPairs >= game.totalPairs) return; // already done
+  if (game.matchedPairs >= game.totalPairs) return;
   clearInterval(game.timerInterval);
-  game.locked = true;
-  doShuffle();
+  clearInterval(game.shuffleTimerInterval);
+  onGameComplete(true);
+}
+
+function startShuffleTimer() {
+  clearInterval(game.shuffleTimerInterval);
+  game.shuffleTimer = game.shuffleMaxTime;
+  updateShuffleTimerDisplay();
+  game.shuffleTimerInterval = setInterval(() => {
+    if (game.paused || game.shuffling) return;
+    game.shuffleTimer--;
+    updateShuffleTimerDisplay();
+    if (game.shuffleTimer <= 0) {
+      clearInterval(game.shuffleTimerInterval);
+      doShuffle();
+    }
+  }, 1000);
+}
+
+function updateShuffleTimerDisplay() {
+  const el = document.getElementById('shuffleTimerDisplay');
+  if (!el) return;
+  const secs = Math.max(0, game.shuffleTimer);
+  const mins = Math.floor(secs / 60);
+  const s = secs % 60;
+  el.textContent = mins + ':' + String(s).padStart(2, '0');
+  el.classList.toggle('soon', secs <= 8 && secs > 0);
 }
 
 // ============================================================
@@ -2639,12 +2793,9 @@ function doShuffle() {
           card.wrapEl.classList.add('dancing');
           done++;
           if (done === unmatchedCards.length) {
-            // Reset timer
-            game.timer = game.maxTime;
-            updateTimerDisplay();
             game.locked = false;
             game.shuffling = false;
-            startTimer();
+            startShuffleTimer();
             updateTurnIndicator();
             if (cfg.mode === 'ai' && game.currentPlayer === 1) {
               setTimeout(doAITurn, 1000);
@@ -2691,6 +2842,9 @@ function handleBonusEgg(idx) {
   const p = game.currentPlayer;
   sfxMatch();
 
+  // Close any previously-revealed card that isn't the bonus egg itself
+  game.current.filter(i => i !== idx).forEach(i => closeCard(i));
+
   // Show golden egg overlay
   const overlay = document.getElementById('bonusEggOverlay');
   // Re-trigger animations by replacing the animated child
@@ -2716,12 +2870,16 @@ function handleBonusEgg(idx) {
   setTimeout(() => {
     overlay.classList.remove('visible');
     card.matched = true;
-    card.wrapEl.style.visibility = 'hidden';
+    const bonusCell = card.wrapEl.parentElement;
+    if (bonusCell) {
+      bonusCell.classList.add('removing');
+      setTimeout(() => { bonusCell.style.display = 'none'; }, 400);
+    }
     game.matchedPairs++;
     game.current = [];
     game.locked = false;
     updateTurnIndicator();
-    if (game.matchedPairs >= game.totalPairs) { onGameComplete(); return; }
+    if (game.matchedPairs >= game.totalPairs) { onGameComplete(false); return; }
     if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 900);
   }, 1800);
 }
@@ -2823,47 +2981,6 @@ function showItemPopup(emoji, callback) {
   }, 900);
 }
 
-function showResultModal(emojiA, emojiB, isMatch, callback) {
-  const modal = document.getElementById('resultModal');
-  const row = document.getElementById('resultItemsRow');
-  const label = document.getElementById('resultLabel');
-
-  // Build emoji elements fresh (re-triggers CSS animations)
-  row.innerHTML = '';
-  const e1 = document.createElement('span');
-  e1.className = 'result-item-emoji';
-  e1.textContent = emojiA;
-  const e2 = document.createElement('span');
-  e2.className = 'result-item-emoji';
-  e2.textContent = emojiB;
-  row.appendChild(e1);
-  row.appendChild(e2);
-
-  if (isMatch) {
-    label.className = 'result-label match';
-    label.textContent = '🎉 MATCH! 🎉';
-    // Confetti burst during modal
-    burstConfetti(window.innerWidth / 2, window.innerHeight / 2, 80);
-    setTimeout(() => burstConfetti(window.innerWidth / 2 - 120, window.innerHeight / 3, 50), 250);
-    setTimeout(() => burstConfetti(window.innerWidth / 2 + 120, window.innerHeight / 3, 50), 450);
-    flashScreen('#ffffff', 0.4, 300);
-  } else {
-    // Add big X overlay
-    const x = document.createElement('div');
-    x.className = 'result-x-overlay';
-    x.textContent = '✕';
-    row.appendChild(x);
-
-    label.className = 'result-label no-match';
-    label.textContent = '✕ Incorrect!';
-  }
-
-  modal.classList.add('visible');
-  setTimeout(() => {
-    modal.classList.remove('visible');
-    setTimeout(callback, 300);
-  }, 2200);
-}
 
 function checkMatch() {
   const [a, b] = game.current;
@@ -2873,42 +2990,48 @@ function checkMatch() {
 
   if (cardA.emoji === cardB.emoji) {
     sfxMatch();
-    showResultModal(cardA.emoji, cardB.emoji, true, () => {
-      const p = game.currentPlayer;
-      game.scores[p]++;
-      game.items[p].push(cardA.emoji);
-      updateBaskets();
+    showGameMessage('🎊 MATCH! 🎊', 'msg-match', 1100);
+    launchMatchFireworks();
+    const p = game.currentPlayer;
+    game.scores[p]++;
+    game.items[p].push(cardA.emoji);
+    updateBaskets();
 
-      hideItemGlow(cardA);
-      hideItemGlow(cardB);
+    hideItemGlow(cardA);
+    hideItemGlow(cardB);
 
-      const posA = getEggCenter(cardA.wrapEl);
-      const posB = getEggCenter(cardB.wrapEl);
-      burstConfetti(posA.x, posA.y, 55);
-      burstConfetti(posB.x, posB.y, 55);
-      flashScreen('#ffffff', 0.45, 250);
+    const posA = getEggCenter(cardA.wrapEl);
+    const posB = getEggCenter(cardB.wrapEl);
+    burstConfetti(posA.x, posA.y, 55);
+    burstConfetti(posB.x, posB.y, 55);
+    flashScreen('#ffffff', 0.45, 250);
 
-      cardA.wrapEl.classList.remove('dancing');
-      cardB.wrapEl.classList.remove('dancing');
-      cardA.wrapEl.classList.add('matched');
-      cardB.wrapEl.classList.add('matched');
+    cardA.wrapEl.classList.remove('dancing');
+    cardB.wrapEl.classList.remove('dancing');
+    cardA.wrapEl.classList.add('matched');
+    cardB.wrapEl.classList.add('matched');
 
-      setTimeout(() => {
-        cardA.matched = true;
-        cardB.matched = true;
-        cardA.wrapEl.style.visibility = 'hidden';
-        cardB.wrapEl.style.visibility = 'hidden';
-        game.matchedPairs++;
-        game.current = [];
-        game.locked = false;
-        updateTurnIndicator();
-        if (game.matchedPairs >= game.totalPairs) { onGameComplete(); return; }
-        if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
-      }, 450);
-    });
+    setTimeout(() => {
+      cardA.matched = true;
+      cardB.matched = true;
+      [cardA, cardB].forEach(c => {
+        const cell = c.wrapEl.parentElement;
+        if (cell) {
+          cell.classList.add('removing');
+          setTimeout(() => { cell.style.display = 'none'; }, 400);
+        }
+      });
+      game.matchedPairs++;
+      game.current = [];
+      game.locked = false;
+      updateTurnIndicator();
+      if (game.matchedPairs >= game.totalPairs) { onGameComplete(false); return; }
+      if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
+    }, 450);
   } else {
     sfxNoMatch();
-    showResultModal(cardA.emoji, cardB.emoji, false, () => {
+    showGameMessage('✕ Incorrect!', 'msg-nomatch', 1100);
+    setTimeout(() => {
       hideItemGlow(cardA);
       hideItemGlow(cardB);
       closeCard(a);
@@ -2923,7 +3046,7 @@ function checkMatch() {
       } else {
         updateTurnIndicator();
       }
-    });
+    }, 1400);
   }
 }
 
@@ -3029,13 +3152,12 @@ function doAITurn() {
 //  PAUSE
 // ============================================================
 function togglePause() {
-  if (document.getElementById('resultModal').classList.contains('visible')) return;
   game.paused = !game.paused;
   const pauseBtn = document.getElementById('pauseBtn');
   const overlay = document.getElementById('pauseOverlay');
 
   if (game.paused) {
-    pauseBtn.textContent = '▶';
+    if (pauseBtn) pauseBtn.textContent = '▶';
     overlay.classList.remove('hidden');
     // Freeze dances visually by stopping animation
     document.querySelectorAll('.egg-wrapper.dancing').forEach(w => {
@@ -3049,7 +3171,7 @@ function togglePause() {
       } catch(e){}
     }
   } else {
-    pauseBtn.textContent = '⏸';
+    if (pauseBtn) pauseBtn.textContent = '⏸';
     overlay.classList.add('hidden');
     document.querySelectorAll('.egg-wrapper.dancing').forEach(w => {
       w.style.animationPlayState = 'running';
@@ -3071,13 +3193,23 @@ function togglePause() {
 // ============================================================
 function confirmExit() {
   if (!document.getElementById('gameScreen').classList.contains('hidden')) {
+    game.paused = true;
     document.getElementById('pauseOverlay').classList.add('hidden');
     document.getElementById('exitOverlay').classList.remove('hidden');
   }
 }
 
+function cancelExit() {
+  document.getElementById('exitOverlay').classList.add('hidden');
+  game.paused = false;
+  if (cfg.mode === 'ai' && game.currentPlayer === 1 && !game.locked) {
+    setTimeout(doAITurn, 800);
+  }
+}
+
 function goHome() {
   clearInterval(game.timerInterval);
+  clearInterval(game.shuffleTimerInterval);
   stopBGM();
   document.getElementById('gameScreen').classList.add('hidden');
   document.getElementById('homeScreen').classList.remove('hidden');
@@ -3089,9 +3221,12 @@ function goHome() {
   }
 }
 
-function onGameComplete() {
+function onGameComplete(timeUp) {
   clearInterval(game.timerInterval);
-  sfxFanfare();
+  clearInterval(game.shuffleTimerInterval);
+  const allPairsFound = game.matchedPairs >= game.totalPairs;
+
+  if (!timeUp || allPairsFound) sfxFanfare();
 
   setTimeout(() => {
     const overlay = document.getElementById('gameOverOverlay');
@@ -3100,6 +3235,28 @@ function onGameComplete() {
     const scores = document.getElementById('gameOverScores');
     const badge = document.getElementById('winnerBadge');
 
+    if (timeUp && !allPairsFound) {
+      // Time ran out — show what was found
+      title.textContent = '⏰ Time\'s Up!';
+      badge.textContent = '⏰';
+      sub.textContent = 'Try to find all pairs next time!';
+
+      const allFound = [...new Set([...game.items[0], ...game.items[1]])];
+      if (allFound.length > 0) {
+        scores.innerHTML = `
+          <div style="text-align:center;margin-top:4px">
+            <div style="font-size:0.9rem;opacity:0.75;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase">Pairs Found</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-size:2rem">${allFound.map(e => `<span>${e}</span>`).join('')}</div>
+          </div>`;
+      } else {
+        scores.innerHTML = `<div style="text-align:center;opacity:0.65">No pairs found this time!</div>`;
+      }
+
+      overlay.classList.remove('hidden');
+      return;
+    }
+
+    // All pairs found — normal win flow
     if (cfg.mode === '1p') {
       title.textContent = '🎉 You Won!';
       sub.textContent = `You found all ${game.totalPairs} pairs!`;
@@ -3145,7 +3302,6 @@ function onGameComplete() {
 
     overlay.classList.remove('hidden');
 
-    // Big confetti burst
     for (let i = 0; i < 5; i++) {
       setTimeout(() => {
         burstConfetti(
@@ -3177,6 +3333,57 @@ function flashScreen(color, alpha, durationMs) {
 // ============================================================
 //  UTILS
 // ============================================================
+function launchMatchFireworks() {
+  const W = window.innerWidth, H = window.innerHeight;
+  const bursts = [
+    [W * 0.18, H * 0.28],
+    [W * 0.82, H * 0.22],
+    [W * 0.50, H * 0.16],
+    [W * 0.10, H * 0.52],
+    [W * 0.90, H * 0.48],
+    [W * 0.33, H * 0.32],
+    [W * 0.68, H * 0.26],
+  ];
+  bursts.forEach(([x, y], i) => setTimeout(() => fireFirework(x, y), i * 110));
+}
+
+function fireFirework(x, y) {
+  const colors = ['#ff6b9d','#ffd93d','#6bcb77','#4ecdc4','#a78bfa','#ff8c42','#ffffff','#ff4444','#00d4ff'];
+  const count = 30;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'fw-particle';
+    const color = colors[i % colors.length];
+    const angle = (i / count) * Math.PI * 2;
+    const speed = 55 + Math.random() * 95;
+    const dx = Math.cos(angle) * speed;
+    const dy = Math.sin(angle) * speed;
+    const size = 5 + Math.random() * 8;
+    const dur = 0.7 + Math.random() * 0.5;
+    p.style.cssText = `left:${x}px;top:${y}px;width:${size}px;height:${size}px;`
+      + `background:${color};box-shadow:0 0 ${size + 3}px 2px ${color};`
+      + `--fw-dx:${dx}px;--fw-dy:${dy}px;`
+      + `animation:fwParticle ${dur}s ease-out forwards;`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), (dur + 0.15) * 1000);
+  }
+}
+
+function showGameMessage(text, cls, duration) {
+  const el = document.getElementById('gameMessage');
+  const blur = document.getElementById('screenBlurOverlay');
+  if (!el) return;
+  clearTimeout(el._msgTimeout);
+  el.textContent = text;
+  el.className = cls + ' show';
+  if (blur) blur.classList.add('show');
+  el._msgTimeout = setTimeout(() => {
+    el.classList.remove('show');
+    if (blur) blur.classList.remove('show');
+    setTimeout(() => { if (!el.classList.contains('show')) el.className = ''; }, 260);
+  }, duration);
+}
+
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
