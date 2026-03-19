@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
 /* ========== RESET & BASE ========== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -189,7 +190,7 @@ html, body {
 }
 .mode-card {
   flex: 1;
-  padding: 14px 8px;
+  padding: 10px 6px;
   border-radius: 14px;
   border: 2px solid transparent;
   cursor: pointer;
@@ -214,8 +215,8 @@ html, body {
 .mode-card.mode-1p.selected { border: 4px solid #ffffff; box-shadow: none; }
 .mode-card.mode-2p.selected { border: 4px solid #ffffff; box-shadow: none; }
 .mode-card.mode-ai.selected { border: 4px solid #ffffff; box-shadow: none; }
-.mode-card .mode-icon { font-size: 1.9rem; display: block; margin-bottom: 4px; }
-.mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 1.2rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.mode-card .mode-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
+.mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
 /* Difficulty */
 .diff-cards {
@@ -292,6 +293,154 @@ html, body {
 }
 .player-name-input:focus { border-color: #888; }
 .player-name-input::placeholder { color: #aaa; }
+
+/* Topbar (home + settings screens) */
+.home-topbar {
+  width: 100%; max-width: 440px;
+  display: flex; align-items: center;
+  padding: 4px 0 0 0;
+  flex-shrink: 0;
+}
+/* Hamburger menu button */
+.menu-btn {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.35);
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.18s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.menu-btn:hover { background: rgba(255,255,255,0.55); }
+/* Settings nav buttons on home screen */
+.settings-nav-row {
+  display: flex; gap: 12px;
+  width: 100%; max-width: 440px;
+}
+.settings-nav-btn {
+  flex: 1;
+  padding: 14px 10px;
+  border-radius: 18px;
+  border: 3px solid #ffffff;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+.settings-nav-btn:hover { transform: scale(1.03); }
+.settings-nav-btn.btn-avatar { background: linear-gradient(135deg, #6bcb77, #32a046); }
+.settings-nav-btn.btn-audio  { background: linear-gradient(135deg, #ffd93d, #dca000); }
+/* Settings screen */
+#settingsScreen {
+  background: transparent;
+  min-height: 100%;
+  padding: 20px 16px 40px;
+  align-items: center;
+  gap: 24px;
+}
+#settingsScreen > * { position: relative; z-index: 1; }
+.settings-topbar {
+  width: 100%; max-width: 440px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+.settings-title {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.3rem; font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  letter-spacing: 1px;
+}
+
+/* Online multiplayer lobby */
+.mode-cards { flex-wrap: wrap; }
+.mode-card.mode-online { background: linear-gradient(135deg,#3b82f6,#1d4ed8); border-color:#3b82f6; }
+.mode-card.mode-online.selected { border: 4px solid #fff; box-shadow: none; }
+.online-tabs { display:flex; gap:8px; margin-bottom:10px; }
+.online-tab {
+  flex:1; padding:8px; border-radius:10px;
+  border:2px solid rgba(255,255,255,0.6);
+  background:rgba(255,255,255,0.2); color:#fff;
+  font-family:'Fredoka','Fredoka One',sans-serif;
+  font-size:0.9rem; font-weight:700; cursor:pointer; transition:background 0.2s;
+}
+.online-tab.selected { background:rgba(255,255,255,0.55); color:#333; }
+.room-code-box {
+  background:rgba(0,0,0,0.18); border-radius:10px; padding:10px 12px;
+  margin:8px 0; text-align:center;
+}
+.room-code-label { font-size:0.8rem; color:rgba(255,255,255,0.8); margin-bottom:4px; }
+.room-code-value {
+  font-family:'Courier New',Courier,monospace; font-size:1.2rem; font-weight:700;
+  color:#fff; letter-spacing:2px; word-break:break-all;
+}
+.room-copy-btn {
+  background:rgba(255,255,255,0.25); border:2px solid rgba(255,255,255,0.5);
+  color:#fff; border-radius:8px; padding:4px 12px; cursor:pointer;
+  font-size:0.85rem; margin-top:6px; display:inline-block;
+}
+.room-code-input {
+  width:100%; padding:10px 12px; border-radius:10px;
+  border:2px solid rgba(255,255,255,0.5);
+  background:rgba(255,255,255,0.9); color:#333;
+  font-family:'Courier New',Courier,monospace; font-size:1rem;
+  text-align:center; letter-spacing:1px; outline:none; margin-bottom:8px;
+  box-sizing:border-box;
+}
+.online-status {
+  font-size:0.85rem; color:rgba(255,255,255,0.9); text-align:center; margin-top:6px;
+  min-height:1.2em;
+}
+.online-action-btn {
+  display:block; margin:8px auto 0; padding:9px 24px;
+  background:rgba(255,255,255,0.9); color:#1d4ed8;
+  border:none; border-radius:12px; cursor:pointer;
+  font-family:'Fredoka One','Fredoka',sans-serif; font-size:1rem; font-weight:700;
+  transition:background 0.15s;
+}
+.online-action-btn:hover { background:#fff; }
+
+/* Mini scores (header-right) */
+.mini-scores { display: flex; flex-direction: column; gap: 4px; }
+.mini-score-row {
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.95rem; color: rgba(255,255,255,0.7);
+  transition: color 0.2s;
+}
+.mini-score-row.active { color: #fff; }
+.mini-score-av { font-size: 1.1rem; }
+.mini-score-num {
+  background: rgba(255,255,255,0.2); border-radius: 8px;
+  padding: 1px 7px; min-width: 24px; text-align: center;
+}
+.mini-score-row.active .mini-score-num { background: rgba(255,255,255,0.45); }
+
+/* High score display in game-over overlay */
+.hs-badge {
+  text-align: center; margin-top: 14px;
+  background: linear-gradient(135deg,#ffd93d,#f9a825);
+  color: #5a3a00; border-radius: 14px; border: 3px solid #fff;
+  padding: 8px 18px; font-family: 'Fredoka One','Fredoka',sans-serif;
+  font-size: 1.05rem; font-weight: 700;
+  animation: hsPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes hsPop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.hs-prev {
+  text-align: center; font-size: 0.85rem; opacity: 0.65; margin-top: 10px;
+  font-family: 'Fredoka','Fredoka One',sans-serif;
+}
 
 /* Audio controls */
 .audio-row {
@@ -457,7 +606,7 @@ html, body {
   gap: 12px;
 }
 .header-left { display: flex; align-items: center; padding-top: 20px; }
-.header-right { display: none; }
+.header-right { display: flex; align-items: center; padding-top: 20px; }
 .header-center {
   display: flex; flex-direction: column; align-items: center;
   flex: 0 0 auto;
@@ -674,7 +823,7 @@ html, body {
 /* ========== EGG ========== */
 .egg-cell {
   display: flex; align-items: center; justify-content: center;
-  aspect-ratio: 5/6;
+  aspect-ratio: 3/4;
   padding: 5px;
   flex-shrink: 0;
   overflow: visible;
@@ -715,9 +864,10 @@ html, body {
 
 /* Egg body */
 .egg-body {
-  width: 85%; height: 86%;
-  max-width: 86px; max-height: 96px;
-  border-radius: 50% 50% 50% 50% / 56% 56% 44% 44%;
+  width: 78%;
+  max-width: 72px;
+  aspect-ratio: 3/4;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
   background: radial-gradient(ellipse at 35% 30%,
     var(--egg-light) 0%, var(--egg-mid) 45%, var(--egg-dark) 100%);
   box-shadow:
@@ -726,10 +876,12 @@ html, body {
     0 8px 25px rgba(0,0,0,0.3),
     0 3px 8px rgba(0,0,0,0.2);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   transition: opacity 0.3s;
   flex-shrink: 0;
 }
+/* Allow top half to fly out when egg opens */
+.egg-body.egg-opened { overflow: visible; }
 /* Gloss shine */
 .egg-body::before {
   content: '';
@@ -1522,7 +1674,10 @@ html, body {
 <!-- ========== HOME SCREEN ========== -->
 <div class="screen" id="homeScreen">
 
-  <!-- Title -->
+  <!-- Topbar -->
+  <div class="home-topbar">
+    <button class="menu-btn" onclick="showSettings('home')" title="Settings">☰</button>
+  </div>
 
   <!-- Decorative eggs -->
   <div class="deco-eggs" id="decoEggs"></div>
@@ -1543,6 +1698,10 @@ html, body {
         <span class="mode-icon">🤖</span>
         <span class="mode-name">vs AI</span>
       </div>
+      <div class="mode-card mode-online" data-mode="online" onclick="selectMode('online',this)">
+        <span class="mode-icon">🌐</span>
+        <span class="mode-name">Online</span>
+      </div>
     </div>
     <!-- AI difficulty sub-option -->
     <div id="aiDiffRow" class="ai-diff-row hidden" style="margin-top:12px;">
@@ -1550,6 +1709,33 @@ html, body {
       <button class="ai-diff-btn selected" data-aidiff="easy" onclick="selectAIDiff('easy',this)">Easy AI</button>
       <button class="ai-diff-btn" data-aidiff="medium" onclick="selectAIDiff('medium',this)">Medium AI</button>
       <button class="ai-diff-btn" data-aidiff="hard" onclick="selectAIDiff('hard',this)">Hard AI</button>
+    </div>
+
+    <!-- Online lobby -->
+    <div id="onlineLobby" class="hidden" style="margin-top:12px;">
+      <div class="section-label" style="width:100%;margin-bottom:10px;">Online Game</div>
+      <div class="online-tabs">
+        <button class="online-tab selected" id="tabHost" onclick="switchOnlineTab('host',this)">🏠 Host</button>
+        <button class="online-tab" id="tabJoin" onclick="switchOnlineTab('join',this)">🎮 Join</button>
+      </div>
+      <!-- Host panel -->
+      <div id="onlineHostPanel">
+        <button class="online-action-btn" onclick="createOnlineRoom()">Create Room</button>
+        <div id="roomCodeDisplay" class="hidden">
+          <div class="room-code-box">
+            <div class="room-code-label">Share this code with your opponent:</div>
+            <div class="room-code-value" id="roomCodeText">—</div>
+            <button class="room-copy-btn" onclick="copyRoomCode()">📋 Copy</button>
+          </div>
+        </div>
+        <div class="online-status" id="hostStatus"></div>
+      </div>
+      <!-- Join panel -->
+      <div id="onlineJoinPanel" class="hidden">
+        <input class="room-code-input" id="joinCodeInput" placeholder="Paste room code here…" maxlength="40">
+        <button class="online-action-btn" onclick="joinOnlineRoom()">Join Game</button>
+        <div class="online-status" id="joinStatus"></div>
+      </div>
     </div>
   </div>
 
@@ -1559,17 +1745,37 @@ html, body {
     <div class="diff-cards">
       <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectDiff('easy',this)">
         <span class="diff-name">Easy</span>
-        <span class="diff-info">15 eggs · 40s</span>
+        <span class="diff-info">15 eggs</span>
       </div>
       <div class="diff-card diff-med" data-diff="medium" onclick="selectDiff('medium',this)">
         <span class="diff-name">Medium</span>
-        <span class="diff-info">20 eggs · 30s</span>
+        <span class="diff-info">20 eggs</span>
       </div>
       <div class="diff-card diff-hard" data-diff="hard" onclick="selectDiff('hard',this)">
         <span class="diff-name">Hard</span>
-        <span class="diff-info">20 eggs · 20s</span>
+        <span class="diff-info">20 eggs</span>
       </div>
     </div>
+  </div>
+
+  <!-- Settings nav buttons -->
+  <div class="settings-nav-row">
+    <button class="settings-nav-btn btn-avatar" onclick="showSettings('home')">🐣 Avatars &amp; Names</button>
+    <button class="settings-nav-btn btn-audio" onclick="showSettings('home')">🎵 Audio</button>
+  </div>
+
+  <!-- Start button -->
+  <button class="start-btn" onclick="startGame()">🌸 START GAME 🌸</button>
+
+</div><!-- /homeScreen -->
+
+<!-- ========== SETTINGS SCREEN ========== -->
+<div class="screen hidden" id="settingsScreen">
+
+  <!-- Topbar -->
+  <div class="settings-topbar">
+    <button class="ctrl-btn home-egg-btn" onclick="closeSettings()" title="Back">←</button>
+    <span class="settings-title">Settings</span>
   </div>
 
   <!-- Avatars -->
@@ -1624,10 +1830,7 @@ html, body {
     <div class="music-status" id="musicStatus"></div>
   </div>
 
-  <!-- Start button -->
-  <button class="start-btn" onclick="startGame()">🌸 START GAME 🌸</button>
-
-</div><!-- /homeScreen -->
+</div><!-- /settingsScreen -->
 
 <!-- ========== GAME SCREEN ========== -->
 <div class="screen hidden" id="gameScreen">
@@ -1649,7 +1852,9 @@ html, body {
         </div>
       </div>
     </div>
-    <div class="header-right"></div>
+    <div class="header-right">
+      <div class="mini-scores" id="miniScores"></div>
+    </div>
   </div>
 
   <!-- Baskets -->
@@ -1726,9 +1931,9 @@ const ITEMS_BY_DIFF = {
   hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 15, time: 120, shuffleTime: 40 },
-  medium: { eggs: 20, time: 120, shuffleTime: 30 },
-  hard:   { eggs: 20, time: 120, shuffleTime: 20 },
+  easy:   { eggs: 15, time: 150, shuffleTime: 40 },
+  medium: { eggs: 20, time: 210, shuffleTime: 30 },
+  hard:   { eggs: 20, time: 270, shuffleTime: 20 },
 };
 
 let cfg = {
@@ -2375,6 +2580,8 @@ function selectMode(mode, el) {
   cfg.mode = mode;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  // Hide online lobby by default; shown only for 'online'
+  document.getElementById('onlineLobby').classList.add('hidden');
   // Show/hide P2 avatar block
   const p2Block = document.getElementById('p2AvatarBlock');
   const aiRow = document.getElementById('aiDiffRow');
@@ -2387,7 +2594,7 @@ function selectMode(mode, el) {
     document.getElementById('p2Label').textContent = 'Player 2';
     document.getElementById('p2Name').value = cfg.p2.name === 'AI' ? 'Player 2' : cfg.p2.name;
     document.getElementById('p2Name').disabled = false;
-  } else { // ai
+  } else if (mode === 'ai') {
     p2Block.classList.remove('hidden');
     aiRow.classList.remove('hidden');
     document.getElementById('p2Label').textContent = 'AI Player';
@@ -2397,6 +2604,10 @@ function selectMode(mode, el) {
     cfg.p2.avatar = '🤖';
     // Update p2 avatar btns
     document.getElementById('p2AvatarRow').querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+  } else { // online
+    p2Block.classList.add('hidden');
+    aiRow.classList.add('hidden');
+    document.getElementById('onlineLobby').classList.remove('hidden');
   }
 }
 
@@ -2432,6 +2643,7 @@ function loadCustomMusic(input) {
 //  GAME START
 // ============================================================
 function startGame() {
+  if (cfg.mode === 'online') return; // Online games start via PeerJS connection
   getAudioCtx(); // Unlock audio on user gesture
 
   // Read names
@@ -2571,6 +2783,7 @@ function buildGameHeader() {
     `;
     basketsRow.appendChild(basket);
   }
+  updateMiniScores();
 }
 
 function buildEggGrid() {
@@ -2811,7 +3024,16 @@ function doShuffle() {
 // ============================================================
 //  EGG CLICK & GAME LOGIC
 // ============================================================
-function onEggClick(idx) {
+function onEggClick(idx, fromRemote) {
+  // Online: guest forwards clicks to host; only allow own-turn clicks
+  if (onlineConn && !fromRemote) {
+    if (isOnlineHost && game.currentPlayer !== 0) return;
+    if (!isOnlineHost) {
+      if (game.currentPlayer !== 1) return;
+      sendOnline({ type: 'click', idx });
+      return;
+    }
+  }
   if (game.locked || game.paused || game.shuffling) return;
   const card = game.cards[idx];
   if (!card || card.matched || card.revealed) return;
@@ -3025,6 +3247,7 @@ function checkMatch() {
       game.current = [];
       game.locked = false;
       updateTurnIndicator();
+      syncOnlineState();
       if (game.matchedPairs >= game.totalPairs) { onGameComplete(false); return; }
       if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
     }, 450);
@@ -3042,11 +3265,35 @@ function checkMatch() {
         game.currentPlayer = 1 - game.currentPlayer;
         updateBaskets();
         updateTurnIndicator();
+        syncOnlineState();
         if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
       } else {
         updateTurnIndicator();
       }
     }, 1400);
+  }
+}
+
+function updateMiniScores() {
+  const el = document.getElementById('miniScores');
+  if (!el) return;
+  if (cfg.mode === '1p') {
+    el.innerHTML = `
+      <div class="mini-score-row active">
+        <span class="mini-score-av">${cfg.p1.avatar}</span>
+        <span class="mini-score-num">${game.scores[0]}</span>
+      </div>`;
+  } else {
+    const p2av = (cfg.mode === 'ai') ? '🤖' : cfg.p2.avatar;
+    el.innerHTML = `
+      <div class="mini-score-row${game.currentPlayer===0?' active':''}">
+        <span class="mini-score-av">${cfg.p1.avatar}</span>
+        <span class="mini-score-num">${game.scores[0]}</span>
+      </div>
+      <div class="mini-score-row${game.currentPlayer===1?' active':''}">
+        <span class="mini-score-av">${p2av}</span>
+        <span class="mini-score-num">${game.scores[1]}</span>
+      </div>`;
   }
 }
 
@@ -3071,6 +3318,7 @@ function updateBaskets() {
       if (basketEl) basketEl.classList.toggle('active', i === game.currentPlayer);
     }
   }
+  updateMiniScores();
 }
 
 function updateTurnIndicator() {
@@ -3207,6 +3455,245 @@ function cancelExit() {
   }
 }
 
+// ============================================================
+//  ONLINE MULTIPLAYER (PeerJS)
+// ============================================================
+let peer = null;
+let onlineConn = null;
+let isOnlineHost = false;
+
+function switchOnlineTab(tab, el) {
+  document.querySelectorAll('.online-tab').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('onlineHostPanel').classList.toggle('hidden', tab !== 'host');
+  document.getElementById('onlineJoinPanel').classList.toggle('hidden', tab === 'host');
+}
+
+function destroyPeer() {
+  if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
+  onlineConn = null;
+}
+
+function createOnlineRoom() {
+  destroyPeer();
+  isOnlineHost = true;
+  document.getElementById('hostStatus').textContent = 'Creating room…';
+  const code = 'EGG' + Math.random().toString(36).substring(2, 9).toUpperCase();
+  try {
+    peer = new Peer(code);
+  } catch(e) {
+    document.getElementById('hostStatus').textContent = '⚠ PeerJS not loaded yet.';
+    return;
+  }
+  peer.on('open', (id) => {
+    document.getElementById('roomCodeText').textContent = id;
+    document.getElementById('roomCodeDisplay').classList.remove('hidden');
+    document.getElementById('hostStatus').textContent = 'Waiting for opponent…';
+  });
+  peer.on('connection', (conn) => {
+    onlineConn = conn;
+    setupOnlineConn();
+    document.getElementById('hostStatus').textContent = 'Opponent connected! Starting…';
+    setTimeout(() => startOnlineGameAsHost(), 900);
+  });
+  peer.on('error', (e) => {
+    document.getElementById('hostStatus').textContent = '⚠ ' + (e.type || e.message);
+  });
+}
+
+function copyRoomCode() {
+  const code = document.getElementById('roomCodeText').textContent;
+  navigator.clipboard.writeText(code).catch(() => {});
+}
+
+function joinOnlineRoom() {
+  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if (!code) return;
+  destroyPeer();
+  isOnlineHost = false;
+  document.getElementById('joinStatus').textContent = 'Connecting…';
+  try {
+    peer = new Peer();
+  } catch(e) {
+    document.getElementById('joinStatus').textContent = '⚠ PeerJS not loaded.';
+    return;
+  }
+  peer.on('open', () => {
+    onlineConn = peer.connect(code);
+    setupOnlineConn();
+  });
+  peer.on('error', (e) => {
+    document.getElementById('joinStatus').textContent = '⚠ ' + (e.type || e.message);
+  });
+}
+
+function setupOnlineConn() {
+  onlineConn.on('data', handleOnlineData);
+  onlineConn.on('open', () => {
+    if (!isOnlineHost) document.getElementById('joinStatus').textContent = 'Connected! Waiting for host to start…';
+  });
+  onlineConn.on('close', () => showGameMessage('🔌 Connection lost', 'msg-nomatch', 3000));
+  onlineConn.on('error', () => showGameMessage('🔌 Connection error', 'msg-nomatch', 3000));
+}
+
+function sendOnline(data) {
+  if (onlineConn && onlineConn.open) onlineConn.send(data);
+}
+
+function handleOnlineData(data) {
+  if (data.type === 'init') { applyOnlineInit(data); }
+  else if (data.type === 'click') { if (isOnlineHost) onEggClick(data.idx, true); }
+  else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
+}
+
+function startOnlineGameAsHost() {
+  cfg.mode = '2p';
+  getAudioCtx();
+  cfg.p1.name = document.getElementById('p1Name').value.trim() || 'Player 1';
+  cfg.p2.name = 'Opponent';
+  if (cfg.musicOn && cfg.customMusic) startCustomBGM();
+  const diffCfg = DIFF_CONFIG[cfg.diff];
+  const items = ITEMS_BY_DIFF[cfg.diff];
+  game.maxTime = diffCfg.time; game.timer = diffCfg.time;
+  game.shuffleMaxTime = diffCfg.shuffleTime; game.shuffleTimer = diffCfg.shuffleTime;
+  game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
+  game.current = []; game.locked = false; game.paused = false;
+  game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
+  let cardItems = [...items, ...items];
+  const hasBonus = diffCfg.eggs % 2 === 1;
+  if (hasBonus) cardItems.push('__LUCKY__');
+  shuffle(cardItems);
+  game.totalPairs = Math.ceil(diffCfg.eggs / 2);
+  game.cards = cardItems.map((emoji, idx) => {
+    const isBonus = emoji === '__LUCKY__';
+    return { id:idx, emoji:isBonus?'🌟':emoji, colorIdx:isBonus?4:idx%EGG_COLORS.length, matched:false, revealed:false, bonus:isBonus, el:null, wrapEl:null };
+  });
+  sendOnline({
+    type: 'init',
+    cards: game.cards.map(c => ({ emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus })),
+    diff: cfg.diff, maxTime: game.maxTime, shuffleMaxTime: game.shuffleMaxTime,
+    totalPairs: game.totalPairs,
+    p1: { name: cfg.p1.name, avatar: cfg.p1.avatar },
+    p2: { name: 'Opponent', avatar: cfg.p2.avatar },
+  });
+  buildGameHeader(); buildEggGrid();
+  document.getElementById('homeScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  document.getElementById('pauseOverlay').classList.add('hidden');
+  document.getElementById('exitOverlay').classList.add('hidden');
+  document.getElementById('gameOverOverlay').classList.add('hidden');
+  updateTimerDisplay();
+  animateEggsIn(() => {
+    startTimer(); startShuffleTimer(); updateTurnIndicator(); updateMiniScores();
+    syncOnlineState();
+  });
+}
+
+function applyOnlineInit(data) {
+  cfg.mode = '2p';
+  cfg.diff = data.diff;
+  cfg.p1 = { name: data.p1.name, avatar: data.p1.avatar, photo: null };
+  cfg.p2 = { name: data.p2.name, avatar: data.p2.avatar, photo: null };
+  game.maxTime = data.maxTime; game.timer = data.maxTime;
+  game.shuffleMaxTime = data.shuffleMaxTime; game.shuffleTimer = data.shuffleMaxTime;
+  game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
+  game.current = []; game.locked = false; game.paused = false;
+  game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
+  game.totalPairs = data.totalPairs;
+  game.cards = data.cards.map((c,idx) => ({ id:idx, emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus, matched:false, revealed:false, el:null, wrapEl:null }));
+  buildGameHeader(); buildEggGrid();
+  document.getElementById('homeScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  document.getElementById('pauseOverlay').classList.add('hidden');
+  document.getElementById('exitOverlay').classList.add('hidden');
+  document.getElementById('gameOverOverlay').classList.add('hidden');
+  updateTimerDisplay();
+  animateEggsIn(() => {
+    startTimer(); startShuffleTimer(); updateTurnIndicator(); updateMiniScores();
+  });
+}
+
+function syncOnlineState() {
+  if (!isOnlineHost || !onlineConn || !onlineConn.open) return;
+  sendOnline({
+    type: 'state',
+    state: {
+      cards: game.cards.map(c => ({ matched:c.matched, revealed:c.revealed })),
+      current: [...game.current],
+      currentPlayer: game.currentPlayer,
+      scores: [...game.scores],
+      items: [game.items[0].slice(), game.items[1].slice()],
+      timer: game.timer,
+      matchedPairs: game.matchedPairs,
+      locked: game.locked,
+      shuffling: game.shuffling,
+      done: game.matchedPairs >= game.totalPairs,
+    }
+  });
+}
+
+function applyOnlineState(state) {
+  const prevPlayer = game.currentPlayer;
+  state.cards.forEach((s, idx) => {
+    const card = game.cards[idx];
+    if (!card) return;
+    if (s.revealed !== card.revealed) {
+      card.revealed = s.revealed;
+      if (card.el) {
+        if (s.revealed) card.el.classList.add('egg-opened');
+        else card.el.classList.remove('egg-opened','egg-cracking');
+      }
+    }
+    if (s.matched && !card.matched) {
+      card.matched = true;
+      if (card.wrapEl) {
+        card.wrapEl.classList.add('matched');
+        const cell = card.wrapEl.parentElement;
+        if (cell) { cell.classList.add('removing'); setTimeout(() => { cell.style.display='none'; }, 400); }
+      }
+    }
+  });
+  game.current = state.current; game.currentPlayer = state.currentPlayer;
+  game.scores = state.scores; game.items = state.items;
+  game.timer = state.timer; game.matchedPairs = state.matchedPairs;
+  game.locked = state.locked; game.shuffling = state.shuffling;
+  updateTimerDisplay(); updateBaskets();
+  if (state.currentPlayer !== prevPlayer) updateTurnIndicator();
+  if (state.done) setTimeout(() => onGameComplete(false), 600);
+}
+
+// ============================================================
+//  HIGH SCORE
+// ============================================================
+function hsKey() {
+  return `eggHunt_hs_${cfg.mode}_${cfg.diff}`;
+}
+function getHighScore() {
+  return parseInt(localStorage.getItem(hsKey()) || '0');
+}
+function saveHighScore(score) {
+  const prev = getHighScore();
+  if (score > prev) { localStorage.setItem(hsKey(), score); return true; }
+  return false;
+}
+
+// ============================================================
+//  SETTINGS SCREEN NAVIGATION
+// ============================================================
+let settingsPrevScreen = 'home';
+function showSettings(from) {
+  settingsPrevScreen = from || 'home';
+  document.getElementById('homeScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.remove('hidden');
+}
+function closeSettings() {
+  document.getElementById('settingsScreen').classList.add('hidden');
+  document.getElementById(settingsPrevScreen + 'Screen').classList.remove('hidden');
+}
+
 function goHome() {
   clearInterval(game.timerInterval);
   clearInterval(game.shuffleTimerInterval);
@@ -3251,6 +3738,13 @@ function onGameComplete(timeUp) {
       } else {
         scores.innerHTML = `<div style="text-align:center;opacity:0.65">No pairs found this time!</div>`;
       }
+
+      const currentScore = game.matchedPairs;
+      const prevHsT = getHighScore();
+      const isNewHsT = saveHighScore(currentScore);
+      scores.innerHTML += isNewHsT && currentScore > 0
+        ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
+        : (prevHsT > 0 ? `<div class="hs-prev">Best: ${prevHsT}</div>` : '');
 
       overlay.classList.remove('hidden');
       return;
@@ -3299,6 +3793,14 @@ function onGameComplete(timeUp) {
           <div class="overlay-score-num">${p2Score}</div>
         </div>`;
     }
+
+    // High score
+    const currentScore = cfg.mode === '1p' ? game.matchedPairs : Math.max(game.scores[0], game.scores[1]);
+    const prevHs = getHighScore();
+    const isNewHs = saveHighScore(currentScore);
+    scores.innerHTML += isNewHs
+      ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
+      : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
 
     overlay.classList.remove('hidden');
 

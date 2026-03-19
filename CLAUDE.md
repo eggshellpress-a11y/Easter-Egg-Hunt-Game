@@ -15,7 +15,7 @@ This is a single-file browser game (`index.html`) — no build step, no package 
 `index.html` is divided into three inline sections in order:
 
 1. **`<style>`** — All CSS. Organized by screen/component with section header comments.
-2. **`<body>`** — Two top-level screens (`#homeScreen`, `#gameScreen`) plus overlay divs (`#pauseOverlay`, `#exitOverlay`, `#gameOverOverlay`, `#casinoOverlay`, `#bonusEggOverlay`). Screen visibility is toggled via the `.hidden` CSS class.
+2. **`<body>`** — Two top-level screens (`#homeScreen`, `#gameScreen`) plus overlay divs (`#pauseOverlay`, `#exitOverlay`, `#gameOverOverlay`, `#casinoOverlay`, `#bonusEggOverlay`). Also two global elements outside screens: `#screenBlurOverlay` (backdrop) and `#gameMessage` (floating match/no-match toast). Screen visibility is toggled via the `.hidden` CSS class.
 3. **`<script>`** — All JavaScript. See sections below.
 
 ## JavaScript Architecture
@@ -24,23 +24,23 @@ The script is organized into clearly labeled sections (`// ===...===` comments):
 
 | Section | Lines | Purpose |
 |---|---|---|
-| STATE | ~1591 | `cfg` (pre-game settings) and `game` (live game state) objects, plus all constants |
-| AUDIO ENGINE | ~1646 | Web Audio API — procedural SFX functions + BGM scheduler + custom music upload |
-| CONFETTI | ~1915 | Canvas overlay particle system |
-| POLKADOT BACKGROUND | ~2026 | Animated polkadot canvas drawn behind game content |
-| CASINO CELEBRATION | ~2073 | `playCasinoCelebration()` — slot-reel animation overlay (retained for potential use) |
-| HOME SCREEN SETUP | ~2188 | `buildDecoEggs()`, avatar pickers, mode/difficulty selection builders |
-| GAME START | ~2310 | `startGame()` — resets state, builds the grid, transitions screens |
-| GRID BUILD | ~2395 | `buildGameHeader()`, `buildEggGrid()` — DOM construction for game screen |
-| SLIDE IN ANIMATION | ~2503 | CSS-driven screen transition animation for game start |
-| TIMER | ~2533 | `startTimer()`, `onTimerExpired()` — setInterval countdown |
-| SHUFFLE | ~2563 | `doShuffle()` — burrow-out → reorder → pop-in sequence |
-| EGG CLICK & GAME LOGIC | ~2661 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
-| AI | ~2969 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
-| PAUSE | ~3029 | `togglePause()` — freezes timer and dims BGM gain |
-| EXIT / GAME OVER | ~3070 | `confirmExit()`, `goHome()`, `onGameComplete()`, `restartGame()` |
-| UTILS | ~3178 | `escHtml()` and other small helpers |
-| INIT | ~3185 | One-time startup — default selections, toggle sync, volume slider init |
+| STATE | ~1710 | `cfg` (pre-game settings) and `game` (live game state) objects, plus all constants |
+| AUDIO ENGINE | ~1768 | Web Audio API — procedural SFX functions + BGM scheduler + custom music upload |
+| CONFETTI | ~2037 | Canvas overlay particle system |
+| POLKADOT BACKGROUND | ~2148 | Animated polkadot canvas drawn behind game content |
+| CASINO CELEBRATION | ~2195 | `playCasinoCelebration()` — slot-reel animation overlay (retained for potential use) |
+| HOME SCREEN SETUP | ~2310 | `buildDecoEggs()`, avatar pickers, mode/difficulty selection builders |
+| GAME START | ~2432 | `startGame()` — resets state, builds the grid, transitions screens |
+| GRID BUILD | ~2520 | `buildGameHeader()`, `buildEggGrid()` — DOM construction for game screen |
+| SLIDE IN ANIMATION | ~2629 | CSS-driven screen transition animation for game start |
+| TIMER | ~2659 | `startTimer()`, `onTimerExpired()` — setInterval countdown |
+| SHUFFLE | ~2717 | `doShuffle()` — burrow-out → reorder → pop-in sequence |
+| EGG CLICK & GAME LOGIC | ~2812 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
+| AI | ~3092 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
+| PAUSE | ~3152 | `togglePause()` — freezes timer and dims BGM gain |
+| EXIT / GAME OVER | ~3192 | `confirmExit()`, `goHome()`, `onGameComplete()`, `restartGame()` |
+| UTILS | ~3334 | `launchMatchFireworks()`, `fireFirework()`, `showGameMessage()`, `escHtml()` |
+| INIT | ~3392 | One-time startup — default selections, toggle sync, volume slider init |
 
 ## Key State Objects
 
@@ -98,9 +98,9 @@ Defined in `DIFF_CONFIG`. Odd egg counts produce one unpaired `__LUCKY__` bonus 
 
 | Level | Eggs | Pairs | Bonus egg | Timer |
 |---|---|---|---|---|
-| easy   | 15 | 7  | yes | 40 s |
-| medium | 20 | 10 | no  | 30 s |
-| hard   | 25 | 12 | yes | 20 s |
+| easy   | 15 | 7  | yes | 2:30 (150 s) |
+| medium | 20 | 10 | no  | 3:30 (210 s) |
+| hard   | 20 | 10 | no  | 4:30 (270 s) |
 
 ## Bonus Egg
 
@@ -108,6 +108,8 @@ When a `__LUCKY__` egg is clicked, `handleBonusEgg()` fires: gameplay locks, the
 
 ## UI Layout Notes
 
-- Game header (`.game-header`) uses a three-column flex layout: `.header-left` (home + pause), `.header-center` (timer), `.header-right` (audio controls). Left and right each have `flex: 1` so the timer stays truly centered. The header has no background — buttons use `#c1f0fb` fill.
-- Volume/SFX sliders on the home screen are wrapped in `.volume-row` divs with a solid white background. In-game audio controls live in `.header-right`.
-- There is no flash message system — it was removed. Do not re-add `setFlash`/`clearFlash`.
+- Game header (`.game-header`) has three columns: `.header-left` (home/exit egg button), `.header-center` (dual timer clocks), `.header-right` (empty, `display:none`). The header has no background — the exit button is a pink egg shape (`.home-egg-btn`).
+- The header center contains a `.timers-row` with two clock faces side by side: `.clock-face` (game countdown, `#timerDisplay`) and `.shuffle-clock-face` (shuffle countdown, `#shuffleTimerDisplay`).
+- Match/no-match feedback uses `showGameMessage(text, cls, duration)` — it populates `#gameMessage` and shows `#screenBlurOverlay`. There is no flash message system — do not re-add `setFlash`/`clearFlash`.
+- Fireworks on match: `launchMatchFireworks()` spawns `.fw-particle` DOM elements at fixed screen positions and removes them after their CSS animation completes.
+- Volume/SFX sliders are on the home screen only, wrapped in `.volume-row` divs. There are no in-game audio controls.
