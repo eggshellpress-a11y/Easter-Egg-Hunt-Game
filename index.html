@@ -1721,63 +1721,77 @@ html, body {
 /* ========== COUNTDOWN OVERLAY ========== */
 #countdownOverlay {
   position: fixed; inset: 0; z-index: 820;
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  background: rgba(0,0,0,0.68);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 20px;
+  gap: 22px;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.35s ease;
 }
 #countdownOverlay.show { opacity: 1; pointer-events: all; }
 .countdown-sub {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: clamp(1rem, 4vw, 1.4rem);
-  color: rgba(255,255,255,0.75);
-  letter-spacing: 4px; text-transform: uppercase;
-  order: 2; margin-top: 4px;
+  font-size: clamp(1rem, 4vw, 1.3rem);
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 5px; text-transform: uppercase;
 }
-.countdown-ring {
-  order: 1;
-  width: clamp(180px, 48vw, 260px);
-  height: clamp(180px, 48vw, 260px);
-  border-radius: 50%;
-  border: 6px solid rgba(255,255,255,0.25);
-  box-shadow: 0 0 60px rgba(255,217,61,0.18), inset 0 0 40px rgba(0,0,0,0.25),
-              0 0 0 2px rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.05);
+/* SVG clock face */
+.countdown-clock {
+  position: relative;
+  width: clamp(190px, 50vw, 270px);
+  height: clamp(190px, 50vw, 270px);
+}
+.countdown-clock svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  transform: rotate(-90deg); /* arc starts at top */
+  overflow: visible;
+}
+.countdown-track {
+  fill: none;
+  stroke: rgba(255,255,255,0.1);
+  stroke-width: 9;
+}
+.countdown-arc {
+  fill: none;
+  stroke: #ffd93d;
+  stroke-width: 9;
+  stroke-linecap: round;
+  /* circumference of r=54: 2π×54 ≈ 339.3 */
+  stroke-dasharray: 339.3;
+  stroke-dashoffset: 0;
+  filter: drop-shadow(0 0 10px rgba(255,217,61,0.8));
+}
+.countdown-arc.play-arc {
+  stroke: #6bcb77;
+  filter: drop-shadow(0 0 14px rgba(107,203,119,0.9));
+  stroke-dashoffset: 0;
+}
+/* Clock inner face */
+.countdown-clock-inner {
+  position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  animation: ringPulse 0.85s ease infinite;
-}
-@keyframes ringPulse {
-  0%,100% { box-shadow: 0 0 60px rgba(255,217,61,0.18), inset 0 0 40px rgba(0,0,0,0.25); }
-  50%     { box-shadow: 0 0 90px rgba(255,217,61,0.38), inset 0 0 40px rgba(0,0,0,0.25); }
-}
-.countdown-ring.play-ring {
-  border-color: rgba(107,203,119,0.6);
-  animation: ringPlayPulse 0.5s ease infinite;
-}
-@keyframes ringPlayPulse {
-  0%,100% { box-shadow: 0 0 80px rgba(107,203,119,0.4), inset 0 0 40px rgba(0,0,0,0.2); }
-  50%     { box-shadow: 0 0 140px rgba(107,203,119,0.7), inset 0 0 40px rgba(0,0,0,0.2); }
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.07) 0%, rgba(0,0,0,0.2) 100%);
 }
 .countdown-number {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: clamp(7rem, 24vw, 12rem); font-weight: 900; line-height: 1;
+  font-size: clamp(7rem, 24vw, 11rem); font-weight: 900; line-height: 1;
   color: #fff;
-  text-shadow: 0 0 60px rgba(255,217,61,0.8), 0 6px 20px rgba(0,0,0,0.5);
-  animation: countPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+  text-shadow: 0 0 60px rgba(255,217,61,0.85), 0 4px 16px rgba(0,0,0,0.6);
+  animation: countPop 0.38s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .countdown-number.play {
   color: #6bcb77;
-  font-size: clamp(4rem, 16vw, 8rem);
-  text-shadow: 0 0 80px rgba(107,203,119,0.9), 0 6px 20px rgba(0,0,0,0.5);
+  font-size: clamp(3.5rem, 13vw, 6.5rem);
+  text-shadow: 0 0 80px rgba(107,203,119,1), 0 4px 16px rgba(0,0,0,0.6);
 }
 @keyframes countPop {
-  0%   { transform: scale(0.15) rotate(-12deg); opacity: 0; }
-  55%  { transform: scale(1.2) rotate(4deg); }
-  75%  { transform: scale(0.95) rotate(-1deg); }
+  0%   { transform: scale(0.1) rotate(-15deg); opacity: 0; }
+  55%  { transform: scale(1.18) rotate(5deg); }
+  78%  { transform: scale(0.94) rotate(-1deg); }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
 
@@ -4326,10 +4340,14 @@ function showMatchReveal(emojiA, emojiB, isMatch, duration, afterCallback) {
 
 function playCountdown(callback) {
   const overlay = document.getElementById('countdownOverlay');
-  const ringEl  = document.getElementById('countdownRing');
+  const arcEl   = document.getElementById('countdownArc');
   const numEl   = document.getElementById('countdownNumber');
   const subEl   = document.getElementById('countdownSub');
   if (!overlay) { if (callback) callback(); return; }
+
+  const CIRCUMFERENCE = 339.3; // 2π × r54
+  const STEP_MS = 900;         // time each number is shown before sweep begins
+  const SWEEP_MS = 850;        // arc sweep duration
 
   const steps = ['3', '2', '1', 'PLAY!'];
   let i = 0;
@@ -4338,30 +4356,43 @@ function playCountdown(callback) {
   function showStep() {
     const val = steps[i];
     const isPlay = val === 'PLAY!';
+
+    // Snap arc back to full, no transition
+    if (arcEl) {
+      arcEl.style.transition = 'none';
+      arcEl.style.strokeDashoffset = '0';
+      arcEl.className = isPlay ? 'countdown-arc play-arc' : 'countdown-arc';
+    }
+
+    // Pop the number in
     numEl.textContent = val;
     numEl.className = isPlay ? 'countdown-number play' : 'countdown-number';
-    if (ringEl) ringEl.className = isPlay ? 'countdown-ring play-ring' : 'countdown-ring';
-    subEl.textContent = isPlay ? '🐣  Let\'s Hunt!  🥚' : 'Get Ready!';
-    // Re-trigger pop animation
     numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
+    subEl.textContent = isPlay ? "🐣  Let's Hunt!  🥚" : 'Get Ready!';
 
     if (isPlay) {
       sfxFanfare();
       const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-      burstConfetti(cx, cy, 120);
-      burstConfetti(cx - 120, cy - 60, 60);
-      burstConfetti(cx + 120, cy - 60, 60);
-      burstConfetti(cx - 80, cy + 80, 40);
-      burstConfetti(cx + 80, cy + 80, 40);
+      burstConfetti(cx, cy, 130);
+      burstConfetti(cx - 130, cy - 70, 65);
+      burstConfetti(cx + 130, cy - 70, 65);
+      burstConfetti(cx - 70, cy + 90, 45);
+      burstConfetti(cx + 70, cy + 90, 45);
       setTimeout(() => {
         overlay.classList.remove('show');
-        if (ringEl) ringEl.className = 'countdown-ring';
         if (callback) callback();
-      }, 900);
+      }, 950);
     } else {
       sfxPop();
+      // After a brief pause, sweep the arc away (full → empty)
+      setTimeout(() => {
+        if (arcEl) {
+          arcEl.style.transition = `stroke-dashoffset ${SWEEP_MS}ms linear`;
+          arcEl.style.strokeDashoffset = String(CIRCUMFERENCE);
+        }
+      }, STEP_MS);
       i++;
-      setTimeout(showStep, 850);
+      setTimeout(showStep, STEP_MS + SWEEP_MS);
     }
   }
   showStep();
@@ -4410,8 +4441,14 @@ syncMusicPlayBtns();
 
 <!-- Countdown overlay (online mode game start) -->
 <div id="countdownOverlay">
-  <div class="countdown-ring" id="countdownRing">
-    <div class="countdown-number" id="countdownNumber">3</div>
+  <div class="countdown-clock">
+    <svg viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="countdown-track" cx="60" cy="60" r="54"/>
+      <circle class="countdown-arc" id="countdownArc" cx="60" cy="60" r="54"/>
+    </svg>
+    <div class="countdown-clock-inner">
+      <div class="countdown-number" id="countdownNumber">3</div>
+    </div>
   </div>
   <div class="countdown-sub" id="countdownSub">Get Ready!</div>
 </div>
