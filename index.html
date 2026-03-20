@@ -1745,9 +1745,9 @@ html, body {
   text-shadow: 0 0 80px rgba(255,217,61,0.7), 0 8px 28px rgba(0,0,0,0.5);
   animation: countPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-.countdown-number.go {
+.countdown-number.play {
   color: #6bcb77;
-  font-size: clamp(6rem, 22vw, 11rem);
+  font-size: clamp(5rem, 20vw, 10rem);
   text-shadow: 0 0 80px rgba(107,203,119,0.85), 0 8px 28px rgba(0,0,0,0.5);
 }
 @keyframes countPop {
@@ -1756,6 +1756,61 @@ html, body {
   75%  { transform: scale(0.95) rotate(-1deg); }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
+
+/* ========== CHAT BAR (online mode) ========== */
+#chatBar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex; flex-direction: column;
+  padding: 6px 12px 10px;
+  background: rgba(20,10,40,0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1.5px solid rgba(255,255,255,0.12);
+  transition: transform 0.25s ease;
+}
+#chatBar.hidden { display: none; }
+.chat-messages {
+  max-height: 72px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 2px;
+  margin-bottom: 6px;
+  scrollbar-width: none;
+}
+.chat-messages::-webkit-scrollbar { display: none; }
+.chat-msg {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.82rem; color: rgba(255,255,255,0.9); line-height: 1.35;
+}
+.chat-from { font-weight: 700; color: #ffd93d; margin-right: 5px; }
+.chat-msg.self .chat-from { color: #6bcb77; }
+.chat-msg.system { color: rgba(255,255,255,0.45); font-style: italic; }
+.chat-input-row {
+  display: flex; gap: 8px; align-items: center;
+}
+.chat-input {
+  flex: 1;
+  background: rgba(255,255,255,0.13);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 22px;
+  color: #fff;
+  font-family: 'Fredoka', sans-serif; font-size: 0.9rem;
+  padding: 7px 16px;
+  outline: none;
+  min-width: 0;
+}
+.chat-input::placeholder { color: rgba(255,255,255,0.4); }
+.chat-input:focus { border-color: rgba(255,142,234,0.7); background: rgba(255,255,255,0.18); }
+.chat-send-btn {
+  background: #ff8eea; border: none; border-radius: 50%;
+  width: 36px; height: 36px; flex-shrink: 0;
+  color: #fff; font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.chat-send-btn:hover { background: #e876d4; }
+/* push egg-grid up when chat bar is visible */
+#gameScreen.chat-visible { padding-bottom: 120px; }
 
 /* ========== EASTER START ANIMATION ========== */
 .easter-eggs-row {
@@ -2023,6 +2078,17 @@ html, body {
   </div>
 
 </div><!-- /gameScreen -->
+
+<!-- Trash-talk chat bar (online mode only) -->
+<div id="chatBar" class="hidden">
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-row">
+    <input type="text" class="chat-input" id="chatInput"
+      placeholder="💬 Trash talk…" maxlength="80" autocomplete="off"
+      onkeydown="if(event.key==='Enter')sendChatMsg()">
+    <button class="chat-send-btn" onclick="sendChatMsg()" title="Send">➤</button>
+  </div>
+</div>
 
 <!-- Screen blur backdrop for match / no-match messages -->
 <div id="screenBlurOverlay"></div>
@@ -3760,11 +3826,12 @@ function sendOnline(data) {
 function handleOnlineData(data) {
   if (data.type === 'init') { applyOnlineInit(data); }
   else if (data.type === 'countdown') {
-    if (!isOnlineHost) playCountdown(() => { startTimer(); startShuffleTimer(); });
+    if (!isOnlineHost) playCountdown(() => { startShuffleTimer(); }); // no startTimer in online
   }
   else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'shuffle') { if (!isOnlineHost) doShuffle(data.order); }
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
+  else if (data.type === 'chat') { addChatMsg(data.avatar, data.from, data.text, false); }
 }
 
 function startOnlineGameAsHost() {
@@ -3775,8 +3842,9 @@ function startOnlineGameAsHost() {
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   const diffCfg = DIFF_CONFIG[cfg.diff];
   const items = ITEMS_BY_DIFF[cfg.diff];
-  game.maxTime = diffCfg.time; game.timer = diffCfg.time;
-  game.shuffleMaxTime = diffCfg.shuffleTime; game.shuffleTimer = diffCfg.shuffleTime;
+  const onlineShuffleTime = 20; // online uses 20s shuffle, no main timer
+  game.maxTime = 0; game.timer = 0;
+  game.shuffleMaxTime = onlineShuffleTime; game.shuffleTimer = onlineShuffleTime;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
@@ -3792,25 +3860,31 @@ function startOnlineGameAsHost() {
   sendOnline({
     type: 'init',
     cards: game.cards.map(c => ({ emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus })),
-    diff: cfg.diff, maxTime: game.maxTime, shuffleMaxTime: game.shuffleMaxTime,
+    diff: cfg.diff, shuffleMaxTime: onlineShuffleTime,
     totalPairs: game.totalPairs,
     p1: { name: cfg.p1.name, avatar: cfg.p1.avatar },
     p2: { name: 'Opponent', avatar: cfg.p2.avatar },
   });
   buildGameHeader(); buildEggGrid();
+  // Hide main timer clock — online mode has no game timer
+  const clockFace = document.querySelector('.clock-face');
+  if (clockFace) clockFace.style.display = 'none';
+  // Show chat bar
+  document.getElementById('chatBar').classList.remove('hidden');
+  document.getElementById('gameScreen').classList.add('chat-visible');
+  document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('homeScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.add('hidden');
   document.getElementById('gameScreen').classList.remove('hidden');
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  updateTimerDisplay();
   animateEggsIn(() => {
     updateTurnIndicator(); updateMiniScores();
     // Signal guest to start countdown; host plays it simultaneously
     sendOnline({ type: 'countdown' });
     playCountdown(() => {
-      startTimer(); startShuffleTimer();
+      startShuffleTimer(); // no startTimer() — online has no main timer
       syncOnlineState();
     });
   });
@@ -3823,7 +3897,7 @@ function applyOnlineInit(data) {
   cfg.p2 = { name: data.p2.name, avatar: data.p2.avatar, photo: null };
   getAudioCtx(); // unlock audio on user gesture (joining counts as gesture)
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
-  game.maxTime = data.maxTime; game.timer = data.maxTime;
+  game.maxTime = 0; game.timer = 0;
   game.shuffleMaxTime = data.shuffleMaxTime; game.shuffleTimer = data.shuffleMaxTime;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
@@ -3831,13 +3905,19 @@ function applyOnlineInit(data) {
   game.totalPairs = data.totalPairs;
   game.cards = data.cards.map((c,idx) => ({ id:idx, emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus, matched:false, revealed:false, el:null, wrapEl:null }));
   buildGameHeader(); buildEggGrid();
+  // Hide main timer clock — online mode has no game timer
+  const clockFace = document.querySelector('.clock-face');
+  if (clockFace) clockFace.style.display = 'none';
+  // Show chat bar
+  document.getElementById('chatBar').classList.remove('hidden');
+  document.getElementById('gameScreen').classList.add('chat-visible');
+  document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('homeScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.add('hidden');
   document.getElementById('gameScreen').classList.remove('hidden');
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  updateTimerDisplay();
   animateEggsIn(() => {
     updateTurnIndicator(); updateMiniScores();
     // Timers start when host sends 'countdown' — keeps both devices in sync
@@ -3906,10 +3986,13 @@ function goHome() {
   clearInterval(game.shuffleTimerInterval);
   stopBGM();
   document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('chat-visible');
   document.getElementById('homeScreen').classList.remove('hidden');
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
+  document.getElementById('chatBar').classList.add('hidden');
+  document.getElementById('chatMessages').innerHTML = '';
   if (cfg.musicOn && cfg.customMusic) {
     setTimeout(() => startCustomBGM(), 300);
   }
@@ -4093,6 +4176,29 @@ function showGameMessage(text, cls, duration) {
   }, duration);
 }
 
+function sendChatMsg() {
+  const input = document.getElementById('chatInput');
+  const text = (input.value || '').trim();
+  if (!text || !onlineConn || !onlineConn.open) return;
+  input.value = '';
+  const avatar = isOnlineHost ? cfg.p1.avatar : cfg.p2.avatar;
+  const from   = isOnlineHost ? cfg.p1.name   : cfg.p2.name;
+  sendOnline({ type: 'chat', avatar, from, text });
+  addChatMsg(avatar, from, text, true);
+}
+
+function addChatMsg(avatar, from, text, isSelf) {
+  const box = document.getElementById('chatMessages');
+  if (!box) return;
+  const div = document.createElement('div');
+  div.className = 'chat-msg' + (isSelf ? ' self' : '');
+  div.innerHTML = `<span class="chat-from">${escHtml(avatar)} ${escHtml(from)}:</span>${escHtml(text)}`;
+  box.appendChild(div);
+  // Keep only the last 12 messages
+  while (box.children.length > 12) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+
 function showMatchReveal(emojiA, emojiB, isMatch, duration, afterCallback) {
   const overlay = document.getElementById('matchRevealOverlay');
   const emojisEl = document.getElementById('revealEmojis');
@@ -4134,24 +4240,31 @@ function playCountdown(callback) {
   const subEl = document.getElementById('countdownSub');
   if (!overlay) { if (callback) callback(); return; }
 
-  const steps = ['3', '2', '1', 'GO!'];
+  const steps = ['3', '2', '1', 'PLAY!'];
   let i = 0;
   overlay.classList.add('show');
 
   function showStep() {
     const val = steps[i];
     numEl.textContent = val;
-    numEl.className = val === 'GO!' ? 'countdown-number go' : 'countdown-number';
-    subEl.textContent = val === 'GO!' ? 'Hunt! 🐣' : 'Get Ready!';
+    numEl.className = val === 'PLAY!' ? 'countdown-number play' : 'countdown-number';
+    subEl.textContent = val === 'PLAY!' ? '🐣  Let\'s Hunt!  🥚' : 'Get Ready!';
     // Re-trigger pop animation
     numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
 
-    if (val === 'GO!') {
+    if (val === 'PLAY!') {
       sfxFanfare();
+      // Celebration confetti burst from multiple points
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      burstConfetti(cx, cy, 120);
+      burstConfetti(cx - 120, cy - 60, 60);
+      burstConfetti(cx + 120, cy - 60, 60);
+      burstConfetti(cx - 80, cy + 80, 40);
+      burstConfetti(cx + 80, cy + 80, 40);
       setTimeout(() => {
         overlay.classList.remove('show');
         if (callback) callback();
-      }, 750);
+      }, 900);
     } else {
       sfxPop();
       i++;
