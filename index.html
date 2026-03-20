@@ -1652,6 +1652,111 @@ html, body {
   border: 3px solid rgba(255,255,255,0.55);
 }
 
+/* ========== MATCH / NO-MATCH REVEAL OVERLAY ========== */
+#matchRevealOverlay {
+  position: fixed; inset: 0; z-index: 810;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(0,0,0,0.58);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+#matchRevealOverlay.show { opacity: 1; }
+.reveal-emojis {
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  position: relative;
+}
+.reveal-emoji {
+  font-size: clamp(4rem, 14vw, 6rem);
+  line-height: 1;
+  filter: drop-shadow(0 4px 18px rgba(0,0,0,0.5));
+  animation: revealEmojiIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.reveal-emoji:nth-child(3) { animation-delay: 0.07s; }
+@keyframes revealEmojiIn {
+  0%   { transform: scale(0.3) translateY(30px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.reveal-emoji.match-glow {
+  filter: drop-shadow(0 0 28px rgba(255,217,61,0.95)) drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+.reveal-x {
+  font-size: clamp(5rem, 18vw, 8rem);
+  color: #ff1f1f;
+  font-family: 'Fredoka One', sans-serif; font-weight: 900; line-height: 1;
+  text-shadow: 0 0 40px rgba(255,0,0,0.9), 0 4px 12px rgba(0,0,0,0.6);
+  animation: xSlam 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes xSlam {
+  0%   { transform: scale(2.5) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.reveal-label {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1.8rem, 6vw, 2.8rem); font-weight: 900;
+  color: #fff; letter-spacing: 1px;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.55);
+  animation: revealLabelIn 0.4s ease 0.2s both;
+}
+@keyframes revealLabelIn {
+  0%   { transform: translateY(18px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.reveal-label.nomatch { color: #ff6666; }
+.reveal-label.match {
+  background: linear-gradient(90deg, #ffd93d, #ff6b9d, #6bcb77, #4ecdc4, #ffd93d);
+  background-size: 300% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: revealLabelIn 0.4s ease 0.2s both, matchLabelShimmer 1.5s linear 0.6s infinite;
+}
+@keyframes matchLabelShimmer {
+  0%   { background-position: 0% center; }
+  100% { background-position: 300% center; }
+}
+
+/* ========== COUNTDOWN OVERLAY ========== */
+#countdownOverlay {
+  position: fixed; inset: 0; z-index: 820;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(0,0,0,0.62);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#countdownOverlay.show { opacity: 1; pointer-events: all; }
+.countdown-sub {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1rem, 4vw, 1.4rem);
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 4px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.countdown-number {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(8rem, 28vw, 14rem); font-weight: 900; line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 80px rgba(255,217,61,0.7), 0 8px 28px rgba(0,0,0,0.5);
+  animation: countPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.countdown-number.go {
+  color: #6bcb77;
+  font-size: clamp(6rem, 22vw, 11rem);
+  text-shadow: 0 0 80px rgba(107,203,119,0.85), 0 8px 28px rgba(0,0,0,0.5);
+}
+@keyframes countPop {
+  0%   { transform: scale(0.15) rotate(-12deg); opacity: 0; }
+  55%  { transform: scale(1.2) rotate(4deg); }
+  75%  { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
 /* ========== EASTER START ANIMATION ========== */
 .easter-eggs-row {
   display: flex; gap: 24px; align-items: flex-end; justify-content: center;
@@ -3268,7 +3373,7 @@ function checkMatch() {
 
   if (cardA.emoji === cardB.emoji) {
     sfxMatch();
-    showGameMessage('🎊 MATCH! 🎊', 'msg-match', 1100);
+    showMatchReveal(cardA.emoji, cardB.emoji, true, 1000);
     launchMatchFireworks();
     const p = game.currentPlayer;
     game.scores[p]++;
@@ -3282,7 +3387,6 @@ function checkMatch() {
     const posB = getEggCenter(cardB.wrapEl);
     burstConfetti(posA.x, posA.y, 55);
     burstConfetti(posB.x, posB.y, 55);
-    flashScreen('#ffffff', 0.45, 250);
 
     cardA.wrapEl.classList.remove('dancing');
     cardB.wrapEl.classList.remove('dancing');
@@ -3309,8 +3413,7 @@ function checkMatch() {
     }, 450);
   } else {
     sfxNoMatch();
-    showGameMessage('✕ Incorrect!', 'msg-nomatch', 1100);
-    setTimeout(() => {
+    showMatchReveal(cardA.emoji, cardB.emoji, false, 1500, () => {
       hideItemGlow(cardA);
       hideItemGlow(cardB);
       closeCard(a);
@@ -3326,7 +3429,7 @@ function checkMatch() {
       } else {
         updateTurnIndicator();
       }
-    }, 1400);
+    });
   }
 }
 
@@ -3574,7 +3677,8 @@ function createOnlineRoom() {
     onlineConn = conn;
     setupOnlineConn();
     document.getElementById('hostStatus').textContent = 'Opponent connected! Starting…';
-    setTimeout(() => startOnlineGameAsHost(), 900);
+    // startOnlineGameAsHost() fires from setupOnlineConn's 'open' handler
+    // once the data channel is confirmed open on both sides
   });
   peer.on('error', (e) => {
     document.getElementById('hostStatus').textContent = '⚠ ' + (e.type || e.message);
@@ -3638,7 +3742,12 @@ function joinOnlineRoom() {
 function setupOnlineConn() {
   onlineConn.on('data', handleOnlineData);
   onlineConn.on('open', () => {
-    if (!isOnlineHost) document.getElementById('joinStatus').textContent = 'Connected! Waiting for host to start…';
+    if (isOnlineHost) {
+      // Data channel confirmed open on both ends — now safe to start
+      startOnlineGameAsHost();
+    } else {
+      document.getElementById('joinStatus').textContent = '✅ Connected! Waiting for host to start…';
+    }
   });
   onlineConn.on('close', () => showGameMessage('🔌 Connection lost', 'msg-nomatch', 3000));
   onlineConn.on('error', () => showGameMessage('🔌 Connection error', 'msg-nomatch', 3000));
@@ -3650,6 +3759,9 @@ function sendOnline(data) {
 
 function handleOnlineData(data) {
   if (data.type === 'init') { applyOnlineInit(data); }
+  else if (data.type === 'countdown') {
+    if (!isOnlineHost) playCountdown(() => { startTimer(); startShuffleTimer(); });
+  }
   else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'shuffle') { if (!isOnlineHost) doShuffle(data.order); }
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
@@ -3694,8 +3806,13 @@ function startOnlineGameAsHost() {
   document.getElementById('gameOverOverlay').classList.add('hidden');
   updateTimerDisplay();
   animateEggsIn(() => {
-    startTimer(); startShuffleTimer(); updateTurnIndicator(); updateMiniScores();
-    syncOnlineState();
+    updateTurnIndicator(); updateMiniScores();
+    // Signal guest to start countdown; host plays it simultaneously
+    sendOnline({ type: 'countdown' });
+    playCountdown(() => {
+      startTimer(); startShuffleTimer();
+      syncOnlineState();
+    });
   });
 }
 
@@ -3722,7 +3839,8 @@ function applyOnlineInit(data) {
   document.getElementById('gameOverOverlay').classList.add('hidden');
   updateTimerDisplay();
   animateEggsIn(() => {
-    startTimer(); startShuffleTimer(); updateTurnIndicator(); updateMiniScores();
+    updateTurnIndicator(); updateMiniScores();
+    // Timers start when host sends 'countdown' — keeps both devices in sync
   });
 }
 
@@ -3975,6 +4093,74 @@ function showGameMessage(text, cls, duration) {
   }, duration);
 }
 
+function showMatchReveal(emojiA, emojiB, isMatch, duration, afterCallback) {
+  const overlay = document.getElementById('matchRevealOverlay');
+  const emojisEl = document.getElementById('revealEmojis');
+  const labelEl = document.getElementById('revealLabel');
+  if (!overlay) { if (afterCallback) setTimeout(afterCallback, duration); return; }
+
+  if (isMatch) {
+    emojisEl.innerHTML =
+      `<span class="reveal-emoji match-glow">${emojiA}</span>` +
+      `<span class="reveal-emoji match-glow" style="animation-delay:0.08s">${emojiB}</span>`;
+    labelEl.textContent = '🎊 MATCH! 🎊';
+    labelEl.className = 'reveal-label match';
+  } else {
+    emojisEl.innerHTML =
+      `<span class="reveal-emoji">${emojiA}</span>` +
+      `<span class="reveal-x">✕</span>` +
+      `<span class="reveal-emoji">${emojiB}</span>`;
+    labelEl.textContent = 'No Match';
+    labelEl.className = 'reveal-label nomatch';
+  }
+
+  // Re-trigger animations
+  emojisEl.querySelectorAll('.reveal-emoji,.reveal-x').forEach(el => {
+    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  });
+  labelEl.style.animation = 'none'; void labelEl.offsetWidth; labelEl.style.animation = '';
+
+  overlay.classList.add('show');
+  clearTimeout(overlay._revealTimer);
+  overlay._revealTimer = setTimeout(() => {
+    overlay.classList.remove('show');
+    if (afterCallback) afterCallback();
+  }, duration);
+}
+
+function playCountdown(callback) {
+  const overlay = document.getElementById('countdownOverlay');
+  const numEl = document.getElementById('countdownNumber');
+  const subEl = document.getElementById('countdownSub');
+  if (!overlay) { if (callback) callback(); return; }
+
+  const steps = ['3', '2', '1', 'GO!'];
+  let i = 0;
+  overlay.classList.add('show');
+
+  function showStep() {
+    const val = steps[i];
+    numEl.textContent = val;
+    numEl.className = val === 'GO!' ? 'countdown-number go' : 'countdown-number';
+    subEl.textContent = val === 'GO!' ? 'Hunt! 🐣' : 'Get Ready!';
+    // Re-trigger pop animation
+    numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
+
+    if (val === 'GO!') {
+      sfxFanfare();
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        if (callback) callback();
+      }, 750);
+    } else {
+      sfxPop();
+      i++;
+      setTimeout(showStep, 850);
+    }
+  }
+  showStep();
+}
+
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -4010,6 +4196,18 @@ syncMusicPlayBtns();
 })();
 
 </script>
+<!-- Match / no-match reveal overlay -->
+<div id="matchRevealOverlay">
+  <div class="reveal-emojis" id="revealEmojis"></div>
+  <div class="reveal-label" id="revealLabel"></div>
+</div>
+
+<!-- Countdown overlay (online mode game start) -->
+<div id="countdownOverlay">
+  <div class="countdown-sub" id="countdownSub">Get Ready!</div>
+  <div class="countdown-number" id="countdownNumber">3</div>
+</div>
+
 <!-- SMS share overlay -->
 <div class="sms-overlay" id="smsOverlay">
   <div class="sms-widget">
