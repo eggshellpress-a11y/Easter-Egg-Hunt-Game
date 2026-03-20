@@ -1606,7 +1606,7 @@ html, body {
   z-index: 800;
   pointer-events: none;
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 3.8rem; font-weight: 900;
+  font-size: 1.9rem; font-weight: 900;
   text-align: center;
   white-space: nowrap;
   padding: 18px 36px;
@@ -1622,7 +1622,7 @@ html, body {
 /* Match — rainbow pop with shimmer */
 #gameMessage.msg-match {
   color: #fff;
-  font-size: 4.6rem;
+  font-size: 2.2rem;
   background: linear-gradient(135deg, #ff6b9d, #ffd93d, #6bcb77, #4ecdc4, #a78bfa, #ff6b9d);
   background-size: 300% 300%;
   border: 4px solid rgba(255,255,255,0.9);
@@ -2963,7 +2963,8 @@ function startShuffleTimer() {
     updateShuffleTimerDisplay();
     if (game.shuffleTimer <= 0) {
       clearInterval(game.shuffleTimerInterval);
-      doShuffle();
+      // Guest waits for host's shuffle message; only host/offline triggers shuffle
+      if (!onlineConn || isOnlineHost) doShuffle();
     }
   }, 1000);
 }
@@ -2981,7 +2982,7 @@ function updateShuffleTimerDisplay() {
 // ============================================================
 //  SHUFFLE
 // ============================================================
-function doShuffle() {
+function doShuffle(providedOrder) {
   game.shuffling = true;
   sfxWhoosh();
   // Close any open cards first
@@ -3003,8 +3004,12 @@ function doShuffle() {
   setTimeout(() => {
     // 2. Shuffle unmatched cards
     const unmatchedIndices = unmatchedCards.map(c => c.id);
-    const shuffledIndices = [...unmatchedIndices];
-    shuffle(shuffledIndices);
+    const shuffledIndices = providedOrder ? [...providedOrder] : [...unmatchedIndices];
+    if (!providedOrder) {
+      shuffle(shuffledIndices);
+      // Host sends the shuffle order to guest so both boards match
+      if (isOnlineHost) sendOnline({ type: 'shuffle', order: shuffledIndices });
+    }
 
     // Rearrange DOM: swap eggs in cells
     const grid = document.getElementById('eggGrid');
@@ -3077,14 +3082,12 @@ function doShuffle() {
 //  EGG CLICK & GAME LOGIC
 // ============================================================
 function onEggClick(idx, fromRemote) {
-  // Online: guest forwards clicks to host; only allow own-turn clicks
+  // Online: enforce turn ownership for local clicks and mirror to remote
   if (onlineConn && !fromRemote) {
     if (isOnlineHost && game.currentPlayer !== 0) return;
-    if (!isOnlineHost) {
-      if (game.currentPlayer !== 1) return;
-      sendOnline({ type: 'click', idx });
-      return;
-    }
+    if (!isOnlineHost && game.currentPlayer !== 1) return;
+    sendOnline({ type: 'click', idx }); // mirror to remote device
+    // fall through — execute locally too so both see animations
   }
   if (game.locked || game.paused || game.shuffling) return;
   const card = game.cards[idx];
@@ -3153,6 +3156,7 @@ function handleBonusEgg(idx) {
     game.current = [];
     game.locked = false;
     updateTurnIndicator();
+    syncOnlineState();
     if (game.matchedPairs >= game.totalPairs) { onGameComplete(false); return; }
     if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 900);
   }, 1800);
@@ -3572,20 +3576,12 @@ function copyRoomCode() {
   }
 }
 function initSmsShare() {
-  if (localStorage.getItem('smsConsentGiven') === 'true') {
-    doSmsShare();
-    return;
-  }
-  document.getElementById('smsNeverCheck').checked = false;
   document.getElementById('smsOverlay').classList.add('show');
 }
 function closeSmsWidget() {
   document.getElementById('smsOverlay').classList.remove('show');
 }
 function confirmSmsShare() {
-  if (document.getElementById('smsNeverCheck').checked) {
-    localStorage.setItem('smsConsentGiven', 'true');
-  }
   closeSmsWidget();
   doSmsShare();
 }
@@ -3632,7 +3628,8 @@ function sendOnline(data) {
 
 function handleOnlineData(data) {
   if (data.type === 'init') { applyOnlineInit(data); }
-  else if (data.type === 'click') { if (isOnlineHost) onEggClick(data.idx, true); }
+  else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
+  else if (data.type === 'shuffle') { if (!isOnlineHost) doShuffle(data.order); }
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
 }
 
@@ -3685,6 +3682,8 @@ function applyOnlineInit(data) {
   cfg.diff = data.diff;
   cfg.p1 = { name: data.p1.name, avatar: data.p1.avatar, photo: null };
   cfg.p2 = { name: data.p2.name, avatar: data.p2.avatar, photo: null };
+  getAudioCtx(); // unlock audio on user gesture (joining counts as gesture)
+  if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   game.maxTime = data.maxTime; game.timer = data.maxTime;
   game.shuffleMaxTime = data.shuffleMaxTime; game.shuffleTimer = data.shuffleMaxTime;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
@@ -3725,33 +3724,11 @@ function syncOnlineState() {
 }
 
 function applyOnlineState(state) {
-  const prevPlayer = game.currentPlayer;
-  state.cards.forEach((s, idx) => {
-    const card = game.cards[idx];
-    if (!card) return;
-    if (s.revealed !== card.revealed) {
-      card.revealed = s.revealed;
-      if (card.el) {
-        if (s.revealed) card.el.classList.add('egg-opened');
-        else card.el.classList.remove('egg-opened','egg-cracking');
-      }
-    }
-    if (s.matched && !card.matched) {
-      card.matched = true;
-      if (card.wrapEl) {
-        card.wrapEl.classList.add('matched');
-        const cell = card.wrapEl.parentElement;
-        if (cell) { cell.classList.add('removing'); setTimeout(() => { cell.style.display='none'; }, 400); }
-      }
-    }
-  });
-  game.current = state.current; game.currentPlayer = state.currentPlayer;
+  // With mirrored clicks both sides run animations locally.
+  // State sync only corrects scores/timer in case of drift.
   game.scores = state.scores; game.items = state.items;
   game.timer = state.timer; game.matchedPairs = state.matchedPairs;
-  game.locked = state.locked; game.shuffling = state.shuffling;
-  updateTimerDisplay(); updateBaskets();
-  if (state.currentPlayer !== prevPlayer) updateTurnIndicator();
-  if (state.done) setTimeout(() => onGameComplete(false), 600);
+  updateTimerDisplay(); updateBaskets(); updateMiniScores();
 }
 
 // ============================================================
@@ -4011,18 +3988,15 @@ syncMusicPlayBtns();
 })();
 
 </script>
-<!-- SMS consent overlay -->
+<!-- SMS share overlay -->
 <div class="sms-overlay" id="smsOverlay">
   <div class="sms-widget">
-    <div class="sms-widget-title">📱 Send via Text Message</div>
-    <div class="sms-widget-msg">This will open your messaging app with the room code pre-filled. Standard data and messaging rates may apply.</div>
+    <div class="sms-widget-title">📱 Open Your Messaging App?</div>
+    <div class="sms-widget-msg">Your room code and join link will be pre-filled — just choose who to send it to.</div>
     <div class="sms-widget-btns">
-      <button class="sms-btn-confirm" onclick="confirmSmsShare()">Send</button>
-      <button class="sms-btn-cancel" onclick="closeSmsWidget()">Cancel</button>
+      <button class="sms-btn-confirm" onclick="confirmSmsShare()">Open Messages</button>
+      <button class="sms-btn-cancel" onclick="closeSmsWidget()">Not Now</button>
     </div>
-    <label class="sms-never-row">
-      <input type="checkbox" id="smsNeverCheck"> Never show this again
-    </label>
   </div>
 </div>
 </body>

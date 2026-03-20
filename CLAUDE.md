@@ -8,14 +8,14 @@ No build step or server required. Open `index.html` directly in any modern brows
 
 ## Project Overview
 
-This is a single-file browser game (`index.html`) — no build step, no package manager, no external dependencies. Open the file directly in a browser to run it. All CSS, JavaScript, and HTML live inline in that one file.
+This is a single-file browser game (`index.html`) — no build step, no package manager, no external dependencies (except PeerJS loaded from CDN for online mode). Open the file directly in a browser to run it. All CSS, JavaScript, and HTML live inline in that one file (~4000 lines).
 
 ## File Structure
 
 `index.html` is divided into three inline sections in order:
 
 1. **`<style>`** — All CSS. Organized by screen/component with section header comments.
-2. **`<body>`** — Two top-level screens (`#homeScreen`, `#gameScreen`) plus overlay divs (`#pauseOverlay`, `#exitOverlay`, `#gameOverOverlay`, `#casinoOverlay`, `#bonusEggOverlay`). Also two global elements outside screens: `#screenBlurOverlay` (backdrop) and `#gameMessage` (floating match/no-match toast). Screen visibility is toggled via the `.hidden` CSS class.
+2. **`<body>`** — Three top-level screens: `#homeScreen`, `#settingsScreen`, `#gameScreen`. Overlay divs: `#pauseOverlay`, `#exitOverlay`, `#gameOverOverlay`, `#casinoOverlay`, `#bonusEggOverlay`, `#smsOverlay`. Two global elements outside screens: `#screenBlurOverlay` (backdrop) and `#gameMessage` (floating match/no-match toast). Screen visibility is toggled via the `.hidden` CSS class.
 3. **`<script>`** — All JavaScript. See sections below.
 
 ## JavaScript Architecture
@@ -24,29 +24,32 @@ The script is organized into clearly labeled sections (`// ===...===` comments):
 
 | Section | Lines | Purpose |
 |---|---|---|
-| STATE | ~1710 | `cfg` (pre-game settings) and `game` (live game state) objects, plus all constants |
-| AUDIO ENGINE | ~1768 | Web Audio API — procedural SFX functions + BGM scheduler + custom music upload |
-| CONFETTI | ~2037 | Canvas overlay particle system |
-| POLKADOT BACKGROUND | ~2148 | Animated polkadot canvas drawn behind game content |
-| CASINO CELEBRATION | ~2195 | `playCasinoCelebration()` — slot-reel animation overlay (retained for potential use) |
-| HOME SCREEN SETUP | ~2310 | `buildDecoEggs()`, avatar pickers, mode/difficulty selection builders |
-| GAME START | ~2432 | `startGame()` — resets state, builds the grid, transitions screens |
-| GRID BUILD | ~2520 | `buildGameHeader()`, `buildEggGrid()` — DOM construction for game screen |
-| SLIDE IN ANIMATION | ~2629 | CSS-driven screen transition animation for game start |
-| TIMER | ~2659 | `startTimer()`, `onTimerExpired()` — setInterval countdown |
-| SHUFFLE | ~2717 | `doShuffle()` — burrow-out → reorder → pop-in sequence |
-| EGG CLICK & GAME LOGIC | ~2812 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
-| AI | ~3092 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
-| PAUSE | ~3152 | `togglePause()` — freezes timer and dims BGM gain |
-| EXIT / GAME OVER | ~3192 | `confirmExit()`, `goHome()`, `onGameComplete()`, `restartGame()` |
-| UTILS | ~3334 | `launchMatchFireworks()`, `fireFirework()`, `showGameMessage()`, `escHtml()` |
-| INIT | ~3392 | One-time startup — default selections, toggle sync, volume slider init |
+| STATE | ~1966 | `cfg` (pre-game settings) and `game` (live game state) objects, plus all constants |
+| AUDIO ENGINE | ~2024 | Web Audio API — procedural SFX functions + BGM scheduler + custom music upload |
+| CONFETTI | ~2293 | Canvas overlay particle system |
+| POLKADOT BACKGROUND | ~2404 | Animated polkadot canvas drawn behind game content |
+| CASINO CELEBRATION | ~2451 | `playCasinoCelebration()` — slot-reel animation overlay (retained for potential use) |
+| HOME SCREEN SETUP | ~2566 | `buildDecoEggs()`, avatar pickers, mode/difficulty selection builders |
+| GAME START | ~2694 | `startGame()` — resets state, builds the grid, transitions screens |
+| GRID BUILD | ~2783 | `buildGameHeader()`, `buildEggGrid()` — DOM construction for game screen |
+| SLIDE IN ANIMATION | ~2893 | CSS-driven screen transition animation for game start |
+| TIMER | ~2923 | `startTimer()`, `onTimerExpired()` — setInterval countdown |
+| SHUFFLE | ~2981 | `doShuffle()` — burrow-out → reorder → pop-in sequence |
+| EGG CLICK & GAME LOGIC | ~3076 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
+| AI | ~3393 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
+| PAUSE | ~3453 | `togglePause()` — freezes timer and dims BGM gain |
+| EXIT / GAME OVER | ~3493 | `confirmExit()`, `onGameComplete()`, `restartGame()` |
+| ONLINE MULTIPLAYER | ~3512 | PeerJS peer-to-peer — host/join lobby, room codes, move sync, SMS share |
+| HIGH SCORE | ~3757 | `localStorage`-backed per-mode/diff high scores |
+| SETTINGS SCREEN | ~3772 | `showSettings()`, `closeSettings()`, `goHome()` — third screen for avatar/audio |
+| UTILS | ~3925 | `launchMatchFireworks()`, `fireFirework()`, `showGameMessage()`, `escHtml()` |
+| INIT | ~3983 | One-time startup — default selections, toggle sync, volume slider init, `?join=` URL param handling |
 
 ## Key State Objects
 
 ```js
 cfg = {
-  mode,        // '1p' | '2p' | 'ai'
+  mode,        // '1p' | '2p' | 'ai' | 'online'
   diff,        // 'easy' | 'medium' | 'hard'
   aiDiff,      // 'easy' | 'medium' | 'hard'  (AI memory usage: 0% / 50% / 80%)
   p1, p2,      // { name, avatar, photo }
@@ -69,16 +72,25 @@ game = {
   matchedPairs,    // pairs found so far
   shuffling,       // true during the post-timer shuffle sequence
 }
+
+// Online multiplayer globals (module-level, not in game object)
+peer          // PeerJS Peer instance (null when offline)
+onlineConn    // PeerJS DataConnection to opponent
+isOnlineHost  // true if this client created the room
 ```
 
 ## Egg Interaction Flow
 
-1. Click → `onEggClick(idx)` — guards on `game.locked`, `matched`, `revealed`
+1. Click → `onEggClick(idx, fromRemote)` — guards on `game.locked`, `matched`, `revealed`; `fromRemote=true` skips turn ownership check for online moves
 2. → `revealCard(idx)` — plays squish CSS animation, then calls `openEgg()`
 3. → `openEgg(card)` — sets `.open` class (top half rises), fires `burstConfetti()`
 4. After 2nd card revealed → `checkMatch()`:
    - **Match**: burst + fade eggs out, add to basket, same player continues
    - **No match**: 1.5 s delay, `closeCard()` on both, turn switches
+
+## Online Multiplayer
+
+Uses PeerJS (loaded from CDN) for browser-to-browser WebRTC. The host generates a room code (`EGG` + 7 random chars) and shares it via clipboard copy or SMS (`sms:` URI). The joiner pastes the code or follows a `?join=<code>` URL. After connection, the host calls `startOnlineGameAsHost()` which syncs the shuffled card order to the guest via a `{type:'start', cards:[...]}` message. During play, each click is broadcast as `{type:'click', idx}` so both peers see identical moves. The `#smsOverlay` / `#smsWidget` provides a consent gate before opening the `sms:` URI (consent stored in `localStorage` as `smsConsentGiven`).
 
 ## Audio System
 
@@ -106,10 +118,16 @@ Defined in `DIFF_CONFIG`. Odd egg counts produce one unpaired `__LUCKY__` bonus 
 
 When a `__LUCKY__` egg is clicked, `handleBonusEgg()` fires: gameplay locks, the `#bonusEggOverlay` fades in with a large CSS golden egg and rotating conic shimmer, confetti bursts at screen center, then the overlay auto-dismisses after 1.8 s and play resumes. No flash text is shown.
 
+## High Scores
+
+Stored in `localStorage` keyed by `eggHunt_hs_{mode}_{diff}` (e.g. `eggHunt_hs_1p_easy`). `saveHighScore(score)` returns `true` if a new record was set. Scores are per mode+difficulty combination.
+
 ## UI Layout Notes
 
-- Game header (`.game-header`) has three columns: `.header-left` (home/exit egg button), `.header-center` (dual timer clocks), `.header-right` (empty, `display:none`). The header has no background — the exit button is a pink egg shape (`.home-egg-btn`).
-- The header center contains a `.timers-row` with two clock faces side by side: `.clock-face` (game countdown, `#timerDisplay`) and `.shuffle-clock-face` (shuffle countdown, `#shuffleTimerDisplay`).
+- **Home screen** (`#homeScreen`): mode selector (`#sectionMode`) which expands `#aiDiffRow` for AI mode or `#onlineLobby` for online mode; difficulty selector (`#sectionDiff`); settings gear button routes to `#settingsScreen`.
+- **Settings screen** (`#settingsScreen`): third top-level screen (hidden by default) containing avatar/name pickers and all audio controls. `showSettings(from)` records the originating screen so `closeSettings()` can return to it.
+- **Game header** (`.game-header`) has three columns: `.header-left` (home/exit egg button), `.header-center` (dual timer clocks), `.header-right` (`.mini-scores` — compact in-game score display, `#miniScores`). The exit button is a pink egg shape (`.home-egg-btn`).
+- The header center contains a `.timers-row` with two clocks: `.timer-display` (game countdown, `#timerDisplay`) and `.shuffle-timer-display` (shuffle countdown, `#shuffleTimerDisplay`).
 - Match/no-match feedback uses `showGameMessage(text, cls, duration)` — it populates `#gameMessage` and shows `#screenBlurOverlay`. There is no flash message system — do not re-add `setFlash`/`clearFlash`.
 - Fireworks on match: `launchMatchFireworks()` spawns `.fw-particle` DOM elements at fixed screen positions and removes them after their CSS animation completes.
-- Volume/SFX sliders are on the home screen only, wrapped in `.volume-row` divs. There are no in-game audio controls.
+- Audio controls (volume/SFX sliders, music upload) live on `#settingsScreen` only — there are no in-game audio controls.
