@@ -3519,6 +3519,17 @@ function cancelExit() {
 let peer = null;
 let onlineConn = null;
 let isOnlineHost = false;
+let currentRoomCode = null; // stored so we can reconnect with the same code
+
+// When the host backgrounds the browser to open Messages, the PeerJS WebSocket
+// to the signaling server can drop. Reconnect automatically when they return.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && peer && peer.disconnected && isOnlineHost && !onlineConn) {
+    const statusEl = document.getElementById('hostStatus');
+    if (statusEl) statusEl.textContent = '⚡ Reconnecting…';
+    peer.reconnect();
+  }
+});
 
 function switchOnlineTab(tab, el) {
   document.querySelectorAll('.online-tab').forEach(b => b.classList.remove('selected'));
@@ -3530,6 +3541,7 @@ function switchOnlineTab(tab, el) {
 function destroyPeer() {
   if (peer) { try { peer.destroy(); } catch(e){} peer = null; }
   onlineConn = null;
+  currentRoomCode = null;
 }
 
 function createOnlineRoom() {
@@ -3537,16 +3549,26 @@ function createOnlineRoom() {
   isOnlineHost = true;
   document.getElementById('hostStatus').textContent = 'Creating room…';
   const code = 'EGG' + Math.random().toString(36).substring(2, 9).toUpperCase();
+  currentRoomCode = code;
   try {
     peer = new Peer(code);
   } catch(e) {
     document.getElementById('hostStatus').textContent = '⚠ PeerJS not loaded yet.';
     return;
   }
-  peer.on('open', (id) => {
-    document.getElementById('roomCodeText').textContent = id;
+  peer.on('open', () => {
+    document.getElementById('roomCodeText').textContent = currentRoomCode;
     document.getElementById('roomCodeDisplay').classList.remove('hidden');
     document.getElementById('hostStatus').textContent = 'Waiting for opponent…';
+  });
+  peer.on('disconnected', () => {
+    // Signaling server lost (e.g. browser backgrounded to open Messages).
+    // Reconnect so the guest can still find us with the same room code.
+    if (!onlineConn) {
+      const statusEl = document.getElementById('hostStatus');
+      if (statusEl) statusEl.textContent = '⚡ Reconnecting…';
+      setTimeout(() => { if (peer && !peer.destroyed) peer.reconnect(); }, 1500);
+    }
   });
   peer.on('connection', (conn) => {
     onlineConn = conn;
