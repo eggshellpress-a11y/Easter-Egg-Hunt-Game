@@ -3842,7 +3842,7 @@ function startOnlineGameAsHost() {
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   const diffCfg = DIFF_CONFIG[cfg.diff];
   const items = ITEMS_BY_DIFF[cfg.diff];
-  const onlineShuffleTime = 20; // online uses 20s shuffle, no main timer
+  const onlineShuffleTime = 30; // online uses 30s shuffle, no main timer
   game.maxTime = 0; game.timer = 0;
   game.shuffleMaxTime = onlineShuffleTime; game.shuffleTimer = onlineShuffleTime;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
