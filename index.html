@@ -305,8 +305,8 @@ html, body {
 .menu-btn {
   width: 44px; height: 44px;
   border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.7);
-  background: rgba(255,255,255,0.35);
+  border: 2px solid #fff;
+  background: #ff8eea;
   color: #fff;
   font-size: 1.3rem;
   cursor: pointer;
@@ -411,21 +411,83 @@ html, body {
 }
 .online-action-btn:hover { background:#fff; }
 
-/* Mini scores (header-right) */
-.mini-scores { display: flex; flex-direction: column; gap: 4px; }
-.mini-score-row {
-  display: flex; align-items: center; gap: 5px;
+/* SMS consent widget */
+.sms-overlay {
+  position: fixed; inset: 0; z-index: 900;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.2s;
+}
+.sms-overlay.show { opacity: 1; pointer-events: all; }
+.sms-widget {
+  background: #fff; border-radius: 18px;
+  padding: 28px 24px 20px;
+  max-width: 320px; width: 90%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+  text-align: center;
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 0.95rem; color: rgba(255,255,255,0.7);
-  transition: color 0.2s;
 }
-.mini-score-row.active { color: #fff; }
-.mini-score-av { font-size: 1.1rem; }
+.sms-widget-title {
+  font-size: 1.1rem; font-weight: 700; color: #3d1a6e; margin-bottom: 10px;
+}
+.sms-widget-msg {
+  font-size: 0.88rem; color: #555; line-height: 1.5; margin-bottom: 16px;
+  font-family: sans-serif;
+}
+.sms-widget-btns {
+  display: flex; gap: 10px; justify-content: center; margin-bottom: 14px;
+}
+.sms-btn-confirm {
+  flex: 1; padding: 10px 0; border-radius: 10px; border: none;
+  background: #ff8eea; color: #fff; font-family: 'Fredoka One','Fredoka',sans-serif;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+}
+.sms-btn-confirm:hover { background: #e876d4; }
+.sms-btn-cancel {
+  flex: 1; padding: 10px 0; border-radius: 10px;
+  border: 2px solid #ccc; background: #fff; color: #555;
+  font-family: 'Fredoka One','Fredoka',sans-serif;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+}
+.sms-btn-cancel:hover { background: #f5f5f5; }
+.sms-never-row {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  font-size: 0.8rem; color: #888; font-family: sans-serif; cursor: pointer;
+}
+.sms-never-row input { cursor: pointer; width: 15px; height: 15px; }
+
+/* Mini scores (header-right) */
+.mini-scores { display: flex; flex-direction: column; gap: 4px; justify-content: center; }
+.mini-score-row {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.85rem; color: #fff;
+  transition: opacity 0.2s;
+  background: #ff8eea;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  padding: 8px 10px;
+  opacity: 0.6;
+  line-height: 1;
+}
+.mini-score-row.active { opacity: 1; }
+.mini-score-av {
+  font-size: 1rem;
+  background: rgba(255,255,255,0.35);
+  border-radius: 50%;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
 .mini-score-num {
-  background: rgba(255,255,255,0.2); border-radius: 8px;
-  padding: 1px 7px; min-width: 24px; text-align: center;
+  background: none; border-radius: 8px;
+  padding: 0; min-width: 20px; text-align: center;
+  border: none;
 }
-.mini-score-row.active .mini-score-num { background: rgba(255,255,255,0.45); }
+.mini-score-row.active .mini-score-num { background: none; }
 
 /* High score display in game-over overlay */
 .hs-badge {
@@ -498,8 +560,8 @@ html, body {
 /* START button */
 .start-btn {
   width: 100%; max-width: 440px;
-  min-height: 80px;
-  padding: 26px 18px;
+  min-height: 52px;
+  padding: 14px 18px;
   border-radius: 28px;
   border: 3px solid #ffffff;
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
@@ -592,21 +654,21 @@ html, body {
 #gameScreen {
   background: transparent;
   min-height: 100%;
-  padding: 0;
+  padding: 16px 0 0;
   justify-content: flex-start;
   align-items: stretch;
 }
 
 /* Header */
 .game-header {
-  display: flex; align-items: flex-start; justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 8px 12px 10px;
   background: none;
   flex-shrink: 0;
   gap: 12px;
 }
-.header-left { display: flex; align-items: center; padding-top: 20px; }
-.header-right { display: flex; align-items: center; padding-top: 20px; }
+.header-left { display: flex; align-items: center; }
+.header-right { display: flex; align-items: center; }
 .header-center {
   display: flex; flex-direction: column; align-items: center;
   flex: 0 0 auto;
@@ -625,25 +687,20 @@ html, body {
 .clock-face {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
-.clock-label {
-  font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 0.6rem; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: rgba(60,30,100,0.65);
-}
+.clock-label { display: none; }
 .timer-display {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 2.4rem; font-weight: 900;
+  font-size: 1rem; font-weight: 900;
   color: #3d1a6e;
   text-shadow: none;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 3px;
-  min-width: 110px; text-align: center;
+  letter-spacing: 2px;
+  min-width: 80px; text-align: center;
   transition: color 0.3s;
   background: #e0cdff;
   border: 3px solid rgba(100,60,180,0.3);
   border-radius: 16px;
-  padding: 8px 16px;
+  padding: 8px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .timer-display.urgent { color: #cc1a1a; animation: timerPulse 1s ease infinite; text-shadow: none; }
@@ -1478,19 +1535,15 @@ html, body {
 /* ========== DUAL TIMERS ========== */
 .timers-row {
   display: flex; flex-direction: row; gap: 10px; align-items: center;
+  padding-top: 10px;
 }
 .shuffle-clock-face {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
 }
-.shuffle-clock-label {
-  font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 0.6rem; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: rgba(10,60,80,0.65);
-}
+.shuffle-clock-label { display: none; }
 .shuffle-timer-display {
   font-family: 'Courier New', Courier, monospace;
-  font-size: 1.55rem; font-weight: 900;
+  font-size: 1rem; font-weight: 900;
   color: #0a5a72;
   background: #c1f0fb;
   border: 3px solid rgba(0,120,160,0.25);
@@ -1725,7 +1778,8 @@ html, body {
           <div class="room-code-box">
             <div class="room-code-label">Share this code with your opponent:</div>
             <div class="room-code-value" id="roomCodeText">—</div>
-            <button class="room-copy-btn" onclick="copyRoomCode()">📋 Copy</button>
+            <button class="room-copy-btn" id="copyRoomBtn" onclick="copyRoomCode()">📋 Copy</button>
+            <button class="room-copy-btn" onclick="initSmsShare()" style="margin-left:6px;">📱 Text</button>
           </div>
         </div>
         <div class="online-status" id="hostStatus"></div>
@@ -1843,12 +1897,10 @@ html, body {
     <div class="header-center">
       <div class="timers-row">
         <div class="clock-face">
-          <div class="clock-label">⏱ Time</div>
-          <div class="timer-display" id="timerDisplay">2:00</div>
+          <div class="timer-display" id="timerDisplay">⏱ 2:00</div>
         </div>
         <div class="shuffle-clock-face">
-          <div class="shuffle-clock-label">🔀 Shuffle</div>
-          <div class="shuffle-timer-display" id="shuffleTimerDisplay">0:40</div>
+          <div class="shuffle-timer-display" id="shuffleTimerDisplay">🔀 0:40</div>
         </div>
       </div>
     </div>
@@ -2890,7 +2942,7 @@ function updateTimerDisplay() {
   const secs = Math.max(0, game.timer);
   const mins = Math.floor(secs / 60);
   const s = secs % 60;
-  el.textContent = mins + ':' + String(s).padStart(2, '0');
+  el.textContent = '⏱ ' + mins + ':' + String(s).padStart(2, '0');
   el.classList.toggle('urgent', secs <= 15 && secs > 0);
 }
 
@@ -2922,7 +2974,7 @@ function updateShuffleTimerDisplay() {
   const secs = Math.max(0, game.shuffleTimer);
   const mins = Math.floor(secs / 60);
   const s = secs % 60;
-  el.textContent = mins + ':' + String(s).padStart(2, '0');
+  el.textContent = '🔀 ' + mins + ':' + String(s).padStart(2, '0');
   el.classList.toggle('soon', secs <= 8 && secs > 0);
 }
 
@@ -3278,12 +3330,14 @@ function updateMiniScores() {
   const el = document.getElementById('miniScores');
   if (!el) return;
   if (cfg.mode === '1p') {
+    el.style.paddingTop = '10px';
     el.innerHTML = `
       <div class="mini-score-row active">
         <span class="mini-score-av">${cfg.p1.avatar}</span>
         <span class="mini-score-num">${game.scores[0]}</span>
       </div>`;
   } else {
+    el.style.paddingTop = '';
     const p2av = (cfg.mode === 'ai') ? '🤖' : cfg.p2.avatar;
     el.innerHTML = `
       <div class="mini-score-row${game.currentPlayer===0?' active':''}">
@@ -3501,9 +3555,45 @@ function createOnlineRoom() {
   });
 }
 
+function getRoomJoinUrl(code) {
+  return window.location.href.split('?')[0] + '?join=' + encodeURIComponent(code);
+}
 function copyRoomCode() {
   const code = document.getElementById('roomCodeText').textContent;
-  navigator.clipboard.writeText(code).catch(() => {});
+  const url = getRoomJoinUrl(code);
+  const text = 'Room code: ' + code + '\nJoin here: ' + url;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = document.getElementById('copyRoomBtn');
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = '✅ Copied!';
+    btn.style.background = 'rgba(100,220,100,0.35)';
+    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
+  }
+}
+function initSmsShare() {
+  if (localStorage.getItem('smsConsentGiven') === 'true') {
+    doSmsShare();
+    return;
+  }
+  document.getElementById('smsNeverCheck').checked = false;
+  document.getElementById('smsOverlay').classList.add('show');
+}
+function closeSmsWidget() {
+  document.getElementById('smsOverlay').classList.remove('show');
+}
+function confirmSmsShare() {
+  if (document.getElementById('smsNeverCheck').checked) {
+    localStorage.setItem('smsConsentGiven', 'true');
+  }
+  closeSmsWidget();
+  doSmsShare();
+}
+function doSmsShare() {
+  const code = document.getElementById('roomCodeText').textContent;
+  const url = getRoomJoinUrl(code);
+  const body = encodeURIComponent('Join my Easter Egg Hunt game! Room code: ' + code + '\nOr tap to join directly: ' + url);
+  window.open('sms:?&body=' + body, '_blank');
 }
 
 function joinOnlineRoom() {
@@ -3909,6 +3999,31 @@ document.getElementById('sfxToggleHome').classList.toggle('on', cfg.sfxOn);
 updateVolSliderStyle();
 syncMusicPlayBtns();
 
+// Auto-fill join code from ?join= URL param
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const joinCode = params.get('join');
+  if (joinCode) {
+    selectMode('online', document.querySelector('[data-mode="online"]'));
+    switchOnlineTab('join', document.getElementById('tabJoin'));
+    document.getElementById('joinCodeInput').value = joinCode.toUpperCase();
+  }
+})();
+
 </script>
+<!-- SMS consent overlay -->
+<div class="sms-overlay" id="smsOverlay">
+  <div class="sms-widget">
+    <div class="sms-widget-title">📱 Send via Text Message</div>
+    <div class="sms-widget-msg">This will open your messaging app with the room code pre-filled. Standard data and messaging rates may apply.</div>
+    <div class="sms-widget-btns">
+      <button class="sms-btn-confirm" onclick="confirmSmsShare()">Send</button>
+      <button class="sms-btn-cancel" onclick="closeSmsWidget()">Cancel</button>
+    </div>
+    <label class="sms-never-row">
+      <input type="checkbox" id="smsNeverCheck"> Never show this again
+    </label>
+  </div>
+</div>
 </body>
 </html>
