@@ -1721,12 +1721,12 @@ html, body {
 /* ========== COUNTDOWN OVERLAY ========== */
 #countdownOverlay {
   position: fixed; inset: 0; z-index: 820;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  background: rgba(0,0,0,0.62);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  background: rgba(0,0,0,0.65);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 8px;
+  gap: 20px;
   opacity: 0; pointer-events: none;
   transition: opacity 0.3s ease;
 }
@@ -1736,25 +1736,57 @@ html, body {
   font-size: clamp(1rem, 4vw, 1.4rem);
   color: rgba(255,255,255,0.75);
   letter-spacing: 4px; text-transform: uppercase;
-  margin-bottom: 8px;
+  order: 2; margin-top: 4px;
+}
+.countdown-ring {
+  order: 1;
+  width: clamp(180px, 48vw, 260px);
+  height: clamp(180px, 48vw, 260px);
+  border-radius: 50%;
+  border: 6px solid rgba(255,255,255,0.25);
+  box-shadow: 0 0 60px rgba(255,217,61,0.18), inset 0 0 40px rgba(0,0,0,0.25),
+              0 0 0 2px rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  animation: ringPulse 0.85s ease infinite;
+}
+@keyframes ringPulse {
+  0%,100% { box-shadow: 0 0 60px rgba(255,217,61,0.18), inset 0 0 40px rgba(0,0,0,0.25); }
+  50%     { box-shadow: 0 0 90px rgba(255,217,61,0.38), inset 0 0 40px rgba(0,0,0,0.25); }
+}
+.countdown-ring.play-ring {
+  border-color: rgba(107,203,119,0.6);
+  animation: ringPlayPulse 0.5s ease infinite;
+}
+@keyframes ringPlayPulse {
+  0%,100% { box-shadow: 0 0 80px rgba(107,203,119,0.4), inset 0 0 40px rgba(0,0,0,0.2); }
+  50%     { box-shadow: 0 0 140px rgba(107,203,119,0.7), inset 0 0 40px rgba(0,0,0,0.2); }
 }
 .countdown-number {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: clamp(8rem, 28vw, 14rem); font-weight: 900; line-height: 1;
+  font-size: clamp(7rem, 24vw, 12rem); font-weight: 900; line-height: 1;
   color: #fff;
-  text-shadow: 0 0 80px rgba(255,217,61,0.7), 0 8px 28px rgba(0,0,0,0.5);
+  text-shadow: 0 0 60px rgba(255,217,61,0.8), 0 6px 20px rgba(0,0,0,0.5);
   animation: countPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .countdown-number.play {
   color: #6bcb77;
-  font-size: clamp(5rem, 20vw, 10rem);
-  text-shadow: 0 0 80px rgba(107,203,119,0.85), 0 8px 28px rgba(0,0,0,0.5);
+  font-size: clamp(4rem, 16vw, 8rem);
+  text-shadow: 0 0 80px rgba(107,203,119,0.9), 0 6px 20px rgba(0,0,0,0.5);
 }
 @keyframes countPop {
   0%   { transform: scale(0.15) rotate(-12deg); opacity: 0; }
   55%  { transform: scale(1.2) rotate(4deg); }
   75%  { transform: scale(0.95) rotate(-1deg); }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ========== OPPONENT LEFT OVERLAY ========== */
+#onlineDisconnectOverlay .overlay-card { text-align: center; }
+.disconnect-countdown {
+  font-family: 'Fredoka One', sans-serif;
+  font-size: 1rem; color: rgba(255,255,255,0.6);
+  margin: 6px 0 18px; letter-spacing: 1px;
 }
 
 /* ========== CHAT BAR (online mode) ========== */
@@ -1771,13 +1803,15 @@ html, body {
 }
 #chatBar.hidden { display: none; }
 .chat-messages {
-  max-height: 72px;
+  height: 46px;       /* ~2 messages visible */
   overflow-y: auto;
   display: flex; flex-direction: column; gap: 2px;
   margin-bottom: 6px;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
 }
-.chat-messages::-webkit-scrollbar { display: none; }
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
 .chat-msg {
   font-family: 'Fredoka', sans-serif;
   font-size: 0.82rem; color: rgba(255,255,255,0.9); line-height: 1.35;
@@ -3689,6 +3723,40 @@ let peer = null;
 let onlineConn = null;
 let isOnlineHost = false;
 let currentRoomCode = null; // stored so we can reconnect with the same code
+let _autoLeaveTimer = null; // used by showOpponentLeftOverlay
+
+function showOpponentLeftOverlay(reason) {
+  clearInterval(game.timerInterval);
+  clearInterval(game.shuffleTimerInterval);
+  game.paused = true;
+  onlineConn = null; // connection is gone
+  const overlay = document.getElementById('onlineDisconnectOverlay');
+  const countEl = document.getElementById('disconnectCountdown');
+  const titleEl = overlay.querySelector('.overlay-title');
+  if (titleEl) titleEl.textContent = reason || '😢 Opponent Left';
+  overlay.classList.remove('hidden');
+  let secs = 10;
+  function tick() {
+    countEl.textContent = `Returning to home in ${secs}s…`;
+    if (secs <= 0) { leaveNow(); return; }
+    secs--;
+    _autoLeaveTimer = setTimeout(tick, 1000);
+  }
+  tick();
+}
+
+function cancelAutoLeave() {
+  clearTimeout(_autoLeaveTimer);
+  document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
+  game.paused = false;
+  addChatMsg('🔌', 'Game', 'Your opponent has left. You\'re playing solo!', false);
+}
+
+function leaveNow() {
+  clearTimeout(_autoLeaveTimer);
+  document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
+  goHome();
+}
 
 // When the host backgrounds the browser to open Messages, the PeerJS WebSocket
 // to the signaling server can drop. Reconnect automatically when they return.
@@ -3815,8 +3883,19 @@ function setupOnlineConn() {
       document.getElementById('joinStatus').textContent = '✅ Connected! Waiting for host to start…';
     }
   });
-  onlineConn.on('close', () => showGameMessage('🔌 Connection lost', 'msg-nomatch', 3000));
-  onlineConn.on('error', () => showGameMessage('🔌 Connection error', 'msg-nomatch', 3000));
+  onlineConn.on('close', () => {
+    // Only show disconnect UI when the game screen is active
+    const gs = document.getElementById('gameScreen');
+    if (gs && !gs.classList.contains('hidden')) {
+      showOpponentLeftOverlay('🔌 Opponent disconnected');
+    }
+  });
+  onlineConn.on('error', () => {
+    const gs = document.getElementById('gameScreen');
+    if (gs && !gs.classList.contains('hidden')) {
+      showOpponentLeftOverlay('⚠️ Connection error');
+    }
+  });
 }
 
 function sendOnline(data) {
@@ -3829,9 +3908,15 @@ function handleOnlineData(data) {
     if (!isOnlineHost) playCountdown(() => { startShuffleTimer(); }); // no startTimer in online
   }
   else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
-  else if (data.type === 'shuffle') { if (!isOnlineHost) doShuffle(data.order); }
+  else if (data.type === 'shuffle') {
+    if (!isOnlineHost) {
+      clearInterval(game.shuffleTimerInterval); // stop guest's own countdown before shuffle
+      doShuffle(data.order);
+    }
+  }
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
   else if (data.type === 'chat') { addChatMsg(data.avatar, data.from, data.text, false); }
+  else if (data.type === 'leaving') { showOpponentLeftOverlay('😢 Opponent left the game'); }
 }
 
 function startOnlineGameAsHost() {
@@ -3982,6 +4067,10 @@ function closeSettings() {
 }
 
 function goHome() {
+  clearTimeout(_autoLeaveTimer);
+  // Notify opponent before tearing down the connection
+  if (onlineConn && onlineConn.open) sendOnline({ type: 'leaving' });
+  destroyPeer();
   clearInterval(game.timerInterval);
   clearInterval(game.shuffleTimerInterval);
   stopBGM();
@@ -3993,6 +4082,7 @@ function goHome() {
   document.getElementById('gameOverOverlay').classList.add('hidden');
   document.getElementById('chatBar').classList.add('hidden');
   document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
   if (cfg.musicOn && cfg.customMusic) {
     setTimeout(() => startCustomBGM(), 300);
   }
@@ -4236,8 +4326,9 @@ function showMatchReveal(emojiA, emojiB, isMatch, duration, afterCallback) {
 
 function playCountdown(callback) {
   const overlay = document.getElementById('countdownOverlay');
-  const numEl = document.getElementById('countdownNumber');
-  const subEl = document.getElementById('countdownSub');
+  const ringEl  = document.getElementById('countdownRing');
+  const numEl   = document.getElementById('countdownNumber');
+  const subEl   = document.getElementById('countdownSub');
   if (!overlay) { if (callback) callback(); return; }
 
   const steps = ['3', '2', '1', 'PLAY!'];
@@ -4246,15 +4337,16 @@ function playCountdown(callback) {
 
   function showStep() {
     const val = steps[i];
+    const isPlay = val === 'PLAY!';
     numEl.textContent = val;
-    numEl.className = val === 'PLAY!' ? 'countdown-number play' : 'countdown-number';
-    subEl.textContent = val === 'PLAY!' ? '🐣  Let\'s Hunt!  🥚' : 'Get Ready!';
+    numEl.className = isPlay ? 'countdown-number play' : 'countdown-number';
+    if (ringEl) ringEl.className = isPlay ? 'countdown-ring play-ring' : 'countdown-ring';
+    subEl.textContent = isPlay ? '🐣  Let\'s Hunt!  🥚' : 'Get Ready!';
     // Re-trigger pop animation
     numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
 
-    if (val === 'PLAY!') {
+    if (isPlay) {
       sfxFanfare();
-      // Celebration confetti burst from multiple points
       const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
       burstConfetti(cx, cy, 120);
       burstConfetti(cx - 120, cy - 60, 60);
@@ -4263,6 +4355,7 @@ function playCountdown(callback) {
       burstConfetti(cx + 80, cy + 80, 40);
       setTimeout(() => {
         overlay.classList.remove('show');
+        if (ringEl) ringEl.className = 'countdown-ring';
         if (callback) callback();
       }, 900);
     } else {
@@ -4317,8 +4410,20 @@ syncMusicPlayBtns();
 
 <!-- Countdown overlay (online mode game start) -->
 <div id="countdownOverlay">
+  <div class="countdown-ring" id="countdownRing">
+    <div class="countdown-number" id="countdownNumber">3</div>
+  </div>
   <div class="countdown-sub" id="countdownSub">Get Ready!</div>
-  <div class="countdown-number" id="countdownNumber">3</div>
+</div>
+
+<!-- Opponent left overlay -->
+<div class="overlay hidden" id="onlineDisconnectOverlay">
+  <div class="overlay-card">
+    <div class="overlay-title">😢 Opponent Left</div>
+    <div class="disconnect-countdown" id="disconnectCountdown">Returning to home in 10s…</div>
+    <button class="overlay-btn primary" onclick="cancelAutoLeave()">Stay in Game</button>
+    <button class="overlay-btn secondary" onclick="leaveNow()">🏠 Leave Now</button>
+  </div>
 </div>
 
 <!-- SMS share overlay -->
