@@ -139,13 +139,13 @@ All sound is procedural Web Audio API — no audio files required. `audioCtx` is
 
 Defined in `DIFF_CONFIG`. Odd egg counts produce one unpaired `__LUCKY__` bonus egg.
 
-| Level | Eggs | Pairs | Bonus egg | Timer |
-|---|---|---|---|---|
-| easy   | 15 | 7  | yes | 2:30 (150 s) |
-| medium | 20 | 10 | no  | 3:30 (210 s) |
-| hard   | 20 | 10 | no  | 4:30 (270 s) |
+| Level | Eggs | Pairs | Bonus egg | Timer | Shuffle interval |
+|---|---|---|---|---|---|
+| easy   | 15 | 7  | yes | 2:15 (135 s) | 40 s |
+| medium | 20 | 10 | no  | 3:15 (195 s) | 30 s |
+| hard   | 20 | 10 | no  | 4:15 (255 s) | 20 s |
 
-Online mode always uses a 20 s shuffle timer (not the per-difficulty timers). The in-game clock (`.clock-face`) is hidden in online mode; only the shuffle clock (`.shuffle-clock-face`) is shown.
+The shuffle loop runs in all modes. Offline modes use per-difficulty shuffle intervals (above); online mode always uses a fixed 20 s shuffle interval. The in-game countdown clock (`.clock-face`) is hidden in online mode; only the shuffle clock (`.shuffle-clock-face`) is shown. In offline modes both clocks are visible.
 
 ## Bonus Egg
 

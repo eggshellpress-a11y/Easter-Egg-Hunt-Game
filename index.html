@@ -504,6 +504,26 @@ html, body {
   font-family: 'Fredoka','Fredoka One',sans-serif;
 }
 
+/* 1p win — matched items celebration grid */
+.p1-win-label {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.45); margin-bottom: 10px;
+}
+.p1-win-items {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center; margin-bottom: 16px;
+}
+.p1-win-item {
+  font-size: clamp(1.7rem, 5.5vw, 2.4rem);
+  animation: p1ItemPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+  filter: drop-shadow(0 2px 6px rgba(255,217,61,0.4));
+}
+@keyframes p1ItemPop {
+  from { opacity: 0; transform: scale(0) rotate(-20deg); }
+  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
 /* Audio controls */
 .audio-row {
   display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
@@ -1174,7 +1194,7 @@ html, body {
   backdrop-filter: blur(8px);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  z-index: 500;
+  z-index: 900;
   padding: 24px;
   transition: opacity 0.3s;
 }
@@ -1247,6 +1267,65 @@ html, body {
   0% { transform: scale(0) rotate(-180deg); }
   70% { transform: scale(1.2) rotate(15deg); }
   100% { transform: scale(1) rotate(0); }
+}
+/* 2p/AI winner badge — larger, bouncing */
+.winner-badge.bouncing {
+  font-size: clamp(3rem, 12vw, 5rem);
+  animation: winnerSpin 0.65s cubic-bezier(0.34,1.56,0.64,1) both,
+             ogoBounce 1.1s 0.7s ease-in-out infinite alternate;
+}
+/* Shimmer title for winner */
+.overlay-title.winner-shimmer {
+  background: linear-gradient(90deg, #ffd93d, #ff6b9d, #6bcb77, #4ecdc4, #ffd93d);
+  background-size: 250% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: ogoShimmer 2.2s 0.7s linear infinite;
+}
+/* 2p/AI pairs pill */
+.go-pairs-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255,217,61,0.18), rgba(255,107,157,0.18));
+  border: 2px solid rgba(255,217,61,0.5);
+  border-radius: 30px; padding: 7px 22px;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1.05rem, 4vw, 1.3rem); color: #ffd93d;
+  letter-spacing: 0.5px; margin-bottom: 6px;
+  animation: ogoUp 0.45s 0.5s ease both, ogoPillGlow 2s 1.2s ease-in-out infinite;
+}
+.go-pairs-pill.tie {
+  border-color: rgba(107,203,119,0.4); color: #6bcb77;
+  background: rgba(107,203,119,0.1);
+  animation: ogoUp 0.45s 0.5s ease both;
+}
+/* Loser detail line */
+.go-detail {
+  font-family: 'Fredoka', sans-serif;
+  font-size: clamp(0.88rem, 3vw, 1rem); color: rgba(255,255,255,0.6);
+  margin: 2px 0 10px; line-height: 1.5;
+  animation: ogoUp 0.45s 0.62s ease both;
+}
+/* Loser taunt — hidden until .active */
+.go-taunt {
+  opacity: 0;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1rem, 4vw, 1.2rem); color: #ff8eea;
+  margin: 6px 0 10px; line-height: 1.4;
+}
+.go-taunt.active { animation: ogoTauntIn 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+/* Rematch section — hidden until .visible */
+.go-rematch-section {
+  border-top: 1px solid rgba(255,255,255,0.13);
+  padding-top: 14px; margin-top: 2px;
+  opacity: 0; pointer-events: none;
+}
+.go-rematch-section.visible {
+  animation: ogoUp 0.5s ease both;
+  pointer-events: auto;
+}
+.go-rematch-label {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.82rem; color: rgba(255,255,255,0.4);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
 }
 
 /* ========== SCROLLBAR ========== */
@@ -1869,10 +1948,47 @@ html, body {
 .ogo-winner .ogo-badge {
   animation: ogoBadgePop 0.65s cubic-bezier(0.34,1.56,0.64,1) both,
              ogoBounce 1.1s 0.7s ease-in-out infinite alternate;
+  position: relative; z-index: 1;
 }
 @keyframes ogoBounce {
   0%   { transform: translateY(0) rotate(-4deg) scale(1); }
   100% { transform: translateY(-12px) rotate(5deg) scale(1.06); }
+}
+/* Rotating rainbow rays behind trophy */
+.ogo-winner .ogo-badge-wrap { overflow: visible; }
+.ogo-winner .ogo-badge-wrap::before {
+  content: '';
+  position: absolute;
+  width: clamp(150px, 46vw, 250px);
+  height: clamp(150px, 46vw, 250px);
+  border-radius: 50%;
+  background: conic-gradient(
+    rgba(255,217,61,0.30) 0deg,   transparent 18deg,
+    rgba(255,107,157,0.24) 27deg, transparent 45deg,
+    rgba(107,203,119,0.24) 54deg, transparent 72deg,
+    rgba(78,205,196,0.24) 81deg,  transparent 99deg,
+    rgba(167,139,250,0.24) 108deg,transparent 126deg,
+    rgba(255,140,66,0.24) 135deg, transparent 153deg,
+    rgba(255,217,61,0.30) 162deg, transparent 180deg,
+    rgba(255,107,157,0.24) 189deg,transparent 207deg,
+    rgba(107,203,119,0.24) 216deg,transparent 234deg,
+    rgba(78,205,196,0.24) 243deg, transparent 261deg,
+    rgba(167,139,250,0.24) 270deg,transparent 288deg,
+    rgba(255,140,66,0.24) 297deg, transparent 315deg,
+    rgba(255,217,61,0.30) 324deg, transparent 342deg
+  );
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: ogoRaysRotate 7s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes ogoRaysRotate {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes ogoWinFlash {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
 }
 /* Loser badge shakes periodically */
 .ogo-loser .ogo-badge {
@@ -1945,11 +2061,33 @@ html, body {
   animation: ogoUp 0.45s 0.62s ease both;
 }
 
+/* Delayed loser taunt — hidden until .active */
+.ogo-taunt {
+  opacity: 0;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  color: #ff8eea;
+  margin: 6px 0 10px;
+  line-height: 1.4;
+}
+.ogo-taunt.active {
+  animation: ogoTauntIn 0.65s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes ogoTauntIn {
+  0%   { opacity: 0; transform: scale(0.4) translateY(18px); }
+  65%  { transform: scale(1.12) translateY(-5px); opacity: 1; }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 /* Rematch section */
 .ogo-rematch-section {
   border-top: 1px solid rgba(255,255,255,0.13);
   padding-top: 14px; margin-top: 2px;
-  animation: ogoUp 0.45s 0.75s ease both;
+  opacity: 0; pointer-events: none;
+}
+.ogo-rematch-section.visible {
+  animation: ogoUp 0.5s ease both;
+  pointer-events: auto;
 }
 .ogo-rematch-label {
   font-family: 'Fredoka', sans-serif;
@@ -2174,6 +2312,7 @@ html, body {
             <div class="room-code-value" id="roomCodeText">—</div>
             <button class="room-copy-btn" id="copyRoomBtn" onclick="copyRoomCode()">📋 Copy</button>
             <button class="room-copy-btn" onclick="initSmsShare()" style="margin-left:6px;">📱 Text</button>
+            <button class="room-copy-btn" onclick="emailRoomCode()" style="margin-left:6px;">✉️ Email</button>
           </div>
         </div>
         <div class="online-status" id="hostStatus"></div>
@@ -2291,7 +2430,7 @@ html, body {
     <div class="header-center">
       <div class="timers-row">
         <div class="clock-face">
-          <div class="timer-display" id="timerDisplay">⏱ 2:00</div>
+          <div class="timer-display" id="timerDisplay">⏱ 2:15</div>
         </div>
         <div class="shuffle-clock-face">
           <div class="shuffle-timer-display" id="shuffleTimerDisplay">🔀 0:40</div>
@@ -2352,13 +2491,21 @@ html, body {
 
 <!-- ========== GAME OVER OVERLAY ========== -->
 <div class="overlay hidden" id="gameOverOverlay">
-  <div class="overlay-card">
+  <div class="overlay-card" id="goCard">
     <span class="winner-badge" id="winnerBadge">🏆</span>
     <div class="overlay-title" id="gameOverTitle">Time's Up!</div>
     <div class="overlay-subtitle" id="gameOverSubtitle">Great job!</div>
     <div class="overlay-scores" id="gameOverScores"></div>
-    <button class="overlay-btn primary" onclick="restartGame()">🔄 Play Again</button>
-    <button class="overlay-btn secondary" onclick="goHome()">🏠 Home</button>
+    <div class="go-taunt" id="goTaunt"></div>
+    <div id="goMainBtns">
+      <button class="overlay-btn primary" onclick="restartGame()">🔄 Play Again</button>
+      <button class="overlay-btn secondary" onclick="goHome()">🏠 Home</button>
+    </div>
+    <div class="go-rematch-section" id="goRematchSection">
+      <div class="go-rematch-label">Play Again?</div>
+      <button class="overlay-btn primary" onclick="localRematch()">🔄 Rematch!</button>
+      <button class="overlay-btn secondary" onclick="localDeclineRematch()">🏠 No Thanks</button>
+    </div>
   </div>
 </div>
 
@@ -2389,9 +2536,9 @@ const ITEMS_BY_DIFF = {
   hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 15, time: 150, shuffleTime: 40 },
-  medium: { eggs: 20, time: 210, shuffleTime: 30 },
-  hard:   { eggs: 20, time: 270, shuffleTime: 20 },
+  easy:   { eggs: 15, time: 135, shuffleTime: 40 },
+  medium: { eggs: 20, time: 195, shuffleTime: 30 },
+  hard:   { eggs: 20, time: 255, shuffleTime: 20 },
 };
 
 let cfg = {
@@ -3158,6 +3305,12 @@ function startGame() {
   buildGameHeader();
   buildEggGrid();
 
+  // Game clock only shown in 1p mode; hidden for 2p and ai
+  const clockFace = document.querySelector('.clock-face');
+  if (clockFace) clockFace.style.display = cfg.mode === '1p' ? '' : 'none';
+  const shuffleClockFace = document.querySelector('.shuffle-clock-face');
+  if (shuffleClockFace) shuffleClockFace.style.display = '';
+
   // Switch screens
   document.getElementById('homeScreen').classList.add('hidden');
   document.getElementById('gameScreen').classList.remove('hidden');
@@ -3169,7 +3322,7 @@ function startGame() {
 
   // Animate eggs sliding in
   animateEggsIn(() => {
-    startTimer();
+    if (cfg.mode === '1p') startTimer();
     startShuffleTimer();
     updateTurnIndicator();
     if (cfg.mode === 'ai' && game.currentPlayer === 1) {
@@ -3390,6 +3543,14 @@ function startShuffleTimer() {
     updateShuffleTimerDisplay();
     if (game.shuffleTimer <= 0) {
       clearInterval(game.shuffleTimerInterval);
+      // Close every revealed unmatched egg the moment the clock hits zero,
+      // on all devices — the guest may not call doShuffle() until the host's
+      // network message arrives, so eggs must close here rather than waiting.
+      game.cards.forEach((card, idx) => {
+        if (!card.matched && card.revealed) closeCard(idx);
+      });
+      game.current = [];
+      game.locked = false;
       // Guest waits for host's shuffle message; only host/offline triggers shuffle
       if (!onlineConn || isOnlineHost) doShuffle();
     }
@@ -3412,9 +3573,13 @@ function updateShuffleTimerDisplay() {
 function doShuffle(providedOrder) {
   game.shuffling = true;
   sfxWhoosh();
-  // Close any open cards first
-  game.current.forEach(idx => closeCard(idx));
+  // Close every revealed unmatched egg — not just game.current, which may not
+  // cover all open eggs if the shuffle fires mid-turn or mid-animation
+  game.cards.forEach((card, idx) => {
+    if (!card.matched && card.revealed) closeCard(idx);
+  });
   game.current = [];
+  game.locked = false; // clear any stale lock; game.shuffling blocks clicks anyway
 
   const unmatchedCards = game.cards.filter(c => !c.matched);
 
@@ -3484,13 +3649,21 @@ function doShuffle(providedOrder) {
       if (shuffleDone) return;
       shuffleDone = true;
       if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
-      game.locked = false;
       game.shuffling = false;
-      startShuffleTimer();
-      updateTurnIndicator();
-      if (cfg.mode === 'ai' && game.currentPlayer === 1) {
-        setTimeout(doAITurn, 1000);
+
+      if (onlineConn && isOnlineHost) {
+        // Stay locked — verify guest is in sync before resuming play
+        syncOnlineState();
+        _syncRetryCount = 0;
+        _startSyncCheck();
+        return;
       }
+      if (onlineConn && !isOnlineHost) {
+        // Stay locked — wait for host's sync_resume signal
+        return;
+      }
+      // Offline modes: resume immediately
+      resumeAfterShuffle();
     }
     // Safety fallback: if animationend events don't all fire (can happen on mobile),
     // force-complete after a generous timeout so the shuffle cycle never gets stuck.
@@ -3594,7 +3767,10 @@ function handleBonusEgg(idx) {
     game.locked = false;
     updateTurnIndicator();
     syncOnlineState();
-    if (game.matchedPairs >= game.totalPairs) { onGameComplete(false); return; }
+    if (game.matchedPairs >= game.totalPairs) {
+      if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
+      return;
+    }
     if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 900);
   }, 1800);
 }
@@ -3606,8 +3782,10 @@ function revealCard(idx, callback) {
 
   // Step 1: Wiggle
   card.wrapEl.classList.add('wiggling');
-  card.wrapEl.addEventListener('animationend', function onWiggle() {
-    card.wrapEl.removeEventListener('animationend', onWiggle);
+  let wiggleDone = false;
+  function afterWiggle() {
+    if (wiggleDone) return;
+    wiggleDone = true;
     card.wrapEl.classList.remove('wiggling');
 
     // Step 2: Half-crack
@@ -3632,7 +3810,9 @@ function revealCard(idx, callback) {
         });
       }, 250);
     }, 300);
-  }, { once: true });
+  }
+  card.wrapEl.addEventListener('animationend', afterWiggle, { once: true });
+  setTimeout(afterWiggle, 500); // fallback: if animationend never fires (mobile/CSS), proceed anyway
 }
 
 function openEgg(card) {
@@ -3643,6 +3823,7 @@ function closeCard(idx) {
   const card = game.cards[idx];
   card.revealed = false;
   card.el.classList.remove('egg-opened', 'egg-cracking');
+  card.wrapEl.classList.remove('wiggling'); // must remove so animation can restart on re-click
   card.wrapEl.classList.add('dancing');
   hideItemGlow(card);
 }
@@ -3749,7 +3930,10 @@ function checkMatch() {
       game.locked = false;
       updateTurnIndicator();
       syncOnlineState();
-      if (game.matchedPairs >= game.totalPairs) { onGameComplete(false); return; }
+      if (game.matchedPairs >= game.totalPairs) {
+        if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
+        return;
+      }
       if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
     }, 450);
   } else {
@@ -3968,6 +4152,8 @@ let _pendingCountdown = null; // set when countdown message arrives before eggs 
 let _isOnlineGame = false;    // true while an online game is active
 let _rematchOffered = false;  // this player clicked Rematch
 let _rematchOpponentOffered = false; // opponent sent rematch_offer
+let _syncRetryCount = 0;      // how many post-shuffle sync retries attempted
+let _syncCheckTimer = null;   // setTimeout handle waiting for sync_ack
 
 // ============================================================
 //  ONLINE READY LOBBY
@@ -4076,6 +4262,11 @@ function showOnlineGameOver() {
   card.className = 'overlay-card ogo-card';
   void card.offsetWidth;
   badgeEl.style.animation = 'none'; void badgeEl.offsetWidth; badgeEl.style.animation = '';
+  const tauntEl = document.getElementById('ogoTaunt');
+  tauntEl.textContent = '';
+  tauntEl.classList.remove('active');
+  const rematchSection = card.querySelector('.ogo-rematch-section');
+  rematchSection.classList.remove('visible');
 
   if (myScore > oppScore) {
     // ── WINNER ──────────────────────────────────────────────
@@ -4083,8 +4274,24 @@ function showOnlineGameOver() {
     badgeEl.textContent  = '🏆';
     titleEl.textContent  = '🎉 You Won!';
     subEl.textContent    = 'Amazing memory! You crushed it! 🧠✨';
-    pairsEl.textContent  = `🥚 ${myPairs} matched`;
     detailEl.textContent = `${escHtml(oppName)} matched ${oppScore} — better luck to them! 😄`;
+
+    // Animate pair count from 0 → myScore
+    pairsEl.textContent = '🥚 0 pairs matched';
+    let _counted = 0;
+    const _step = Math.max(55, Math.round(950 / (myScore || 1)));
+    const _cTimer = setInterval(() => {
+      _counted = Math.min(_counted + 1, myScore);
+      pairsEl.textContent = `🥚 ${_counted} pair${_counted !== 1 ? 's' : ''} matched`;
+      if (_counted >= myScore) clearInterval(_cTimer);
+    }, _step);
+
+    // Gold screen flash
+    const _flash = document.createElement('div');
+    _flash.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
+    document.body.appendChild(_flash);
+    setTimeout(() => _flash.remove(), 750);
+
     sfxFanfare();
     const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
     burstConfetti(cx,        cy,        160);
@@ -4098,7 +4305,15 @@ function showOnlineGameOver() {
       burstConfetti(cx + 200, cy,       50);
     }, 1000);
     launchMatchFireworks();
-    setTimeout(launchMatchFireworks, 600);
+    setTimeout(launchMatchFireworks,  600);
+    setTimeout(launchMatchFireworks, 1500);
+    setTimeout(launchMatchFireworks, 2500);
+    setTimeout(() => {
+      burstConfetti(cx,        cy - 60, 150);
+      burstConfetti(cx - 170,  cy + 90,  70);
+      burstConfetti(cx + 170,  cy + 90,  70);
+    }, 3200);
+    setTimeout(() => rematchSection.classList.add('visible'), 3800);
 
   } else if (myScore === oppScore) {
     // ── TIE ─────────────────────────────────────────────────
@@ -4113,16 +4328,23 @@ function showOnlineGameOver() {
     burstConfetti(cx, cy, 90);
     burstConfetti(cx - 100, cy - 60, 50);
     burstConfetti(cx + 100, cy - 60, 50);
+    setTimeout(() => rematchSection.classList.add('visible'), 1500);
 
   } else {
     // ── LOSER ───────────────────────────────────────────────
     card.classList.add('ogo-loser');
     badgeEl.textContent  = '😅';
     titleEl.textContent  = `${escHtml(oppName)} Wins!`;
-    subEl.textContent    = 'Time to work on that memory! 🧠💪';
+    subEl.textContent    = '';
     pairsEl.textContent  = `You matched ${myPairs}`;
-    detailEl.textContent = "Don't worry — every game makes you sharper. Better luck next time! You've got this! 🌟";
+    detailEl.textContent = '';
     sfxNoMatch();
+    // Wait for the winner's celebration to finish, then pop in the taunt
+    setTimeout(() => {
+      tauntEl.textContent = "🧠 Time to train that memory! Better luck next time — you've got this! 💪";
+      tauntEl.classList.add('active');
+    }, 3500);
+    setTimeout(() => rematchSection.classList.add('visible'), 4300);
   }
 
   overlay.classList.remove('hidden');
@@ -4180,9 +4402,35 @@ function startRematch() {
   // Guest side: waits for the host's new {type:'init'} message — applyOnlineInit handles it
 }
 
+function showSyncErrorOverlay() {
+  clearInterval(game.shuffleTimerInterval);
+  game.paused = true;
+  game.locked = true;
+  const overlay = document.getElementById('syncErrorOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+}
+
+function syncErrorNewGame() {
+  const overlay = document.getElementById('syncErrorOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  game.paused = false;
+  game.locked = false;
+  // Both players return to home then can start a new online game
+  if (onlineConn && onlineConn.open) sendOnline({ type: 'leaving' });
+  goHome();
+}
+
+function syncErrorGoHome() {
+  const overlay = document.getElementById('syncErrorOverlay');
+  if (overlay) overlay.classList.add('hidden');
+  if (onlineConn && onlineConn.open) sendOnline({ type: 'leaving' });
+  goHome();
+}
+
 function showOpponentLeftOverlay(reason) {
   clearInterval(game.timerInterval);
   clearInterval(game.shuffleTimerInterval);
+  if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
   game.paused = true;
   onlineConn = null;
   const overlay = document.getElementById('onlineDisconnectOverlay');
@@ -4270,6 +4518,18 @@ function copyRoomCode() {
     btn.style.background = 'rgba(100,220,100,0.35)';
     setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 2000);
   }
+}
+function emailRoomCode() {
+  const code = document.getElementById('roomCodeText').textContent;
+  const url = getRoomJoinUrl(code);
+  const subject = encodeURIComponent('Join my Easter Egg Hunt game!');
+  const body = encodeURIComponent(
+    "I'm challenging you to an Easter Egg Hunt memory match!\n\n" +
+    "Room code: " + code + "\n" +
+    "Join here: " + url + "\n\n" +
+    "Open the link on your phone or computer, enter the code, and let's play!"
+  );
+  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
 }
 function initSmsShare() {
   document.getElementById('smsOverlay').classList.add('show');
@@ -4379,9 +4639,55 @@ function handleOnlineData(data) {
       });
     }
   }
+  else if (data.type === 'game_over') {
+    if (!isOnlineHost) {
+      clearInterval(game.timerInterval);
+      clearInterval(game.shuffleTimerInterval);
+      if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
+      game.scores = data.scores;
+      game.matchedPairs = data.matchedPairs;
+      sfxFanfare();
+      setTimeout(showOnlineGameOver, 700);
+    }
+  }
   else if (data.type === 'leaving') { showOpponentLeftOverlay('😢 Opponent left the game'); }
   else if (data.type === 'rematch_offer') { handleRematchOffer(); }
   else if (data.type === 'rematch_decline') { handleRematchDecline(); }
+  else if (data.type === 'sync_check') {
+    // Guest: verify our state matches what host sent
+    if (!isOnlineHost) {
+      const ok = game.matchedPairs === data.matchedPairs &&
+                 game.scores[0] === data.scores[0] &&
+                 game.scores[1] === data.scores[1];
+      sendOnline({ type: 'sync_ack', ok });
+    }
+  }
+  else if (data.type === 'sync_ack') {
+    if (isOnlineHost) {
+      if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
+      if (data.ok) {
+        // Confirmed in sync — tell both sides to resume
+        sendOnline({ type: 'sync_resume' });
+        resumeAfterShuffle();
+      } else if (_syncRetryCount === 0) {
+        // Guest reported mismatch — apply full state and retry check
+        _syncRetryCount = 1;
+        syncOnlineState();
+        _startSyncCheck();
+      } else {
+        // Retry also reported mismatch — unrecoverable
+        sendOnline({ type: 'sync_error' });
+        showSyncErrorOverlay();
+      }
+    }
+  }
+  else if (data.type === 'sync_resume') {
+    // Guest: host confirmed sync is good, resume play
+    resumeAfterShuffle();
+  }
+  else if (data.type === 'sync_error') {
+    showSyncErrorOverlay();
+  }
 }
 
 function startOnlineGameAsHost() {
@@ -4392,7 +4698,7 @@ function startOnlineGameAsHost() {
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   const diffCfg = DIFF_CONFIG[cfg.diff];
   const items = ITEMS_BY_DIFF[cfg.diff];
-  const onlineShuffleTime = 20; // online uses 20s shuffle, no main timer
+  const onlineShuffleTime = 30; // online uses 30s shuffle, no main timer
   game.maxTime = 0; game.timer = 0;
   game.shuffleMaxTime = onlineShuffleTime; game.shuffleTimer = onlineShuffleTime;
   updateShuffleTimerDisplay();
@@ -4516,6 +4822,33 @@ function applyOnlineInit(data) {
   });
 }
 
+function resumeAfterShuffle() {
+  game.locked = false;
+  startShuffleTimer();
+  updateTurnIndicator();
+  if (cfg.mode === 'ai' && game.currentPlayer === 1) {
+    setTimeout(doAITurn, 1000);
+  }
+}
+
+function _startSyncCheck() {
+  if (_syncCheckTimer) clearTimeout(_syncCheckTimer);
+  sendOnline({ type: 'sync_check', matchedPairs: game.matchedPairs, scores: [...game.scores] });
+  _syncCheckTimer = setTimeout(() => {
+    _syncCheckTimer = null;
+    if (_syncRetryCount === 0) {
+      // Retry: re-send full state + another check
+      _syncRetryCount = 1;
+      syncOnlineState();
+      _startSyncCheck();
+    } else {
+      // Both attempts timed out — unrecoverable
+      sendOnline({ type: 'sync_error' });
+      showSyncErrorOverlay();
+    }
+  }, 3000);
+}
+
 function syncOnlineState() {
   if (!isOnlineHost || !onlineConn || !onlineConn.open) return;
   sendOnline({
@@ -4574,7 +4907,7 @@ function applyOnlineState(state) {
     });
   }
 
-  if (state.done) { onGameComplete(false); return; }
+  if (state.done) return; // game_over message handles the overlay
 
   updateTimerDisplay();
   updateBaskets();
@@ -4631,6 +4964,10 @@ function goHome() {
   document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
   document.getElementById('onlineGameOverOverlay').classList.add('hidden');
   document.getElementById('readyLobbyOverlay').classList.add('hidden');
+  const _seOverlay = document.getElementById('syncErrorOverlay');
+  if (_seOverlay) _seOverlay.classList.add('hidden');
+  if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
+  _syncRetryCount = 0;
   _isOnlineGame = false; _rematchOffered = false; _rematchOpponentOffered = false;
   _myReady = false; _opponentReady = false; _skipInGameCountdown = false;
   if (cfg.musicOn && cfg.customMusic) {
@@ -4641,12 +4978,21 @@ function goHome() {
 function onGameComplete(timeUp) {
   clearInterval(game.timerInterval);
   clearInterval(game.shuffleTimerInterval);
+  // Dismiss any in-game overlays that would sit on top of the game-over card
+  const _mro = document.getElementById('matchRevealOverlay');
+  if (_mro) { clearTimeout(_mro._revealTimer); _mro.classList.remove('show'); }
+  const _ipp = document.getElementById('itemPopup');
+  if (_ipp) _ipp.classList.remove('visible');
   const allPairsFound = game.matchedPairs >= game.totalPairs;
 
   if (!timeUp || allPairsFound) sfxFanfare();
 
   // Online mode gets its own game-over screen with rematch option
   if (_isOnlineGame) {
+    // Host broadcasts game_over so both screens show it at the same moment
+    if (isOnlineHost) {
+      sendOnline({ type: 'game_over', scores: [...game.scores], matchedPairs: game.matchedPairs });
+    }
     setTimeout(showOnlineGameOver, 700);
     return;
   }
@@ -4657,6 +5003,15 @@ function onGameComplete(timeUp) {
     const sub = document.getElementById('gameOverSubtitle');
     const scores = document.getElementById('gameOverScores');
     const badge = document.getElementById('winnerBadge');
+    // Reset 2p/AI-specific elements for every call
+    const goTauntEl    = document.getElementById('goTaunt');
+    const goRematchEl  = document.getElementById('goRematchSection');
+    const goMainBtnsEl = document.getElementById('goMainBtns');
+    goTauntEl.textContent = ''; goTauntEl.classList.remove('active');
+    goRematchEl.classList.remove('visible');
+    badge.classList.remove('bouncing');
+    title.classList.remove('winner-shimmer');
+    if (goMainBtnsEl) goMainBtnsEl.style.display = '';
 
     if (timeUp && !allPairsFound) {
       // Time ran out — show what was found
@@ -4688,68 +5043,227 @@ function onGameComplete(timeUp) {
 
     // All pairs found — normal win flow
     if (cfg.mode === '1p') {
-      title.textContent = '🎉 You Won!';
-      sub.textContent = `You found all ${game.totalPairs} pairs!`;
+      title.textContent = '🎉 You Did It!';
+      sub.textContent = `All ${game.totalPairs} pairs found! Amazing! 🥚✨`;
       badge.textContent = '🏆';
+      const matchedEmojis = game.items[0];
       scores.innerHTML = `
-        <div class="overlay-score-card">
-          <div class="overlay-score-avatar">${cfg.p1.avatar}</div>
-          <div class="overlay-score-name">${escHtml(cfg.p1.name)}</div>
-          <div class="overlay-score-num">${game.scores[0]}</div>
+        <div class="p1-win-label">Your Matches</div>
+        <div class="p1-win-items">
+          ${matchedEmojis.map((e, i) =>
+            `<span class="p1-win-item" style="animation-delay:${0.35 + i * 0.08}s">${e}</span>`
+          ).join('')}
         </div>`;
-    } else {
+    } else if (cfg.mode === '2p') {
+      // ── 2P WIN FLOW ───────────────────────────────────────────────────
+      if (goMainBtnsEl) goMainBtnsEl.style.display = 'none';
       const p1Score = game.scores[0];
       const p2Score = game.scores[1];
-      if (p1Score > p2Score) {
-        title.textContent = `${escHtml(cfg.p1.name)} Wins!`;
-        badge.textContent = cfg.p1.avatar;
-        sub.textContent = 'Congratulations! 🎊';
-      } else if (p2Score > p1Score) {
-        const p2n = cfg.mode === 'ai' ? 'Easter AI' : escHtml(cfg.p2.name);
-        title.textContent = `${p2n} Wins!`;
-        badge.textContent = cfg.mode === 'ai' ? '🤖' : cfg.p2.avatar;
-        sub.textContent = cfg.mode === 'ai' ? 'The AI wins this round! 🤖' : 'Congratulations! 🎊';
+      const p2name  = escHtml(cfg.p2.name);
+      const currentScore = Math.max(p1Score, p2Score);
+      const prevHs  = getHighScore();
+      const isNewHs = saveHighScore(currentScore);
+      const hsBadgeHtml = isNewHs
+        ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
+        : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+
+      if (p1Score !== p2Score) {
+        const isP1Win  = p1Score > p2Score;
+        const winScore = isP1Win ? p1Score : p2Score;
+        const loseScore= isP1Win ? p2Score : p1Score;
+        const winName  = isP1Win ? escHtml(cfg.p1.name) : p2name;
+        const winAv    = isP1Win ? cfg.p1.avatar : cfg.p2.avatar;
+        const loseName = isP1Win ? p2name : escHtml(cfg.p1.name);
+
+        void badge.offsetWidth;
+        badge.textContent = winAv;
+        badge.classList.add('bouncing');
+        title.textContent = `🎉 ${winName} Wins!`;
+        title.classList.add('winner-shimmer');
+        sub.textContent   = 'Amazing memory! 🧠✨';
+        scores.innerHTML  = `
+          <div class="go-pairs-pill" id="goPairsPill">🥚 0 pairs matched</div>
+          <div class="go-detail">${loseName} matched ${loseScore}</div>
+          ${hsBadgeHtml}`;
+
+        // Animate pairs counter
+        let _cnt = 0;
+        const _step = Math.max(55, Math.round(950 / (winScore || 1)));
+        const _ct = setInterval(() => {
+          _cnt = Math.min(_cnt + 1, winScore);
+          const pill = document.getElementById('goPairsPill');
+          if (pill) pill.textContent = `🥚 ${_cnt} pair${_cnt !== 1 ? 's' : ''} matched`;
+          if (_cnt >= winScore) clearInterval(_ct);
+        }, _step);
+
+        // Gold flash + confetti + fireworks
+        const _f = document.createElement('div');
+        _f.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
+        document.body.appendChild(_f);
+        setTimeout(() => _f.remove(), 750);
+        sfxFanfare();
+        burstConfetti(cx, cy, 160); burstConfetti(cx-150, cy-90, 80); burstConfetti(cx+150, cy-90, 80);
+        burstConfetti(cx, cy-140, 60);
+        setTimeout(() => burstConfetti(cx-80, cy+110, 55), 350);
+        setTimeout(() => burstConfetti(cx+80, cy+110, 55), 650);
+        setTimeout(() => { burstConfetti(cx-200, cy, 50); burstConfetti(cx+200, cy, 50); }, 1000);
+        launchMatchFireworks();
+        setTimeout(launchMatchFireworks,  600);
+        setTimeout(launchMatchFireworks, 1500);
+        setTimeout(launchMatchFireworks, 2500);
+        setTimeout(() => { burstConfetti(cx, cy-60, 150); burstConfetti(cx-160, cy+80, 65); burstConfetti(cx+160, cy+80, 65); }, 3200);
+
+        // Loser taunt then rematch options
+        setTimeout(() => {
+          goTauntEl.textContent = "🧠 Time to train that memory! Better luck next time — you've got this! 💪";
+          goTauntEl.classList.add('active');
+        }, 3500);
+        setTimeout(() => goRematchEl.classList.add('visible'), 3800);
+
       } else {
-        title.textContent = "It's a Tie!";
+        // Tie
         badge.textContent = '🤝';
-        sub.textContent = 'What a close game!';
+        title.textContent = "It's a Tie!";
+        sub.textContent   = 'What a close game! 🧠';
+        scores.innerHTML  = `<div class="go-pairs-pill tie">🥚 ${p1Score} pairs each</div>${hsBadgeHtml}`;
+        sfxMatch();
+        burstConfetti(cx, cy, 90); burstConfetti(cx-100, cy-60, 50); burstConfetti(cx+100, cy-60, 50);
+        setTimeout(() => goRematchEl.classList.add('visible'), 1500);
       }
 
-      const p2av = cfg.mode === 'ai' ? '🤖' : cfg.p2.avatar;
-      const p2name = cfg.mode === 'ai' ? 'Easter AI' : escHtml(cfg.p2.name);
-      scores.innerHTML = `
-        <div class="overlay-score-card">
-          <div class="overlay-score-avatar">${cfg.p1.photo ? `<img src="${cfg.p1.photo}" style="width:2rem;height:2rem;border-radius:50%;object-fit:cover;">` : cfg.p1.avatar}</div>
-          <div class="overlay-score-name">${escHtml(cfg.p1.name)}</div>
-          <div class="overlay-score-num">${p1Score}</div>
-        </div>
-        <div class="overlay-score-card">
-          <div class="overlay-score-avatar">${p2av}</div>
-          <div class="overlay-score-name">${p2name}</div>
-          <div class="overlay-score-num">${p2Score}</div>
-        </div>`;
+    } else {
+      // ── AI WIN FLOW ───────────────────────────────────────────────────
+      if (goMainBtnsEl) goMainBtnsEl.style.display = 'none';
+      const p1Score = game.scores[0];
+      const p2Score = game.scores[1];
+      const p2name  = 'Easter AI';
+      const p2av    = '🤖';
+      const currentScore = Math.max(p1Score, p2Score);
+      const prevHs  = getHighScore();
+      const isNewHs = saveHighScore(currentScore);
+      const hsBadgeHtml = isNewHs
+        ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
+        : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
+
+      if (p1Score !== p2Score) {
+        const isP1Win  = p1Score > p2Score;
+        const winScore = isP1Win ? p1Score : p2Score;
+        const loseScore= isP1Win ? p2Score : p1Score;
+        const winName  = isP1Win ? escHtml(cfg.p1.name) : p2name;
+        const winAv    = isP1Win ? cfg.p1.avatar : p2av;
+        const loseName = isP1Win ? p2name : escHtml(cfg.p1.name);
+
+        void badge.offsetWidth;
+        badge.textContent = winAv;
+        badge.classList.add('bouncing');
+        title.textContent = `🎉 ${winName} Wins!`;
+        title.classList.add('winner-shimmer');
+        sub.textContent   = 'Amazing memory! 🧠✨';
+        scores.innerHTML  = `
+          <div class="go-pairs-pill" id="goPairsPill">🥚 0 pairs matched</div>
+          <div class="go-detail">${loseName} matched ${loseScore}</div>
+          ${hsBadgeHtml}`;
+
+        let _cnt = 0;
+        const _step = Math.max(55, Math.round(950 / (winScore || 1)));
+        const _ct = setInterval(() => {
+          _cnt = Math.min(_cnt + 1, winScore);
+          const pill = document.getElementById('goPairsPill');
+          if (pill) pill.textContent = `🥚 ${_cnt} pair${_cnt !== 1 ? 's' : ''} matched`;
+          if (_cnt >= winScore) clearInterval(_ct);
+        }, _step);
+
+        const _f = document.createElement('div');
+        _f.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
+        document.body.appendChild(_f);
+        setTimeout(() => _f.remove(), 750);
+
+        sfxFanfare();
+        const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+        burstConfetti(cx, cy, 160); burstConfetti(cx-150, cy-90, 80); burstConfetti(cx+150, cy-90, 80);
+        burstConfetti(cx, cy-140, 60);
+        setTimeout(() => burstConfetti(cx-80, cy+110, 55), 350);
+        setTimeout(() => burstConfetti(cx+80, cy+110, 55), 650);
+        setTimeout(() => { burstConfetti(cx-200, cy, 50); burstConfetti(cx+200, cy, 50); }, 1000);
+        launchMatchFireworks();
+        setTimeout(launchMatchFireworks,  600);
+        setTimeout(launchMatchFireworks, 1500);
+        setTimeout(launchMatchFireworks, 2500);
+        setTimeout(() => { burstConfetti(cx, cy-60, 150); burstConfetti(cx-160, cy+80, 65); burstConfetti(cx+160, cy+80, 65); }, 3200);
+
+        const tauntMsg = (!isP1Win)
+          ? "🧠 Time to train that memory! Better luck next time — you've got this! 💪"
+          : "🤖 Impressive! You outfoxed the AI! Keep it up! 🧠✨";
+        setTimeout(() => { goTauntEl.textContent = tauntMsg; goTauntEl.classList.add('active'); }, 3500);
+        setTimeout(() => goRematchEl.classList.add('visible'), 3800);
+      } else {
+        badge.textContent = '🤝';
+        title.textContent = "It's a Tie!";
+        sub.textContent   = 'What a close game! 🧠';
+        scores.innerHTML  = `<div class="go-pairs-pill tie">🥚 ${p1Score} pairs each</div>${hsBadgeHtml}`;
+        sfxMatch();
+        const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+        burstConfetti(cx, cy, 90); burstConfetti(cx-100, cy-60, 50); burstConfetti(cx+100, cy-60, 50);
+        setTimeout(() => goRematchEl.classList.add('visible'), 1500);
+      }
     }
 
-    // High score
-    const currentScore = cfg.mode === '1p' ? game.matchedPairs : Math.max(game.scores[0], game.scores[1]);
-    const prevHs = getHighScore();
-    const isNewHs = saveHighScore(currentScore);
-    scores.innerHTML += isNewHs
-      ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
-      : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
+    // 1p: high score appended after scores.innerHTML set (counter not affected here)
+    if (cfg.mode === '1p') {
+      const currentScore = game.matchedPairs;
+      const prevHs  = getHighScore();
+      const isNewHs = saveHighScore(currentScore);
+      scores.innerHTML += isNewHs
+        ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
+        : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
+    }
 
     overlay.classList.remove('hidden');
 
-    for (let i = 0; i < 5; i++) {
+    if (cfg.mode === '1p') {
+      // Gold screen flash
+      const _f = document.createElement('div');
+      _f.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
+      document.body.appendChild(_f);
+      setTimeout(() => _f.remove(), 750);
+      // Sustained confetti + fireworks celebration
+      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+      burstConfetti(cx,        cy,        160);
+      burstConfetti(cx - 150,  cy - 90,    80);
+      burstConfetti(cx + 150,  cy - 90,    80);
+      burstConfetti(cx,        cy - 140,   60);
+      setTimeout(() => burstConfetti(cx - 80,  cy + 110, 55), 350);
+      setTimeout(() => burstConfetti(cx + 80,  cy + 110, 55), 650);
+      setTimeout(() => { burstConfetti(cx - 200, cy, 50); burstConfetti(cx + 200, cy, 50); }, 1000);
+      launchMatchFireworks();
+      setTimeout(launchMatchFireworks,  600);
+      setTimeout(launchMatchFireworks, 1500);
+      setTimeout(launchMatchFireworks, 2500);
       setTimeout(() => {
-        burstConfetti(
-          Math.random() * window.innerWidth,
-          Math.random() * window.innerHeight * 0.5,
-          40
-        );
-      }, i * 200);
+        burstConfetti(cx,        cy - 60,  150);
+        burstConfetti(cx - 160,  cy + 80,   65);
+        burstConfetti(cx + 160,  cy + 80,   65);
+      }, 3200);
     }
   }, 600);
+}
+
+function localRematch() {
+  restartGame();
+}
+
+function localDeclineRematch() {
+  const card = document.getElementById('goCard');
+  if (card) {
+    card.innerHTML = `
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:2.5rem;margin-bottom:12px">🏠</div>
+        <div class="overlay-title" style="-webkit-text-fill-color:#ffd93d;color:#ffd93d">No Rematch</div>
+        <div style="font-family:'Fredoka',sans-serif;color:rgba(255,255,255,0.7);font-size:1rem;margin-top:10px">Heading home… see you next time!</div>
+      </div>`;
+  }
+  setTimeout(goHome, 1400);
 }
 
 function restartGame() {
@@ -5029,6 +5543,7 @@ syncMusicPlayBtns();
     <div class="ogo-title" id="ogoTitle">You Won!</div>
     <div class="ogo-sub" id="ogoSub"></div>
     <div class="ogo-pairs-pill" id="ogoPairs"></div>
+    <div class="ogo-taunt" id="ogoTaunt"></div>
     <div class="ogo-detail" id="ogoDetail"></div>
     <div class="ogo-rematch-section">
       <div class="ogo-rematch-label">Play Again?</div>
@@ -5044,6 +5559,17 @@ syncMusicPlayBtns();
   <div class="overlay-card" style="text-align:center">
     <div class="overlay-title">😢 Opponent Left</div>
     <div class="disconnect-sub" style="font-family:'Fredoka',sans-serif;font-size:1rem;color:rgba(255,255,255,0.65);margin-top:10px;">Returning to home…</div>
+  </div>
+</div>
+
+<!-- Sync error overlay (online mode) -->
+<div class="overlay hidden" id="syncErrorOverlay">
+  <div class="overlay-card" style="text-align:center">
+    <div style="font-size:2.8rem;margin-bottom:8px;">⚠️</div>
+    <div class="overlay-title" style="font-size:clamp(1.2rem,5vw,1.6rem);">Sync Problem</div>
+    <div style="font-family:'Fredoka',sans-serif;font-size:0.95rem;color:rgba(255,255,255,0.65);margin:10px 0 22px;line-height:1.5;">The game couldn't re-sync after the shuffle.<br>Would you like to start a new game?</div>
+    <button class="overlay-btn primary" onclick="syncErrorNewGame()" style="margin-bottom:10px;">🎮 New Game</button>
+    <button class="overlay-btn secondary" onclick="syncErrorGoHome()">🏠 Exit Home</button>
   </div>
 </div>
 
