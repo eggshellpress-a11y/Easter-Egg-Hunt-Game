@@ -1785,8 +1785,9 @@ html, body {
 }
 .countdown-number.play {
   color: #6bcb77;
-  font-size: clamp(3.5rem, 13vw, 6.5rem);
-  text-shadow: 0 0 80px rgba(107,203,119,1), 0 4px 16px rgba(0,0,0,0.6);
+  font-size: clamp(5rem, 18vw, 9rem);
+  text-shadow: 0 0 100px rgba(107,203,119,1), 0 0 40px rgba(107,203,119,0.8), 0 4px 16px rgba(0,0,0,0.6);
+  animation: playPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes countPop {
   0%   { transform: scale(0.1) rotate(-15deg); opacity: 0; }
@@ -1794,14 +1795,178 @@ html, body {
   78%  { transform: scale(0.94) rotate(-1deg); }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
+@keyframes playPop {
+  0%   { transform: scale(0.05) rotate(-10deg); opacity: 0; }
+  50%  { transform: scale(1.28) rotate(4deg); }
+  72%  { transform: scale(0.92) rotate(-2deg); }
+  86%  { transform: scale(1.06) rotate(1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ========== READY LOBBY OVERLAY ========== */
+.ready-players {
+  display: flex; gap: 16px; justify-content: center; margin: 16px 0 10px;
+}
+.ready-player-card {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.14);
+  border-radius: 16px; padding: 14px 20px; min-width: 100px;
+  transition: border-color 0.3s, background 0.3s;
+}
+.ready-player-card.is-ready {
+  background: rgba(107,203,119,0.15);
+  border-color: rgba(107,203,119,0.5);
+}
+.ready-player-avatar { font-size: 2.2rem; line-height: 1; }
+.ready-player-name {
+  font-family: 'Fredoka', sans-serif; font-size: 0.82rem;
+  color: rgba(255,255,255,0.75); max-width: 90px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ready-player-tick {
+  font-size: 1.4rem; min-height: 1.6rem; line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.ready-player-card.is-ready .ready-player-tick { transform: scale(1.25); }
+.ready-opp-msg {
+  font-family: 'Fredoka', sans-serif; font-size: 0.95rem;
+  color: rgba(255,255,255,0.6); min-height: 1.4em; margin-bottom: 14px;
+}
+
+/* ========== ONLINE GAME OVER OVERLAY ========== */
+#onlineGameOverOverlay .overlay-card { text-align: center; padding: 28px 24px 22px; }
+
+/* Winner card — rich gold border + deep teal/purple */
+.ogo-card.ogo-winner {
+  background: linear-gradient(160deg, #1a0a3c 0%, #0d2b4a 55%, #0f3325 100%);
+  border: 2px solid rgba(255,217,61,0.45);
+  box-shadow: 0 0 40px rgba(255,217,61,0.15), 0 20px 60px rgba(0,0,0,0.55);
+}
+/* Loser card — softer purple */
+.ogo-card.ogo-loser {
+  background: linear-gradient(160deg, #2a1555, #183560);
+  border: 2px solid rgba(255,255,255,0.15);
+}
+/* Tie card */
+.ogo-card.ogo-tie {
+  background: linear-gradient(160deg, #1a2a1a, #1a2a3a);
+  border: 2px solid rgba(107,203,119,0.3);
+}
+
+/* Badge */
+.ogo-badge-wrap { position: relative; display: flex; justify-content: center; margin-bottom: 4px; }
+.ogo-badge {
+  font-size: clamp(4rem, 15vw, 6.5rem); line-height: 1; display: block;
+  animation: ogoBadgePop 0.65s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes ogoBadgePop {
+  0%   { transform: scale(0.05) rotate(-25deg); opacity: 0; }
+  60%  { transform: scale(1.28) rotate(8deg); opacity: 1; }
+  80%  { transform: scale(0.90) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+/* Winner badge keeps bouncing */
+.ogo-winner .ogo-badge {
+  animation: ogoBadgePop 0.65s cubic-bezier(0.34,1.56,0.64,1) both,
+             ogoBounce 1.1s 0.7s ease-in-out infinite alternate;
+}
+@keyframes ogoBounce {
+  0%   { transform: translateY(0) rotate(-4deg) scale(1); }
+  100% { transform: translateY(-12px) rotate(5deg) scale(1.06); }
+}
+/* Loser badge shakes periodically */
+.ogo-loser .ogo-badge {
+  animation: ogoBadgePop 0.65s cubic-bezier(0.34,1.56,0.64,1) both,
+             ogoShake 2.4s 1s ease-in-out infinite;
+}
+@keyframes ogoShake {
+  0%,55%,100% { transform: rotate(0); }
+  10%,30% { transform: rotate(-8deg); }
+  20%,40% { transform: rotate(8deg); }
+  50% { transform: rotate(-4deg); }
+}
+
+/* Title */
+.ogo-title {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1.9rem, 7vw, 2.5rem); font-weight: 900; line-height: 1.1;
+  margin-bottom: 5px;
+  animation: ogoUp 0.45s 0.25s ease both;
+}
+.ogo-winner .ogo-title {
+  background: linear-gradient(90deg, #ffd93d, #ff6b9d, #6bcb77, #4ecdc4, #ffd93d);
+  background-size: 250% auto;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  animation: ogoUp 0.45s 0.25s ease both, ogoShimmer 2.2s 0.7s linear infinite;
+}
+.ogo-loser .ogo-title { color: #ff8eea; }
+.ogo-tie .ogo-title   { color: #6bcb77; }
+@keyframes ogoShimmer { to { background-position: 250% center; } }
+
+/* Sub-heading */
+.ogo-sub {
+  font-family: 'Fredoka', sans-serif;
+  font-size: clamp(0.92rem, 3.5vw, 1.05rem); color: rgba(255,255,255,0.72);
+  margin-bottom: 13px; line-height: 1.4;
+  animation: ogoUp 0.45s 0.38s ease both;
+}
+
+/* Pairs pill */
+.ogo-pairs-pill {
+  display: inline-block;
+  background: linear-gradient(135deg, rgba(255,217,61,0.18), rgba(255,107,157,0.18));
+  border: 2px solid rgba(255,217,61,0.5);
+  border-radius: 30px; padding: 7px 22px;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: clamp(1.05rem, 4vw, 1.3rem); color: #ffd93d;
+  letter-spacing: 0.5px; margin-bottom: 8px;
+  animation: ogoUp 0.45s 0.5s ease both, ogoPillGlow 2s 1.2s ease-in-out infinite;
+}
+@keyframes ogoPillGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,217,61,0); }
+  50%      { box-shadow: 0 0 18px 5px rgba(255,217,61,0.22); }
+}
+.ogo-loser .ogo-pairs-pill {
+  border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.07);
+  animation: ogoUp 0.45s 0.5s ease both;
+}
+.ogo-tie .ogo-pairs-pill {
+  border-color: rgba(107,203,119,0.4); color: #6bcb77;
+  background: rgba(107,203,119,0.1);
+  animation: ogoUp 0.45s 0.5s ease both;
+}
+
+/* Detail text */
+.ogo-detail {
+  font-family: 'Fredoka', sans-serif;
+  font-size: clamp(0.88rem, 3vw, 1rem); color: rgba(255,255,255,0.6);
+  margin: 2px 0 14px; line-height: 1.5;
+  animation: ogoUp 0.45s 0.62s ease both;
+}
+
+/* Rematch section */
+.ogo-rematch-section {
+  border-top: 1px solid rgba(255,255,255,0.13);
+  padding-top: 14px; margin-top: 2px;
+  animation: ogoUp 0.45s 0.75s ease both;
+}
+.ogo-rematch-label {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.82rem; color: rgba(255,255,255,0.4);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+}
+.ogo-rematch-status {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.92rem; color: #6bcb77;
+  min-height: 1.4em; margin-bottom: 6px;
+  animation: fadeIn 0.3s ease both;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+@keyframes ogoUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:none; } }
 
 /* ========== OPPONENT LEFT OVERLAY ========== */
 #onlineDisconnectOverlay .overlay-card { text-align: center; }
-.disconnect-countdown {
-  font-family: 'Fredoka One', sans-serif;
-  font-size: 1rem; color: rgba(255,255,255,0.6);
-  margin: 6px 0 18px; letter-spacing: 1px;
-}
 
 /* ========== CHAT BAR (online mode) ========== */
 #chatBar {
@@ -1809,56 +1974,77 @@ html, body {
   z-index: 200;
   display: flex; flex-direction: column;
   padding: 6px 12px 10px;
-  background: rgba(20,10,40,0.72);
+  background: linear-gradient(135deg, rgba(255,107,157,0.93) 0%, rgba(167,139,250,0.93) 50%, rgba(78,205,196,0.93) 100%);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-top: 1.5px solid rgba(255,255,255,0.12);
+  border-top: 3px solid #ffd93d;
   transition: transform 0.25s ease;
 }
 #chatBar.hidden { display: none; }
 .chat-messages {
-  height: 58px;       /* ~2 messages visible */
+  height: calc(1.05rem * 1.35 * 2); /* exactly 2 lines */
   overflow-y: auto;
   display: flex; flex-direction: column; gap: 2px;
   margin-bottom: 6px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  scrollbar-color: rgba(255,255,255,0.4) transparent;
 }
 .chat-messages::-webkit-scrollbar { width: 3px; }
-.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.4); border-radius: 2px; }
 .chat-msg {
   font-family: 'Fredoka', sans-serif;
-  font-size: 1.05rem; color: rgba(255,255,255,0.9); line-height: 1.35;
+  font-size: 1.05rem; color: #fff; line-height: 1.35;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
-.chat-from { font-weight: 700; color: #ffd93d; margin-right: 5px; }
+.chat-from { font-weight: 700; color: #ffd93d; margin-right: 5px; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 .chat-msg.self .chat-from { color: #6bcb77; }
-.chat-msg.system { color: rgba(255,255,255,0.45); font-style: italic; }
+.chat-msg.system { color: rgba(255,255,255,0.65); font-style: italic; }
 .chat-input-row {
   display: flex; gap: 8px; align-items: center;
 }
 .chat-input {
   flex: 1;
-  background: rgba(255,255,255,0.13);
-  border: 1.5px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.92);
+  border: 2px solid rgba(255,255,255,0.6);
   border-radius: 22px;
-  color: #fff;
+  color: #333;
   font-family: 'Fredoka', sans-serif; font-size: 0.9rem;
   padding: 7px 16px;
   outline: none;
   min-width: 0;
 }
-.chat-input::placeholder { color: rgba(255,255,255,0.4); }
-.chat-input:focus { border-color: rgba(255,142,234,0.7); background: rgba(255,255,255,0.18); }
+.chat-input::placeholder { color: rgba(0,0,0,0.35); }
+.chat-input:focus { border-color: #ffd93d; background: #fff; }
 .chat-send-btn {
-  background: #ff8eea; border: none; border-radius: 50%;
+  background: #ffd93d; border: none; border-radius: 50%;
   width: 36px; height: 36px; flex-shrink: 0;
   color: #fff; font-size: 1rem; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
-.chat-send-btn:hover { background: #e876d4; }
+.chat-send-btn:hover { background: #ffed6f; }
 /* push egg-grid up when chat bar is visible */
 #gameScreen.chat-visible { padding-bottom: 120px; }
+#gameScreen.chat-visible.chat-collapsed { padding-bottom: 44px; }
+/* Chat collapse toggle */
+.chat-toggle {
+  align-self: center;
+  background: rgba(255,255,255,0.25);
+  border: 1.5px solid rgba(255,255,255,0.55);
+  border-radius: 20px;
+  color: #fff;
+  font-family: 'Fredoka', sans-serif; font-size: 0.78rem;
+  padding: 3px 14px 3px 10px;
+  cursor: pointer; margin-bottom: 6px;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1.4;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.chat-toggle:hover { background: rgba(255,255,255,0.4); color: #fff; }
+#chatBar.collapsed .chat-messages,
+#chatBar.collapsed .chat-input-row { display: none; }
+#chatBar.collapsed .chat-toggle { margin-bottom: 0; }
 
 /* ========== EASTER START ANIMATION ========== */
 .easter-eggs-row {
@@ -2129,6 +2315,7 @@ html, body {
 
 <!-- Trash-talk chat bar (online mode only) -->
 <div id="chatBar" class="hidden">
+  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬 Hide Chat ▼</button>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-row">
     <input type="text" class="chat-input" id="chatInput"
@@ -3121,6 +3308,27 @@ function animateEggsIn(callback) {
   });
 
   let done = 0;
+  let finished = false;
+  function onAllIn() {
+    if (finished) return;
+    finished = true;
+    if (fallback) { clearTimeout(fallback); fallback = null; }
+    // Ensure all wrappers are in their final visible state
+    wrappers.forEach(w => {
+      w.classList.remove('slide-in');
+      w.style.opacity = '';
+      w.style.transform = '';
+      if (!w.classList.contains('dancing') && !w.classList.contains('matched')) {
+        w.classList.add('dancing');
+      }
+    });
+    if (callback) callback();
+  }
+  // Fallback: if any animationend events don't fire (mobile Safari, backgrounded tab),
+  // force-complete so the game always starts. Generous timeout covers the full stagger.
+  const animDur = wrappers.length * 60 + 900;
+  let fallback = setTimeout(onAllIn, animDur);
+
   wrappers.forEach((w, i) => {
     setTimeout(() => {
       w.style.transition = 'none';
@@ -3133,7 +3341,7 @@ function animateEggsIn(callback) {
         w.style.transform = '';
         w.classList.add('dancing');
         done++;
-        if (done === wrappers.length && callback) callback();
+        if (done === wrappers.length) onAllIn();
       }, { once: true });
     }, i * 60);
   });
@@ -3271,6 +3479,24 @@ function doShuffle(providedOrder) {
 
     // 3. Slide back in
     let done = 0;
+    let shuffleDone = false;
+    function onShuffleComplete() {
+      if (shuffleDone) return;
+      shuffleDone = true;
+      if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+      game.locked = false;
+      game.shuffling = false;
+      startShuffleTimer();
+      updateTurnIndicator();
+      if (cfg.mode === 'ai' && game.currentPlayer === 1) {
+        setTimeout(doAITurn, 1000);
+      }
+    }
+    // Safety fallback: if animationend events don't all fire (can happen on mobile),
+    // force-complete after a generous timeout so the shuffle cycle never gets stuck.
+    const slideInDur = unmatchedCards.length * 60 + 900;
+    let fallbackTimer = setTimeout(onShuffleComplete, slideInDur);
+
     unmatchedCards.forEach((card, i) => {
       setTimeout(() => {
         card.wrapEl.classList.add('slide-in');
@@ -3281,15 +3507,7 @@ function doShuffle(providedOrder) {
           card.wrapEl.style.transform = '';
           card.wrapEl.classList.add('dancing');
           done++;
-          if (done === unmatchedCards.length) {
-            game.locked = false;
-            game.shuffling = false;
-            startShuffleTimer();
-            updateTurnIndicator();
-            if (cfg.mode === 'ai' && game.currentPlayer === 1) {
-              setTimeout(doAITurn, 1000);
-            }
-          }
+          if (done === unmatchedCards.length) onShuffleComplete();
         }, { once: true });
       }, i * 60);
     });
@@ -3485,17 +3703,26 @@ function checkMatch() {
   const cardB = game.cards[b];
   // game.locked is already true from second egg reveal
 
+  // Safety: close any revealed eggs that aren't the two being checked
+  game.cards.forEach((c, i) => {
+    if (c.revealed && !c.matched && i !== a && i !== b) closeCard(i);
+  });
+
   if (cardA.emoji === cardB.emoji) {
     sfxMatch();
+    // Close eggs visually before overlay appears so items are hidden behind the blur
+    hideItemGlow(cardA);
+    hideItemGlow(cardB);
+    cardA.el.classList.remove('egg-opened', 'egg-cracking');
+    cardB.el.classList.remove('egg-opened', 'egg-cracking');
+
     showMatchReveal(cardA.emoji, cardB.emoji, true, 1000);
     launchMatchFireworks();
     const p = game.currentPlayer;
     game.scores[p]++;
     game.items[p].push(cardA.emoji);
     updateBaskets();
-
-    hideItemGlow(cardA);
-    hideItemGlow(cardB);
+    syncOnlineState(); // early sync so guest updates scores immediately
 
     const posA = getEggCenter(cardA.wrapEl);
     const posB = getEggCenter(cardB.wrapEl);
@@ -3527,11 +3754,10 @@ function checkMatch() {
     }, 450);
   } else {
     sfxNoMatch();
+    // Close both eggs before the overlay appears so items are back inside
+    closeCard(a);
+    closeCard(b);
     showMatchReveal(cardA.emoji, cardB.emoji, false, 1500, () => {
-      hideItemGlow(cardA);
-      hideItemGlow(cardB);
-      closeCard(a);
-      closeCard(b);
       game.current = [];
       game.locked = false;
       if (cfg.mode !== '1p') {
@@ -3738,38 +3964,234 @@ let onlineConn = null;
 let isOnlineHost = false;
 let currentRoomCode = null; // stored so we can reconnect with the same code
 let _autoLeaveTimer = null; // used by showOpponentLeftOverlay
+let _pendingCountdown = null; // set when countdown message arrives before eggs finish animating
+let _isOnlineGame = false;    // true while an online game is active
+let _rematchOffered = false;  // this player clicked Rematch
+let _rematchOpponentOffered = false; // opponent sent rematch_offer
+
+// ============================================================
+//  ONLINE READY LOBBY
+// ============================================================
+let _myReady              = false;
+let _opponentReady        = false;
+let _skipInGameCountdown  = false; // true when ready-lobby countdown already played
+
+function showReadyLobby() {
+  _myReady = false;
+  _opponentReady = false;
+
+  const myName   = cfg.p1.name || 'You';
+  const myAvatar = cfg.p1.avatar || '🐣';
+
+  document.getElementById('readyPlayers').innerHTML = `
+    <div class="ready-player-card" id="readyCardMe">
+      <div class="ready-player-avatar">${myAvatar}</div>
+      <div class="ready-player-name">${escHtml(myName)}</div>
+      <div class="ready-player-tick" id="readyTickMe">⏳</div>
+    </div>
+    <div class="ready-player-card" id="readyCardOpp">
+      <div class="ready-player-avatar">🎮</div>
+      <div class="ready-player-name">Opponent</div>
+      <div class="ready-player-tick" id="readyTickOpp">⏳</div>
+    </div>`;
+
+  document.getElementById('readyOppMsg').textContent = 'Press Play when you\'re ready!';
+  const btn = document.getElementById('readyPlayBtn');
+  btn.disabled = false;
+  btn.textContent = '▶ Play!';
+
+  document.getElementById('readyLobbyOverlay').classList.remove('hidden');
+}
+
+function pressReady() {
+  _myReady = true;
+  const btn = document.getElementById('readyPlayBtn');
+  btn.disabled = true;
+  btn.textContent = '✅ Ready!';
+  document.getElementById('readyCardMe').classList.add('is-ready');
+  document.getElementById('readyTickMe').textContent = '✅';
+  sendOnline({ type: 'player_ready' });
+  if (_opponentReady) {
+    _startBothReady();
+  } else {
+    document.getElementById('readyOppMsg').textContent = 'Waiting for opponent…';
+  }
+}
+
+function handlePlayerReady() {
+  _opponentReady = true;
+  document.getElementById('readyCardOpp').classList.add('is-ready');
+  document.getElementById('readyTickOpp').textContent = '✅';
+  if (_myReady) {
+    _startBothReady();
+  } else {
+    document.getElementById('readyOppMsg').textContent = '🔥 Opponent is ready — press Play!';
+  }
+}
+
+function _startBothReady() {
+  _myReady = false; _opponentReady = false;
+  _skipInGameCountdown = true;
+  // Play the countdown immediately over the ready lobby (z-index 820 covers everything).
+  // Host also sends ready_countdown so the guest plays it in sync.
+  if (isOnlineHost) {
+    sendOnline({ type: 'ready_countdown' });
+    playCountdown(() => {
+      document.getElementById('readyLobbyOverlay').classList.add('hidden');
+      startOnlineGameAsHost();
+    });
+  }
+  // Guest: waits for {type:'ready_countdown'} message to play its own countdown
+}
+
+// ============================================================
+//  ONLINE GAME OVER & REMATCH
+// ============================================================
+function showOnlineGameOver() {
+  const myIdx  = isOnlineHost ? 0 : 1;
+  const oppIdx = isOnlineHost ? 1 : 0;
+  const myScore  = game.scores[myIdx];
+  const oppScore = game.scores[oppIdx];
+  const oppName  = isOnlineHost ? cfg.p2.name : cfg.p1.name;
+  const myPairs  = `${myScore} pair${myScore !== 1 ? 's' : ''}`;
+
+  _rematchOffered = false;
+  _rematchOpponentOffered = false;
+
+  const overlay    = document.getElementById('onlineGameOverOverlay');
+  const card       = document.getElementById('ogoCard');
+  const badgeEl    = document.getElementById('ogoBadge');
+  const titleEl    = document.getElementById('ogoTitle');
+  const subEl      = document.getElementById('ogoSub');
+  const pairsEl    = document.getElementById('ogoPairs');
+  const detailEl   = document.getElementById('ogoDetail');
+  const statusEl   = document.getElementById('ogoRematchStatus');
+  const rematchBtn = document.getElementById('ogoRematchBtn');
+
+  statusEl.textContent = '';
+  rematchBtn.disabled  = false;
+  rematchBtn.textContent = '🔄 Rematch!';
+
+  // Reset card state and re-trigger entrance animations
+  card.className = 'overlay-card ogo-card';
+  void card.offsetWidth;
+  badgeEl.style.animation = 'none'; void badgeEl.offsetWidth; badgeEl.style.animation = '';
+
+  if (myScore > oppScore) {
+    // ── WINNER ──────────────────────────────────────────────
+    card.classList.add('ogo-winner');
+    badgeEl.textContent  = '🏆';
+    titleEl.textContent  = '🎉 You Won!';
+    subEl.textContent    = 'Amazing memory! You crushed it! 🧠✨';
+    pairsEl.textContent  = `🥚 ${myPairs} matched`;
+    detailEl.textContent = `${escHtml(oppName)} matched ${oppScore} — better luck to them! 😄`;
+    sfxFanfare();
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    burstConfetti(cx,        cy,        160);
+    burstConfetti(cx - 150,  cy - 90,   80);
+    burstConfetti(cx + 150,  cy - 90,   80);
+    burstConfetti(cx,        cy - 140,  60);
+    setTimeout(() => burstConfetti(cx - 80, cy + 110, 55), 350);
+    setTimeout(() => burstConfetti(cx + 80, cy + 110, 55), 650);
+    setTimeout(() => {
+      burstConfetti(cx - 200, cy,       50);
+      burstConfetti(cx + 200, cy,       50);
+    }, 1000);
+    launchMatchFireworks();
+    setTimeout(launchMatchFireworks, 600);
+
+  } else if (myScore === oppScore) {
+    // ── TIE ─────────────────────────────────────────────────
+    card.classList.add('ogo-tie');
+    badgeEl.textContent  = '🤝';
+    titleEl.textContent  = "It's a Tie!";
+    subEl.textContent    = 'Great minds think alike! 🧠';
+    pairsEl.textContent  = `🥚 ${myPairs} each`;
+    detailEl.textContent = 'Well matched — literally! A rematch will settle it. 😏';
+    sfxMatch();
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    burstConfetti(cx, cy, 90);
+    burstConfetti(cx - 100, cy - 60, 50);
+    burstConfetti(cx + 100, cy - 60, 50);
+
+  } else {
+    // ── LOSER ───────────────────────────────────────────────
+    card.classList.add('ogo-loser');
+    badgeEl.textContent  = '😅';
+    titleEl.textContent  = `${escHtml(oppName)} Wins!`;
+    subEl.textContent    = 'Time to work on that memory! 🧠💪';
+    pairsEl.textContent  = `You matched ${myPairs}`;
+    detailEl.textContent = "Don't worry — every game makes you sharper. Better luck next time! You've got this! 🌟";
+    sfxNoMatch();
+  }
+
+  overlay.classList.remove('hidden');
+}
+
+function offerRematch() {
+  if (!onlineConn || !onlineConn.open) { goHome(); return; }
+  _rematchOffered = true;
+  const btn = document.getElementById('ogoRematchBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Waiting for opponent…';
+  sendOnline({ type: 'rematch_offer' });
+  if (_rematchOpponentOffered) startRematch(); // both already offered
+}
+
+function declineRematch() {
+  if (onlineConn && onlineConn.open) sendOnline({ type: 'rematch_decline' });
+  document.getElementById('onlineGameOverOverlay').classList.add('hidden');
+  showDeclineOverlay('You declined the rematch.');
+}
+
+function handleRematchOffer() {
+  _rematchOpponentOffered = true;
+  if (_rematchOffered) {
+    startRematch(); // both agreed
+  } else {
+    const statusEl = document.getElementById('ogoRematchStatus');
+    if (statusEl) statusEl.textContent = '🔄 Opponent wants a rematch!';
+  }
+}
+
+function handleRematchDecline() {
+  document.getElementById('onlineGameOverOverlay').classList.add('hidden');
+  showDeclineOverlay('Opponent declined the rematch.');
+}
+
+function showDeclineOverlay(msg) {
+  const overlay = document.getElementById('onlineDisconnectOverlay');
+  const titleEl = overlay.querySelector('.overlay-title');
+  const subEl   = overlay.querySelector('.disconnect-sub');
+  if (titleEl) titleEl.textContent = '🚫 Rematch Declined';
+  if (subEl)   subEl.textContent   = msg + ' Returning to home…';
+  overlay.classList.remove('hidden');
+  _autoLeaveTimer = setTimeout(goHome, 2800);
+}
+
+function startRematch() {
+  document.getElementById('onlineGameOverOverlay').classList.add('hidden');
+  _rematchOffered = false;
+  _rematchOpponentOffered = false;
+  if (isOnlineHost) {
+    // Host re-runs the full game setup; guest will receive a new init message
+    startOnlineGameAsHost();
+  }
+  // Guest side: waits for the host's new {type:'init'} message — applyOnlineInit handles it
+}
 
 function showOpponentLeftOverlay(reason) {
   clearInterval(game.timerInterval);
   clearInterval(game.shuffleTimerInterval);
   game.paused = true;
-  onlineConn = null; // connection is gone
+  onlineConn = null;
   const overlay = document.getElementById('onlineDisconnectOverlay');
-  const countEl = document.getElementById('disconnectCountdown');
   const titleEl = overlay.querySelector('.overlay-title');
+  const subEl   = overlay.querySelector('.disconnect-sub');
   if (titleEl) titleEl.textContent = reason || '😢 Opponent Left';
+  if (subEl)   subEl.textContent   = 'Returning to home…';
   overlay.classList.remove('hidden');
-  let secs = 10;
-  function tick() {
-    countEl.textContent = `Returning to home in ${secs}s…`;
-    if (secs <= 0) { leaveNow(); return; }
-    secs--;
-    _autoLeaveTimer = setTimeout(tick, 1000);
-  }
-  tick();
-}
-
-function cancelAutoLeave() {
-  clearTimeout(_autoLeaveTimer);
-  document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
-  game.paused = false;
-  addChatMsg('🔌', 'Game', 'Your opponent has left. You\'re playing solo!', false);
-}
-
-function leaveNow() {
-  clearTimeout(_autoLeaveTimer);
-  document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
-  goHome();
+  _autoLeaveTimer = setTimeout(goHome, 2500);
 }
 
 // When the host backgrounds the browser to open Messages, the PeerJS WebSocket
@@ -3890,24 +4312,34 @@ function joinOnlineRoom() {
 function setupOnlineConn() {
   onlineConn.on('data', handleOnlineData);
   onlineConn.on('open', () => {
+    // Both sides show the Ready lobby — game starts only when both press Play
     if (isOnlineHost) {
-      // Data channel confirmed open on both ends — now safe to start
-      startOnlineGameAsHost();
+      document.getElementById('hostStatus').textContent = '✅ Opponent connected!';
     } else {
-      document.getElementById('joinStatus').textContent = '✅ Connected! Waiting for host to start…';
+      document.getElementById('joinStatus').textContent = '✅ Connected!';
     }
+    showReadyLobby();
   });
   onlineConn.on('close', () => {
-    // Only show disconnect UI when the game screen is active
     const gs = document.getElementById('gameScreen');
+    const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
       showOpponentLeftOverlay('🔌 Opponent disconnected');
+    } else if (rl && !rl.classList.contains('hidden')) {
+      rl.classList.add('hidden');
+      const statusId = isOnlineHost ? 'hostStatus' : 'joinStatus';
+      document.getElementById(statusId).textContent = '⚠️ Opponent disconnected. Try again.';
     }
   });
   onlineConn.on('error', () => {
     const gs = document.getElementById('gameScreen');
+    const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
       showOpponentLeftOverlay('⚠️ Connection error');
+    } else if (rl && !rl.classList.contains('hidden')) {
+      rl.classList.add('hidden');
+      const statusId = isOnlineHost ? 'hostStatus' : 'joinStatus';
+      document.getElementById(statusId).textContent = '⚠️ Connection error. Try again.';
     }
   });
 }
@@ -3919,7 +4351,15 @@ function sendOnline(data) {
 function handleOnlineData(data) {
   if (data.type === 'init') { applyOnlineInit(data); }
   else if (data.type === 'countdown') {
-    if (!isOnlineHost) playCountdown(() => { startShuffleTimer(); }); // no startTimer in online
+    if (!isOnlineHost) {
+      const doCountdown = () => playCountdown(() => { startShuffleTimer(); });
+      // If eggs are still animating in, queue it; otherwise play immediately
+      if (document.querySelectorAll('.egg-wrapper.slide-in').length > 0) {
+        _pendingCountdown = doCountdown;
+      } else {
+        doCountdown();
+      }
+    }
   }
   else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'shuffle') {
@@ -3930,7 +4370,18 @@ function handleOnlineData(data) {
   }
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
   else if (data.type === 'chat') { addChatMsg(data.avatar, data.from, data.text, false); }
+  else if (data.type === 'player_ready') { handlePlayerReady(); }
+  else if (data.type === 'ready_countdown') {
+    if (!isOnlineHost) {
+      playCountdown(() => {
+        document.getElementById('readyLobbyOverlay').classList.add('hidden');
+        // Game setup arrives via {type:'init'} sent by host after its countdown
+      });
+    }
+  }
   else if (data.type === 'leaving') { showOpponentLeftOverlay('😢 Opponent left the game'); }
+  else if (data.type === 'rematch_offer') { handleRematchOffer(); }
+  else if (data.type === 'rematch_decline') { handleRematchDecline(); }
 }
 
 function startOnlineGameAsHost() {
@@ -3941,12 +4392,14 @@ function startOnlineGameAsHost() {
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   const diffCfg = DIFF_CONFIG[cfg.diff];
   const items = ITEMS_BY_DIFF[cfg.diff];
-  const onlineShuffleTime = 30; // online uses 30s shuffle, no main timer
+  const onlineShuffleTime = 20; // online uses 20s shuffle, no main timer
   game.maxTime = 0; game.timer = 0;
   game.shuffleMaxTime = onlineShuffleTime; game.shuffleTimer = onlineShuffleTime;
+  updateShuffleTimerDisplay();
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
+  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
   if (hasBonus) cardItems.push('__LUCKY__');
@@ -3965,12 +4418,17 @@ function startOnlineGameAsHost() {
     p2: { name: 'Opponent', avatar: cfg.p2.avatar },
   });
   buildGameHeader(); buildEggGrid();
-  // Hide main timer clock — online mode has no game timer
+  // Hide game clock, show shuffle clock — online uses shuffle timer only
   const clockFace = document.querySelector('.clock-face');
   if (clockFace) clockFace.style.display = 'none';
-  // Show chat bar
-  document.getElementById('chatBar').classList.remove('hidden');
-  document.getElementById('gameScreen').classList.add('chat-visible');
+  const shuffleClockFace = document.querySelector('.shuffle-clock-face');
+  if (shuffleClockFace) shuffleClockFace.style.display = '';
+  // Show chat bar (always start expanded)
+  const chatBar = document.getElementById('chatBar');
+  chatBar.classList.remove('hidden');
+  chatBar.classList.add('collapsed');
+  document.getElementById('chatToggle').textContent = '💬 Show Chat ▲';
+  document.getElementById('gameScreen').classList.add('chat-visible', 'chat-collapsed');
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('homeScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.add('hidden');
@@ -3978,14 +4436,25 @@ function startOnlineGameAsHost() {
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
+  // Start the shuffle timer immediately — do NOT wait for animateEggsIn callback.
+  // On iOS Safari / mobile, animationend events and setTimeout fallbacks can be
+  // throttled or dropped, so gating the timer on the animation is unreliable.
+  // The egg slide-in is purely visual and must never block game logic.
+  startShuffleTimer();
   animateEggsIn(() => {
     updateTurnIndicator(); updateMiniScores();
-    // Signal guest to start countdown; host plays it simultaneously
-    sendOnline({ type: 'countdown' });
-    playCountdown(() => {
-      startShuffleTimer(); // no startTimer() — online has no main timer
+    if (_skipInGameCountdown) {
+      // First game: PLAY! countdown already played in the ready lobby
+      _skipInGameCountdown = false;
       syncOnlineState();
-    });
+    } else {
+      // Rematch path: play 3-2-1-PLAY! then reset timer to a fresh 20 s
+      sendOnline({ type: 'countdown' });
+      playCountdown(() => {
+        startShuffleTimer();
+        syncOnlineState();
+      });
+    }
   });
 }
 
@@ -3998,18 +4467,26 @@ function applyOnlineInit(data) {
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   game.maxTime = 0; game.timer = 0;
   game.shuffleMaxTime = data.shuffleMaxTime; game.shuffleTimer = data.shuffleMaxTime;
+  updateShuffleTimerDisplay();
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
+  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
+  document.getElementById('onlineGameOverOverlay').classList.add('hidden');
   game.totalPairs = data.totalPairs;
   game.cards = data.cards.map((c,idx) => ({ id:idx, emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus, matched:false, revealed:false, el:null, wrapEl:null }));
   buildGameHeader(); buildEggGrid();
-  // Hide main timer clock — online mode has no game timer
+  // Hide game clock, show shuffle clock — online uses shuffle timer only
   const clockFace = document.querySelector('.clock-face');
   if (clockFace) clockFace.style.display = 'none';
-  // Show chat bar
-  document.getElementById('chatBar').classList.remove('hidden');
-  document.getElementById('gameScreen').classList.add('chat-visible');
+  const shuffleClockFace = document.querySelector('.shuffle-clock-face');
+  if (shuffleClockFace) shuffleClockFace.style.display = '';
+  // Show chat bar (always start expanded)
+  const chatBar = document.getElementById('chatBar');
+  chatBar.classList.remove('hidden');
+  chatBar.classList.add('collapsed');
+  document.getElementById('chatToggle').textContent = '💬 Show Chat ▲';
+  document.getElementById('gameScreen').classList.add('chat-visible', 'chat-collapsed');
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('homeScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.add('hidden');
@@ -4017,9 +4494,25 @@ function applyOnlineInit(data) {
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
+  // Start the shuffle timer immediately — do NOT wait for animateEggsIn callback.
+  // On iOS Safari / mobile, animationend events and setTimeout fallbacks can be
+  // throttled or dropped, so gating the timer on the animation is unreliable.
+  startShuffleTimer();
   animateEggsIn(() => {
     updateTurnIndicator(); updateMiniScores();
-    // Timers start when host sends 'countdown' — keeps both devices in sync
+    if (_skipInGameCountdown) {
+      // First game: PLAY! countdown already played in the ready lobby
+      _skipInGameCountdown = false;
+    } else {
+      // Rematch path: countdown message will reset timer to fresh 20 s after PLAY!
+      if (_pendingCountdown) {
+        const cb = _pendingCountdown;
+        _pendingCountdown = null;
+        cb();
+      }
+      // If _pendingCountdown is null: {type:'countdown'} arrives later via
+      // handleOnlineData which calls startShuffleTimer() after PLAY! directly.
+    }
   });
 }
 
@@ -4034,6 +4527,7 @@ function syncOnlineState() {
       scores: [...game.scores],
       items: [game.items[0].slice(), game.items[1].slice()],
       timer: game.timer,
+      shuffleTimer: game.shuffleTimer,
       matchedPairs: game.matchedPairs,
       locked: game.locked,
       shuffling: game.shuffling,
@@ -4043,11 +4537,49 @@ function syncOnlineState() {
 }
 
 function applyOnlineState(state) {
-  // With mirrored clicks both sides run animations locally.
-  // State sync only corrects scores/timer in case of drift.
-  game.scores = state.scores; game.items = state.items;
-  game.timer = state.timer; game.matchedPairs = state.matchedPairs;
-  updateTimerDisplay(); updateBaskets(); updateMiniScores();
+  // Apply all authoritative state from host so both screens stay in sync.
+  game.scores = state.scores;
+  game.items = state.items;
+  game.timer = state.timer;
+  if (state.shuffleTimer !== undefined) {
+    game.shuffleTimer = state.shuffleTimer;
+    updateShuffleTimerDisplay();
+  }
+  game.matchedPairs = state.matchedPairs;
+  game.currentPlayer = state.currentPlayer;
+  game.current = state.current || [];
+  game.locked = state.locked;
+
+  // Sync card matched/revealed states and fix DOM to match host
+  if (state.cards) {
+    state.cards.forEach((sc, i) => {
+      const card = game.cards[i];
+      if (!card) return;
+      // Card became matched on host but not yet locally
+      if (sc.matched && !card.matched) {
+        card.matched = true;
+        card.revealed = false;
+        hideItemGlow(card);
+        card.el.classList.remove('egg-opened', 'egg-cracking');
+        const cell = card.wrapEl ? card.wrapEl.parentElement : null;
+        if (cell && cell.style.display !== 'none') {
+          cell.classList.add('removing');
+          setTimeout(() => { cell.style.display = 'none'; }, 400);
+        }
+      }
+      // Card should be closed but is still showing as revealed locally
+      if (!sc.revealed && card.revealed && !card.matched) {
+        closeCard(i);
+      }
+    });
+  }
+
+  if (state.done) { onGameComplete(false); return; }
+
+  updateTimerDisplay();
+  updateBaskets();
+  updateMiniScores();
+  updateTurnIndicator();
 }
 
 // ============================================================
@@ -4097,6 +4629,10 @@ function goHome() {
   document.getElementById('chatBar').classList.add('hidden');
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
+  document.getElementById('onlineGameOverOverlay').classList.add('hidden');
+  document.getElementById('readyLobbyOverlay').classList.add('hidden');
+  _isOnlineGame = false; _rematchOffered = false; _rematchOpponentOffered = false;
+  _myReady = false; _opponentReady = false; _skipInGameCountdown = false;
   if (cfg.musicOn && cfg.customMusic) {
     setTimeout(() => startCustomBGM(), 300);
   }
@@ -4108,6 +4644,12 @@ function onGameComplete(timeUp) {
   const allPairsFound = game.matchedPairs >= game.totalPairs;
 
   if (!timeUp || allPairsFound) sfxFanfare();
+
+  // Online mode gets its own game-over screen with rematch option
+  if (_isOnlineGame) {
+    setTimeout(showOnlineGameOver, 700);
+    return;
+  }
 
   setTimeout(() => {
     const overlay = document.getElementById('gameOverOverlay');
@@ -4280,6 +4822,15 @@ function showGameMessage(text, cls, duration) {
   }, duration);
 }
 
+function toggleChat() {
+  const bar = document.getElementById('chatBar');
+  const btn = document.getElementById('chatToggle');
+  const gs  = document.getElementById('gameScreen');
+  const collapsed = bar.classList.toggle('collapsed');
+  btn.textContent = collapsed ? '💬 Show Chat ▲' : '💬 Hide Chat ▼';
+  gs.classList.toggle('chat-collapsed', collapsed);
+}
+
 function sendChatMsg() {
   const input = document.getElementById('chatInput');
   const text = (input.value || '').trim();
@@ -4352,15 +4903,19 @@ function playCountdown(callback) {
   const steps = ['3', '2', '1', 'PLAY!'];
   let i = 0;
   overlay.classList.add('show');
+  // Wait for the overlay fade-in (350ms transition) before showing the first number
+  // so the blur is fully visible when "3" pops in
+  const FADE_IN_MS = 360;
 
   function showStep() {
     const val = steps[i];
     const isPlay = val === 'PLAY!';
 
-    // Snap arc back to full, no transition
+    // Snap arc back to full without transition (reflow required to flush transition:none)
     if (arcEl) {
       arcEl.style.transition = 'none';
-      arcEl.style.strokeDashoffset = '0';
+      void arcEl.offsetWidth; // flush so transition:none is applied before offset changes
+      arcEl.style.strokeDashoffset = isPlay ? String(CIRCUMFERENCE) : '0';
       arcEl.className = isPlay ? 'countdown-arc play-arc' : 'countdown-arc';
     }
 
@@ -4373,15 +4928,16 @@ function playCountdown(callback) {
     if (isPlay) {
       sfxFanfare();
       const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-      burstConfetti(cx, cy, 130);
-      burstConfetti(cx - 130, cy - 70, 65);
-      burstConfetti(cx + 130, cy - 70, 65);
-      burstConfetti(cx - 70, cy + 90, 45);
-      burstConfetti(cx + 70, cy + 90, 45);
+      burstConfetti(cx, cy, 160);
+      burstConfetti(cx - 150, cy - 80, 80);
+      burstConfetti(cx + 150, cy - 80, 80);
+      burstConfetti(cx - 80, cy + 100, 60);
+      burstConfetti(cx + 80, cy + 100, 60);
+      burstConfetti(cx, cy - 120, 50);
       setTimeout(() => {
         overlay.classList.remove('show');
         if (callback) callback();
-      }, 950);
+      }, 1100);
     } else {
       sfxPop();
       // After a brief pause, sweep the arc away (full → empty)
@@ -4395,7 +4951,7 @@ function playCountdown(callback) {
       setTimeout(showStep, STEP_MS + SWEEP_MS);
     }
   }
-  showStep();
+  setTimeout(showStep, FADE_IN_MS);
 }
 
 function escHtml(str) {
@@ -4453,13 +5009,41 @@ syncMusicPlayBtns();
   <div class="countdown-sub" id="countdownSub">Get Ready!</div>
 </div>
 
+<!-- Ready lobby overlay (shown when both players are connected, before game starts) -->
+<div class="overlay hidden" id="readyLobbyOverlay">
+  <div class="overlay-card" style="text-align:center">
+    <div class="overlay-title">🎮 Ready to Play?</div>
+    <div class="overlay-subtitle">Both players are connected!</div>
+    <div class="ready-players" id="readyPlayers"></div>
+    <div class="ready-opp-msg" id="readyOppMsg">Press Play when you're ready!</div>
+    <button class="overlay-btn primary" id="readyPlayBtn" onclick="pressReady()">▶ Play!</button>
+  </div>
+</div>
+
+<!-- Online game over overlay -->
+<div class="overlay hidden" id="onlineGameOverOverlay">
+  <div class="overlay-card ogo-card" id="ogoCard">
+    <div class="ogo-badge-wrap">
+      <span class="ogo-badge" id="ogoBadge">🏆</span>
+    </div>
+    <div class="ogo-title" id="ogoTitle">You Won!</div>
+    <div class="ogo-sub" id="ogoSub"></div>
+    <div class="ogo-pairs-pill" id="ogoPairs"></div>
+    <div class="ogo-detail" id="ogoDetail"></div>
+    <div class="ogo-rematch-section">
+      <div class="ogo-rematch-label">Play Again?</div>
+      <div class="ogo-rematch-status" id="ogoRematchStatus"></div>
+      <button class="overlay-btn primary" id="ogoRematchBtn" onclick="offerRematch()">🔄 Rematch!</button>
+      <button class="overlay-btn secondary" onclick="declineRematch()">🏠 No Thanks</button>
+    </div>
+  </div>
+</div>
+
 <!-- Opponent left overlay -->
 <div class="overlay hidden" id="onlineDisconnectOverlay">
-  <div class="overlay-card">
+  <div class="overlay-card" style="text-align:center">
     <div class="overlay-title">😢 Opponent Left</div>
-    <div class="disconnect-countdown" id="disconnectCountdown">Returning to home in 10s…</div>
-    <button class="overlay-btn primary" onclick="cancelAutoLeave()">Stay in Game</button>
-    <button class="overlay-btn secondary" onclick="leaveNow()">🏠 Leave Now</button>
+    <div class="disconnect-sub" style="font-family:'Fredoka',sans-serif;font-size:1rem;color:rgba(255,255,255,0.65);margin-top:10px;">Returning to home…</div>
   </div>
 </div>
 
