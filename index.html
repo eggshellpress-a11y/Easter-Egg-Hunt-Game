@@ -210,11 +210,9 @@ html, body {
 .mode-card:hover::before { opacity: 1; }
 .mode-card.mode-1p { background: linear-gradient(135deg, #ff6b9d, #ff326e); border-color: #ff6b9d; }
 .mode-card.mode-2p { background: linear-gradient(135deg, #4ecdc4, #14aaa0); border-color: #4ecdc4; }
-.mode-card.mode-ai { background: linear-gradient(135deg, #a78bfa, #7850e6); border-color: #a78bfa; }
 .mode-card.selected { animation: selectedPulse 1.6s ease-in-out infinite; }
 .mode-card.mode-1p.selected { border: 4px solid #ffffff; box-shadow: none; }
 .mode-card.mode-2p.selected { border: 4px solid #ffffff; box-shadow: none; }
-.mode-card.mode-ai.selected { border: 4px solid #ffffff; box-shadow: none; }
 .mode-card .mode-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 .mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
@@ -559,23 +557,6 @@ html, body {
 .music-status {
   font-size: 0.8rem; color: #888; margin-top: 3px; min-height: 14px;
 }
-
-/* AI difficulty sub-option */
-.ai-diff-row {
-  display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px;
-  justify-content: center;
-}
-.ai-diff-btn {
-  padding: 5px 12px;
-  border-radius: 12px;
-  border: 1px solid #bbb;
-  background: #ffffff;
-  color: #555;
-  font-size: 0.95rem; font-weight: 600;
-  cursor: pointer; transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.ai-diff-btn.selected { border-color: #a78bfa; color: #ffffff; background: #a78bfa; animation: selectedPulse 1.6s ease-in-out infinite; }
 
 /* START button */
 .start-btn {
@@ -2275,27 +2256,11 @@ html, body {
         <span class="mode-icon">🐣</span>
         <span class="mode-name">1 Player</span>
       </div>
-      <div class="mode-card mode-2p" data-mode="2p" onclick="selectMode('2p',this)">
-        <span class="mode-icon">🐰🐰</span>
-        <span class="mode-name">2 Players</span>
-      </div>
-      <div class="mode-card mode-ai" data-mode="ai" onclick="selectMode('ai',this)">
-        <span class="mode-icon">🤖</span>
-        <span class="mode-name">vs AI</span>
-      </div>
       <div class="mode-card mode-online" data-mode="online" onclick="selectMode('online',this)">
         <span class="mode-icon">🌐</span>
         <span class="mode-name">Online</span>
       </div>
     </div>
-    <!-- AI difficulty sub-option -->
-    <div id="aiDiffRow" class="ai-diff-row hidden" style="margin-top:12px;">
-      <div class="section-label" style="width:100%;margin-bottom:6px;">AI Skill Level</div>
-      <button class="ai-diff-btn selected" data-aidiff="easy" onclick="selectAIDiff('easy',this)">Easy AI</button>
-      <button class="ai-diff-btn" data-aidiff="medium" onclick="selectAIDiff('medium',this)">Medium AI</button>
-      <button class="ai-diff-btn" data-aidiff="hard" onclick="selectAIDiff('hard',this)">Hard AI</button>
-    </div>
-
     <!-- Online lobby -->
     <div id="onlineLobby" class="hidden" style="margin-top:12px;">
       <div class="section-label" style="width:100%;margin-bottom:10px;">Online Game</div>
@@ -2544,7 +2509,6 @@ const DIFF_CONFIG = {
 let cfg = {
   mode: '1p',
   diff: 'easy',
-  aiDiff: 'easy',
   p1: { name: 'Player 1', avatar: '🐣', photo: null },
   p2: { name: 'Player 2', avatar: '🐰', photo: null },
   musicOn: true,
@@ -3185,33 +3149,9 @@ function selectMode(mode, el) {
   cfg.mode = mode;
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
-  // Hide online lobby by default; shown only for 'online'
   document.getElementById('onlineLobby').classList.add('hidden');
-  // Show/hide P2 avatar block
-  const p2Block = document.getElementById('p2AvatarBlock');
-  const aiRow = document.getElementById('aiDiffRow');
-  if (mode === '1p') {
-    p2Block.classList.add('hidden');
-    aiRow.classList.add('hidden');
-  } else if (mode === '2p') {
-    p2Block.classList.remove('hidden');
-    aiRow.classList.add('hidden');
-    document.getElementById('p2Label').textContent = 'Player 2';
-    document.getElementById('p2Name').value = cfg.p2.name === 'AI' ? 'Player 2' : cfg.p2.name;
-    document.getElementById('p2Name').disabled = false;
-  } else if (mode === 'ai') {
-    p2Block.classList.remove('hidden');
-    aiRow.classList.remove('hidden');
-    document.getElementById('p2Label').textContent = 'AI Player';
-    document.getElementById('p2Name').value = 'Easter AI';
-    document.getElementById('p2Name').disabled = true;
-    cfg.p2.name = 'Easter AI';
-    cfg.p2.avatar = '🤖';
-    // Update p2 avatar btns
-    document.getElementById('p2AvatarRow').querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
-  } else { // online
-    p2Block.classList.add('hidden');
-    aiRow.classList.add('hidden');
+  document.getElementById('p2AvatarBlock').classList.add('hidden');
+  if (mode === 'online') {
     document.getElementById('onlineLobby').classList.remove('hidden');
   }
 }
@@ -3219,12 +3159,6 @@ function selectMode(mode, el) {
 function selectDiff(diff, el) {
   cfg.diff = diff;
   document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
-function selectAIDiff(d, el) {
-  cfg.aiDiff = d;
-  document.querySelectorAll('.ai-diff-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
 }
 
@@ -3253,9 +3187,6 @@ function startGame() {
 
   // Read names
   cfg.p1.name = document.getElementById('p1Name').value.trim() || 'Player 1';
-  if (cfg.mode !== 'ai') {
-    cfg.p2.name = document.getElementById('p2Name').value.trim() || 'Player 2';
-  }
 
   // Start BGM
   if (cfg.musicOn && cfg.customMusic) {
@@ -3278,7 +3209,6 @@ function startGame() {
   game.paused = false;
   game.shuffling = false;
   game.matchedPairs = 0;
-  game.aiMemory = {};
 
   // Create card data (pairs of each item); odd egg counts get one lucky bonus egg
   let cardItems = [...items, ...items];
@@ -3325,9 +3255,6 @@ function startGame() {
     if (cfg.mode === '1p') startTimer();
     startShuffleTimer();
     updateTurnIndicator();
-    if (cfg.mode === 'ai' && game.currentPlayer === 1) {
-      setTimeout(doAITurn, 1200);
-    }
   });
 }
 
@@ -3361,9 +3288,6 @@ function buildGameHeader() {
       avatarHtml = `<div class="basket-avatar">🥚</div>`;
       nameStr    = 'Pairs Left';
       initScore  = game.totalPairs;
-    } else if (i === 1 && cfg.mode === 'ai') {
-      avatarHtml = `<div class="basket-avatar">🤖</div>`;
-      nameStr    = 'Easter AI';
     } else {
       const p = i === 0 ? cfg.p1 : cfg.p2;
       if (p.photo) {
@@ -3703,11 +3627,9 @@ function onEggClick(idx, fromRemote) {
   const card = game.cards[idx];
   if (!card || card.matched || card.revealed) return;
   if (game.current.length >= 2) return;
-  if (cfg.mode === 'ai' && game.currentPlayer === 1) return;
 
   game.locked = true;
   sfxPop();
-  updateAIMemory(idx);
   game.current.push(idx);
 
   revealCard(idx, () => {
@@ -3771,7 +3693,6 @@ function handleBonusEgg(idx) {
       if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
       return;
     }
-    if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 900);
   }, 1800);
 }
 
@@ -3882,6 +3803,7 @@ function checkMatch() {
   const [a, b] = game.current;
   const cardA = game.cards[a];
   const cardB = game.cards[b];
+  if (!cardA || !cardB) { game.current = []; game.locked = false; return; }
   // game.locked is already true from second egg reveal
 
   // Safety: close any revealed eggs that aren't the two being checked
@@ -3934,7 +3856,6 @@ function checkMatch() {
         if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
         return;
       }
-      if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
     }, 450);
   } else {
     sfxNoMatch();
@@ -3949,7 +3870,6 @@ function checkMatch() {
         updateBaskets();
         updateTurnIndicator();
         syncOnlineState();
-        if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAITurn, 800);
       } else {
         updateTurnIndicator();
       }
@@ -3969,14 +3889,13 @@ function updateMiniScores() {
       </div>`;
   } else {
     el.style.paddingTop = '';
-    const p2av = (cfg.mode === 'ai') ? '🤖' : cfg.p2.avatar;
     el.innerHTML = `
       <div class="mini-score-row${game.currentPlayer===0?' active':''}">
         <span class="mini-score-av">${cfg.p1.avatar}</span>
         <span class="mini-score-num">${game.scores[0]}</span>
       </div>
       <div class="mini-score-row${game.currentPlayer===1?' active':''}">
-        <span class="mini-score-av">${p2av}</span>
+        <span class="mini-score-av">${cfg.p2.avatar}</span>
         <span class="mini-score-num">${game.scores[1]}</span>
       </div>`;
   }
@@ -4012,73 +3931,12 @@ function updateTurnIndicator() {
     el.innerHTML = `<span>${escHtml(cfg.p1.name)}'s turn</span>`;
   } else {
     const p = game.currentPlayer === 0 ? cfg.p1 : cfg.p2;
-    const name = cfg.mode === 'ai' && game.currentPlayer === 1 ? 'Easter AI' : escHtml(p.name);
-    el.innerHTML = `${game.currentPlayer === 0 ? cfg.p1.avatar : (cfg.mode === 'ai' ? '🤖' : cfg.p2.avatar)} <span>${name}'s turn</span>`;
+    el.innerHTML = `${p.avatar} <span>${escHtml(p.name)}'s turn</span>`;
   }
   // Retrigger pop animation
   el.style.animation = 'none';
   void el.offsetWidth;
   el.style.animation = 'turnPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards';
-}
-
-// ============================================================
-//  AI
-// ============================================================
-function updateAIMemory(idx) {
-  if (cfg.mode !== 'ai') return;
-  const card = game.cards[idx];
-  if (!game.aiMemory[card.emoji]) game.aiMemory[card.emoji] = [];
-  if (!game.aiMemory[card.emoji].includes(idx)) {
-    game.aiMemory[card.emoji].push(idx);
-  }
-}
-
-function doAITurn() {
-  if (game.paused || game.shuffling || game.currentPlayer !== 1 || cfg.mode !== 'ai') return;
-
-  const memoryRate = { easy: 0, medium: 0.5, hard: 0.8 }[cfg.aiDiff];
-  const unmatched = game.cards.filter(c => !c.matched && !c.revealed);
-  if (unmatched.length < 2) return;
-
-  let pick1 = null, pick2 = null;
-  const useMemory = Math.random() < memoryRate;
-
-  if (useMemory) {
-    // Try to find a known pair
-    for (const [emoji, ids] of Object.entries(game.aiMemory)) {
-      const available = ids.filter(id => !game.cards[id].matched);
-      if (available.length >= 2) {
-        pick1 = available[0];
-        pick2 = available[1];
-        break;
-      }
-    }
-  }
-
-  if (pick1 === null) {
-    // Random picks
-    const picks = shuffle([...unmatched.map(c => c.id)]).slice(0, 2);
-    pick1 = picks[0];
-    pick2 = picks[1];
-  }
-
-  // Animate AI picks sequentially through the new reveal flow
-  game.locked = true;
-  setTimeout(() => {
-    sfxPop();
-    game.current.push(pick1);
-    updateAIMemory(pick1);
-    revealCard(pick1, () => {
-      setTimeout(() => {
-        sfxPop();
-        game.current.push(pick2);
-        updateAIMemory(pick2);
-        revealCard(pick2, () => {
-          checkMatch();
-        });
-      }, 400);
-    });
-  }, 500);
 }
 
 // ============================================================
@@ -4115,9 +3973,6 @@ function togglePause() {
         bgmGain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.3);
       } catch(e){}
     }
-    if (cfg.mode === 'ai' && game.currentPlayer === 1 && !game.locked) {
-      setTimeout(doAITurn, 800);
-    }
   }
 }
 
@@ -4135,9 +3990,6 @@ function confirmExit() {
 function cancelExit() {
   document.getElementById('exitOverlay').classList.add('hidden');
   game.paused = false;
-  if (cfg.mode === 'ai' && game.currentPlayer === 1 && !game.locked) {
-    setTimeout(doAITurn, 800);
-  }
 }
 
 // ============================================================
@@ -4704,7 +4556,7 @@ function startOnlineGameAsHost() {
   updateShuffleTimerDisplay();
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
-  game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
+  game.shuffling = false; game.matchedPairs = 0;
   _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
@@ -4776,7 +4628,7 @@ function applyOnlineInit(data) {
   updateShuffleTimerDisplay();
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
-  game.shuffling = false; game.matchedPairs = 0; game.aiMemory = {};
+  game.shuffling = false; game.matchedPairs = 0;
   _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
   document.getElementById('onlineGameOverOverlay').classList.add('hidden');
   game.totalPairs = data.totalPairs;
@@ -4826,9 +4678,6 @@ function resumeAfterShuffle() {
   game.locked = false;
   startShuffleTimer();
   updateTurnIndicator();
-  if (cfg.mode === 'ai' && game.currentPlayer === 1) {
-    setTimeout(doAITurn, 1000);
-  }
 }
 
 function _startSyncCheck() {
@@ -5011,6 +4860,7 @@ function onGameComplete(timeUp) {
     goRematchEl.classList.remove('visible');
     badge.classList.remove('bouncing');
     title.classList.remove('winner-shimmer');
+    title.style.cssText = ''; // clear any inline color set by localDeclineRematch
     if (goMainBtnsEl) goMainBtnsEl.style.display = '';
 
     if (timeUp && !allPairsFound) {
@@ -5054,162 +4904,9 @@ function onGameComplete(timeUp) {
             `<span class="p1-win-item" style="animation-delay:${0.35 + i * 0.08}s">${e}</span>`
           ).join('')}
         </div>`;
-    } else if (cfg.mode === '2p') {
-      // ── 2P WIN FLOW ───────────────────────────────────────────────────
-      if (goMainBtnsEl) goMainBtnsEl.style.display = 'none';
-      const p1Score = game.scores[0];
-      const p2Score = game.scores[1];
-      const p2name  = escHtml(cfg.p2.name);
-      const currentScore = Math.max(p1Score, p2Score);
-      const prevHs  = getHighScore();
-      const isNewHs = saveHighScore(currentScore);
-      const hsBadgeHtml = isNewHs
-        ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
-        : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
-      const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-
-      if (p1Score !== p2Score) {
-        const isP1Win  = p1Score > p2Score;
-        const winScore = isP1Win ? p1Score : p2Score;
-        const loseScore= isP1Win ? p2Score : p1Score;
-        const winName  = isP1Win ? escHtml(cfg.p1.name) : p2name;
-        const winAv    = isP1Win ? cfg.p1.avatar : cfg.p2.avatar;
-        const loseName = isP1Win ? p2name : escHtml(cfg.p1.name);
-
-        void badge.offsetWidth;
-        badge.textContent = winAv;
-        badge.classList.add('bouncing');
-        title.textContent = `🎉 ${winName} Wins!`;
-        title.classList.add('winner-shimmer');
-        sub.textContent   = 'Amazing memory! 🧠✨';
-        scores.innerHTML  = `
-          <div class="go-pairs-pill" id="goPairsPill">🥚 0 pairs matched</div>
-          <div class="go-detail">${loseName} matched ${loseScore}</div>
-          ${hsBadgeHtml}`;
-
-        // Animate pairs counter
-        let _cnt = 0;
-        const _step = Math.max(55, Math.round(950 / (winScore || 1)));
-        const _ct = setInterval(() => {
-          _cnt = Math.min(_cnt + 1, winScore);
-          const pill = document.getElementById('goPairsPill');
-          if (pill) pill.textContent = `🥚 ${_cnt} pair${_cnt !== 1 ? 's' : ''} matched`;
-          if (_cnt >= winScore) clearInterval(_ct);
-        }, _step);
-
-        // Gold flash + confetti + fireworks
-        const _f = document.createElement('div');
-        _f.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
-        document.body.appendChild(_f);
-        setTimeout(() => _f.remove(), 750);
-        sfxFanfare();
-        burstConfetti(cx, cy, 160); burstConfetti(cx-150, cy-90, 80); burstConfetti(cx+150, cy-90, 80);
-        burstConfetti(cx, cy-140, 60);
-        setTimeout(() => burstConfetti(cx-80, cy+110, 55), 350);
-        setTimeout(() => burstConfetti(cx+80, cy+110, 55), 650);
-        setTimeout(() => { burstConfetti(cx-200, cy, 50); burstConfetti(cx+200, cy, 50); }, 1000);
-        launchMatchFireworks();
-        setTimeout(launchMatchFireworks,  600);
-        setTimeout(launchMatchFireworks, 1500);
-        setTimeout(launchMatchFireworks, 2500);
-        setTimeout(() => { burstConfetti(cx, cy-60, 150); burstConfetti(cx-160, cy+80, 65); burstConfetti(cx+160, cy+80, 65); }, 3200);
-
-        // Loser taunt then rematch options
-        setTimeout(() => {
-          goTauntEl.textContent = "🧠 Time to train that memory! Better luck next time — you've got this! 💪";
-          goTauntEl.classList.add('active');
-        }, 3500);
-        setTimeout(() => goRematchEl.classList.add('visible'), 3800);
-
-      } else {
-        // Tie
-        badge.textContent = '🤝';
-        title.textContent = "It's a Tie!";
-        sub.textContent   = 'What a close game! 🧠';
-        scores.innerHTML  = `<div class="go-pairs-pill tie">🥚 ${p1Score} pairs each</div>${hsBadgeHtml}`;
-        sfxMatch();
-        burstConfetti(cx, cy, 90); burstConfetti(cx-100, cy-60, 50); burstConfetti(cx+100, cy-60, 50);
-        setTimeout(() => goRematchEl.classList.add('visible'), 1500);
-      }
-
-    } else {
-      // ── AI WIN FLOW ───────────────────────────────────────────────────
-      if (goMainBtnsEl) goMainBtnsEl.style.display = 'none';
-      const p1Score = game.scores[0];
-      const p2Score = game.scores[1];
-      const p2name  = 'Easter AI';
-      const p2av    = '🤖';
-      const currentScore = Math.max(p1Score, p2Score);
-      const prevHs  = getHighScore();
-      const isNewHs = saveHighScore(currentScore);
-      const hsBadgeHtml = isNewHs
-        ? `<div class="hs-badge">🏆 New High Score: ${currentScore}!</div>`
-        : (prevHs > 0 ? `<div class="hs-prev">Best: ${prevHs}</div>` : '');
-
-      if (p1Score !== p2Score) {
-        const isP1Win  = p1Score > p2Score;
-        const winScore = isP1Win ? p1Score : p2Score;
-        const loseScore= isP1Win ? p2Score : p1Score;
-        const winName  = isP1Win ? escHtml(cfg.p1.name) : p2name;
-        const winAv    = isP1Win ? cfg.p1.avatar : p2av;
-        const loseName = isP1Win ? p2name : escHtml(cfg.p1.name);
-
-        void badge.offsetWidth;
-        badge.textContent = winAv;
-        badge.classList.add('bouncing');
-        title.textContent = `🎉 ${winName} Wins!`;
-        title.classList.add('winner-shimmer');
-        sub.textContent   = 'Amazing memory! 🧠✨';
-        scores.innerHTML  = `
-          <div class="go-pairs-pill" id="goPairsPill">🥚 0 pairs matched</div>
-          <div class="go-detail">${loseName} matched ${loseScore}</div>
-          ${hsBadgeHtml}`;
-
-        let _cnt = 0;
-        const _step = Math.max(55, Math.round(950 / (winScore || 1)));
-        const _ct = setInterval(() => {
-          _cnt = Math.min(_cnt + 1, winScore);
-          const pill = document.getElementById('goPairsPill');
-          if (pill) pill.textContent = `🥚 ${_cnt} pair${_cnt !== 1 ? 's' : ''} matched`;
-          if (_cnt >= winScore) clearInterval(_ct);
-        }, _step);
-
-        const _f = document.createElement('div');
-        _f.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
-        document.body.appendChild(_f);
-        setTimeout(() => _f.remove(), 750);
-
-        sfxFanfare();
-        const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-        burstConfetti(cx, cy, 160); burstConfetti(cx-150, cy-90, 80); burstConfetti(cx+150, cy-90, 80);
-        burstConfetti(cx, cy-140, 60);
-        setTimeout(() => burstConfetti(cx-80, cy+110, 55), 350);
-        setTimeout(() => burstConfetti(cx+80, cy+110, 55), 650);
-        setTimeout(() => { burstConfetti(cx-200, cy, 50); burstConfetti(cx+200, cy, 50); }, 1000);
-        launchMatchFireworks();
-        setTimeout(launchMatchFireworks,  600);
-        setTimeout(launchMatchFireworks, 1500);
-        setTimeout(launchMatchFireworks, 2500);
-        setTimeout(() => { burstConfetti(cx, cy-60, 150); burstConfetti(cx-160, cy+80, 65); burstConfetti(cx+160, cy+80, 65); }, 3200);
-
-        const tauntMsg = (!isP1Win)
-          ? "🧠 Time to train that memory! Better luck next time — you've got this! 💪"
-          : "🤖 Impressive! You outfoxed the AI! Keep it up! 🧠✨";
-        setTimeout(() => { goTauntEl.textContent = tauntMsg; goTauntEl.classList.add('active'); }, 3500);
-        setTimeout(() => goRematchEl.classList.add('visible'), 3800);
-      } else {
-        badge.textContent = '🤝';
-        title.textContent = "It's a Tie!";
-        sub.textContent   = 'What a close game! 🧠';
-        scores.innerHTML  = `<div class="go-pairs-pill tie">🥚 ${p1Score} pairs each</div>${hsBadgeHtml}`;
-        sfxMatch();
-        const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-        burstConfetti(cx, cy, 90); burstConfetti(cx-100, cy-60, 50); burstConfetti(cx+100, cy-60, 50);
-        setTimeout(() => goRematchEl.classList.add('visible'), 1500);
-      }
     }
 
-    // 1p: high score appended after scores.innerHTML set (counter not affected here)
+    // 1p: high score appended
     if (cfg.mode === '1p') {
       const currentScore = game.matchedPairs;
       const prevHs  = getHighScore();
@@ -5254,15 +4951,21 @@ function localRematch() {
 }
 
 function localDeclineRematch() {
-  const card = document.getElementById('goCard');
-  if (card) {
-    card.innerHTML = `
-      <div style="text-align:center;padding:16px 0">
-        <div style="font-size:2.5rem;margin-bottom:12px">🏠</div>
-        <div class="overlay-title" style="-webkit-text-fill-color:#ffd93d;color:#ffd93d">No Rematch</div>
-        <div style="font-family:'Fredoka',sans-serif;color:rgba(255,255,255,0.7);font-size:1rem;margin-top:10px">Heading home… see you next time!</div>
-      </div>`;
-  }
+  // Update existing named elements in-place so their IDs are preserved for future games
+  const badge = document.getElementById('winnerBadge');
+  const title = document.getElementById('gameOverTitle');
+  const sub   = document.getElementById('gameOverSubtitle');
+  const scores= document.getElementById('gameOverScores');
+  const taunt = document.getElementById('goTaunt');
+  const mainBtns  = document.getElementById('goMainBtns');
+  const rematchEl = document.getElementById('goRematchSection');
+  if (badge)  { badge.textContent = '🏠'; badge.classList.remove('bouncing'); }
+  if (title)  { title.textContent = 'No Rematch'; title.classList.remove('winner-shimmer'); title.style.cssText = '-webkit-text-fill-color:#ffd93d;color:#ffd93d'; }
+  if (sub)    sub.textContent = 'Heading home… see you next time!';
+  if (scores) scores.innerHTML = '';
+  if (taunt)  { taunt.textContent = ''; taunt.classList.remove('active'); }
+  if (mainBtns)  mainBtns.style.display = 'none';
+  if (rematchEl) rematchEl.classList.remove('visible');
   setTimeout(goHome, 1400);
 }
 
