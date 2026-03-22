@@ -3655,7 +3655,18 @@ function doShuffle(providedOrder) {
     const shuffledIndices = providedOrder ? [...providedOrder] : [...unmatchedIndices];
     if (!providedOrder) {
       shuffle(shuffledIndices);
-      if (onlineConn && isOnlineHost) sendOnline({ type: 'shuffle', order: shuffledIndices });
+      if (onlineConn && isOnlineHost) sendOnline({
+        type: 'shuffle',
+        order: shuffledIndices,
+        // Pre-shuffle state snapshot so guest can correct any drift before animating
+        sync: {
+          cards: game.cards.map(c => ({ matched: c.matched, revealed: c.revealed })),
+          scores: [...game.scores],
+          items: [game.items[0].slice(), game.items[1].slice()],
+          currentPlayer: game.currentPlayer,
+          matchedPairs: game.matchedPairs,
+        }
+      });
     }
 
     // Rearrange DOM: swap eggs in cells
@@ -4669,7 +4680,14 @@ function handleOnlineData(data) {
     }
   }
   else if (data.type === 'shuffle') {
-    if (!isOnlineHost) doShuffle(data.order);
+    if (!isOnlineHost) {
+      // Apply pre-shuffle sync to correct any state drift before animating
+      if (data.sync) applyPreShuffleSync(data.sync);
+      doShuffle(data.order);
+    }
+  }
+  else if (data.type === 'post_shuffle_verify') {
+    if (!isOnlineHost) applyPostShuffleVerify(data.layout);
   }
   else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
@@ -4828,6 +4846,17 @@ function hideShuffleOverlay() {
 
 function resumeAfterShuffle() {
   hideShuffleOverlay();
+  // Post-shuffle verify: host sends its final card-slot layout so guest can
+  // detect and correct any remaining visual mismatch before play resumes.
+  if (onlineConn && isOnlineHost) {
+    const grid = document.getElementById('eggGrid');
+    const cells = Array.from(grid.querySelectorAll('.egg-cell'));
+    const layout = cells.map(cell => {
+      const w = cell.querySelector('.egg-wrapper');
+      return w ? parseInt(w.dataset.id) : null;
+    });
+    sendOnline({ type: 'post_shuffle_verify', layout });
+  }
   game.locked = false;
   startShuffleTimer();
   updateTurnIndicator();
@@ -4893,6 +4922,70 @@ function applyOnlineState(state) {
   updateBaskets();
   updateMiniScores();
   updateTurnIndicator();
+}
+
+// Apply the host's state snapshot that arrives bundled with the shuffle order.
+// Corrects any drift in matched/revealed card states, scores, and turn before
+// doShuffle() runs so both sides animate from an identical starting position.
+function applyPreShuffleSync(sync) {
+  if (sync.cards) {
+    sync.cards.forEach((sc, i) => {
+      const card = game.cards[i];
+      if (!card) return;
+      if (sc.matched && !card.matched) {
+        card.matched = true;
+        card.revealed = false;
+        hideItemGlow(card);
+        if (card.el) card.el.classList.remove('egg-opened', 'egg-cracking');
+        const cell = card.wrapEl ? card.wrapEl.parentElement : null;
+        if (cell && cell.style.display !== 'none') {
+          cell.classList.add('removing');
+          setTimeout(() => { cell.style.display = 'none'; }, 400);
+        }
+      }
+      if (!sc.revealed && card.revealed && !card.matched) closeCard(i);
+    });
+  }
+  game.scores = sync.scores;
+  game.items = sync.items;
+  game.matchedPairs = sync.matchedPairs;
+  game.currentPlayer = sync.currentPlayer;
+  game.current = [];
+  updateBaskets();
+  updateMiniScores();
+  updateTurnIndicator();
+}
+
+// After both sides finish the shuffle animation the host sends its final
+// card-slot layout. Compare with the local DOM and reorder to match if needed.
+function applyPostShuffleVerify(hostLayout) {
+  const grid = document.getElementById('eggGrid');
+  if (!grid) return;
+  const cells = Array.from(grid.querySelectorAll('.egg-cell'));
+  const localLayout = cells.map(cell => {
+    const w = cell.querySelector('.egg-wrapper');
+    return w ? parseInt(w.dataset.id) : null;
+  });
+  // If already identical, nothing to do
+  if (hostLayout.every((id, i) => id === localLayout[i])) return;
+  // Build cardId → wrapper map from current DOM
+  const wrapperMap = {};
+  cells.forEach(cell => {
+    const w = cell.querySelector('.egg-wrapper');
+    if (w) wrapperMap[parseInt(w.dataset.id)] = w;
+  });
+  // Re-place each wrapper to match host's layout
+  hostLayout.forEach((cardId, i) => {
+    if (cardId === null) return;
+    const cell = cells[i];
+    const wrapper = wrapperMap[cardId];
+    if (!cell || !wrapper) return;
+    const current = cell.querySelector('.egg-wrapper');
+    if (current !== wrapper) {
+      if (current) current.remove();
+      cell.appendChild(wrapper);
+    }
+  });
 }
 
 // ============================================================
