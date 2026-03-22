@@ -3591,10 +3591,9 @@ function startShuffleTimer() {
       // Only host/offline triggers the shuffle; guest waits for the network message.
       if (!onlineConn || isOnlineHost) {
         const mro = document.getElementById('matchRevealOverlay');
-        const animPlaying = game.locked || (mro && mro.classList.contains('show'));
-        if (animPlaying) {
-          // Pause here — animation is still running.  _shufflePending = true means
-          // the animation's own completion callback will call executePendingShuffle().
+        if (mro && mro.classList.contains('show')) {
+          // Match or no-match overlay is playing — pause the shuffle until it finishes.
+          // The overlay's callback in checkMatch() will call executePendingShuffle().
           _shufflePending = true;
         } else {
           executePendingShuffle();
