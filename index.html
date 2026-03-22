@@ -296,12 +296,17 @@ html, body {
 .player-name-input:focus { border-color: #888; }
 .player-name-input::placeholder { color: #aaa; }
 
-/* Topbar (home + settings screens) */
-.home-topbar {
-  width: 100%; max-width: 440px;
+/* Eggs row — hamburger + deco eggs on the same horizontal line */
+.home-eggs-row {
   display: flex; align-items: center;
-  padding: 4px 0 0 0;
+  width: 100%; max-width: 440px;
+  gap: 12px;
+}
+.home-eggs-row .deco-eggs { flex: 1; }
+.home-topbar {
+  display: flex; align-items: center;
   flex-shrink: 0;
+  padding: 0;
 }
 /* Hamburger menu button */
 .menu-btn {
@@ -2305,13 +2310,13 @@ html, body {
 <!-- ========== HOME SCREEN ========== -->
 <div class="screen" id="homeScreen">
 
-  <!-- Topbar -->
-  <div class="home-topbar">
-    <button class="menu-btn" onclick="showSettings('home')" title="Settings">☰</button>
+  <!-- Hamburger + decorative eggs on the same row -->
+  <div class="home-eggs-row">
+    <div class="home-topbar">
+      <button class="menu-btn" onclick="showSettings('home')" title="Settings">☰</button>
+    </div>
+    <div class="deco-eggs" id="decoEggs"></div>
   </div>
-
-  <!-- Decorative eggs -->
-  <div class="deco-eggs" id="decoEggs"></div>
 
   <!-- Mode selection -->
   <div class="home-section" id="sectionMode">
