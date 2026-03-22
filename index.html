@@ -3626,6 +3626,8 @@ function doShuffle(providedOrder) {
   });
   game.current = [];
   game.locked = false; // clear any stale lock; game.shuffling blocks clicks anyway
+  _hostShuffleDone = false;
+  _guestShuffleDone = false;
 
   const unmatchedCards = game.cards.filter(c => !c.matched);
 
@@ -4210,6 +4212,8 @@ let _isOnlineGame = false;    // true while an online game is active
 let _rematchOffered = false;  // this player clicked Rematch
 let _rematchOpponentOffered = false; // opponent sent rematch_offer
 let _shufflePending = false;  // timer hit 0 mid-animation; shuffle fires when animation ends
+let _hostShuffleDone = false; // host's shuffle animation has completed
+let _guestShuffleDone = false; // guest signalled its shuffle animation is done
 
 // AI mode globals
 let _aiMemory = new Map(); // cardIdx → emoji, cards the AI has "seen"
@@ -4696,8 +4700,20 @@ function handleOnlineData(data) {
       runGuestShuffle();
     }
   }
-  else if (data.type === 'post_shuffle_verify') {
-    if (!isOnlineHost) applyPostShuffleVerify(data.layout);
+  else if (data.type === 'shuffle_done') {
+    // Guest finished its shuffle animation — check if host is also done.
+    if (isOnlineHost) {
+      _guestShuffleDone = true;
+      if (_hostShuffleDone) _doOnlineShuffleResume();
+    }
+  }
+  else if (data.type === 'shuffle_resume') {
+    // Host confirmed both sides are done — apply layout fix then clear overlay.
+    if (!isOnlineHost) {
+      if (data.layout) applyPostShuffleVerify(data.layout);
+      if (data.shuffleMaxTime) game.shuffleMaxTime = data.shuffleMaxTime;
+      _finalizeShuffleResume();
+    }
   }
   else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
@@ -4739,7 +4755,8 @@ function startOnlineGameAsHost() {
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0;
-  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false; _shufflePending = false;
+  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
+  _shufflePending = false; _hostShuffleDone = false; _guestShuffleDone = false;
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
   if (hasBonus) cardItems.push('__LUCKY__');
@@ -4804,7 +4821,8 @@ function applyOnlineInit(data) {
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0;
-  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false; _shufflePending = false;
+  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
+  _shufflePending = false; _hostShuffleDone = false; _guestShuffleDone = false;
   document.getElementById('onlineGameOverOverlay').classList.add('hidden');
   game.totalPairs = data.totalPairs;
   game.cards = data.cards.map((c,idx) => ({ id:idx, emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus, matched:false, revealed:false, el:null, wrapEl:null }));
@@ -4868,18 +4886,41 @@ function executePendingShuffle() {
 }
 
 function resumeAfterShuffle() {
-  hideShuffleOverlay();
-  // Post-shuffle verify: host sends its final card-slot layout so guest can
-  // detect and correct any remaining visual mismatch before play resumes.
-  if (onlineConn && isOnlineHost) {
-    const grid = document.getElementById('eggGrid');
-    const cells = Array.from(grid.querySelectorAll('.egg-cell'));
-    const layout = cells.map(cell => {
-      const w = cell.querySelector('.egg-wrapper');
-      return w ? parseInt(w.dataset.id) : null;
-    });
-    sendOnline({ type: 'post_shuffle_verify', layout });
+  if (!onlineConn) {
+    // Offline (1p / AI): resume immediately.
+    _finalizeShuffleResume();
+    return;
   }
+  // Online: keep the overlay up until both players have finished animating,
+  // screens are verified identical, and clocks are synced.
+  if (isOnlineHost) {
+    _hostShuffleDone = true;
+    if (_guestShuffleDone) _doOnlineShuffleResume();
+    // else: wait — guest's shuffle_done message will trigger _doOnlineShuffleResume()
+  } else {
+    // Guest: signal host that local animation is complete and wait for the go-ahead.
+    sendOnline({ type: 'shuffle_done' });
+  }
+}
+
+// Host-only: called once both sides have signalled animation complete.
+// Verifies layout, syncs clock, then tells both sides to clear the overlay.
+function _doOnlineShuffleResume() {
+  _hostShuffleDone = false;
+  _guestShuffleDone = false;
+  const grid = document.getElementById('eggGrid');
+  const cells = Array.from(grid.querySelectorAll('.egg-cell'));
+  const layout = cells.map(cell => {
+    const w = cell.querySelector('.egg-wrapper');
+    return w ? parseInt(w.dataset.id) : null;
+  });
+  sendOnline({ type: 'shuffle_resume', layout, shuffleMaxTime: game.shuffleMaxTime });
+  _finalizeShuffleResume();
+}
+
+// Both sides: hide overlay, unlock, restart clock, update UI.
+function _finalizeShuffleResume() {
+  hideShuffleOverlay();
   game.locked = false;
   startShuffleTimer();
   updateTurnIndicator();
