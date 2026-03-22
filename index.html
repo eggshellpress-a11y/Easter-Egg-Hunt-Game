@@ -1853,28 +1853,34 @@ html, body {
   position: fixed; inset: 0; z-index: 820;
   backdrop-filter: blur(26px);
   -webkit-backdrop-filter: blur(26px);
+  /* base bg — overridden per-step in JS */
   background: radial-gradient(ellipse at 50% 44%,
-    rgba(255,142,234,0.22) 0%,
-    rgba(193,240,251,0.14) 38%,
-    rgba(10,3,28,0.94) 72%);
+    rgba(255,142,234,0.30) 0%,
+    rgba(224,205,255,0.14) 38%,
+    rgba(8,2,22,0.96) 70%);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 22px;
+  gap: 18px;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.35s ease, background 0.45s ease;
 }
 #countdownOverlay.show { opacity: 1; pointer-events: all; }
+/* Sub-label styled as a colored pill — color/border set per-step in JS */
 .countdown-sub {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: clamp(1rem, 4vw, 1.3rem);
-  color: rgba(255,255,255,0.82);
-  letter-spacing: 5px; text-transform: uppercase;
+  font-size: clamp(0.85rem, 3.5vw, 1.15rem);
+  letter-spacing: 4px; text-transform: uppercase;
+  padding: 6px 22px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
 }
 /* SVG clock face */
 .countdown-clock {
   position: relative;
-  width: clamp(190px, 50vw, 270px);
-  height: clamp(190px, 50vw, 270px);
+  width: clamp(160px, 44vw, 230px);
+  height: clamp(160px, 44vw, 230px);
 }
 .countdown-clock svg {
   position: absolute; inset: 0;
@@ -1884,13 +1890,13 @@ html, body {
 }
 .countdown-track {
   fill: none;
-  stroke: rgba(255,255,255,0.12);
-  stroke-width: 9;
+  stroke: rgba(255,255,255,0.10);
+  stroke-width: 8;
 }
 .countdown-arc {
   fill: none;
   stroke: #ff8eea; /* overridden per-step in JS */
-  stroke-width: 9;
+  stroke-width: 11;
   stroke-linecap: round;
   /* circumference of r=54: 2π×54 ≈ 339.3 */
   stroke-dasharray: 339.3;
@@ -1898,7 +1904,7 @@ html, body {
 }
 .countdown-arc.play-arc {
   stroke: #dcf9a8;
-  filter: drop-shadow(0 0 14px rgba(220,249,168,0.9));
+  filter: drop-shadow(0 0 16px rgba(220,249,168,0.95));
   stroke-dashoffset: 0;
 }
 /* Clock inner face */
@@ -1906,18 +1912,18 @@ html, body {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.25) 100%);
+  background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.28) 100%);
 }
 .countdown-number {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: clamp(7rem, 24vw, 11rem); font-weight: 900; line-height: 1;
+  font-size: clamp(6rem, 22vw, 10rem); font-weight: 900; line-height: 1;
   color: #ff8eea; /* overridden per-step in JS */
   animation: countPop 0.38s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .countdown-number.play {
   color: #dcf9a8;
-  font-size: clamp(5rem, 18vw, 9rem);
-  text-shadow: 0 0 100px rgba(220,249,168,1), 0 0 40px rgba(220,249,168,0.8), 0 4px 16px rgba(0,0,0,0.6);
+  font-size: clamp(4rem, 13vw, 7.5rem);
+  text-shadow: 0 0 90px rgba(220,249,168,1), 0 0 36px rgba(220,249,168,0.85), 0 4px 16px rgba(0,0,0,0.6);
   animation: playPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes countPop {
@@ -5436,8 +5442,15 @@ function playCountdown(callback) {
   const SWEEP_MS = 850;        // arc sweep duration
 
   const steps = ['3', '2', '1', 'PLAY!'];
-  // Palette: pink → sky → cream → lime
-  const STEP_COLORS = ['#ff8eea', '#c1f0fb', '#ffebaf', '#dcf9a8'];
+  // Palette: pink → lavender → cream → lime
+  const STEP_COLORS = ['#ff8eea', '#e0cdff', '#ffebaf', '#dcf9a8'];
+  // Per-step background — matching radial glow shifts with each number
+  const STEP_BGS = [
+    'radial-gradient(ellipse at 50% 44%, rgba(255,142,234,0.32) 0%, rgba(224,205,255,0.14) 38%, rgba(8,2,22,0.96) 70%)',
+    'radial-gradient(ellipse at 50% 44%, rgba(224,205,255,0.34) 0%, rgba(193,240,251,0.14) 38%, rgba(5,2,22,0.96) 70%)',
+    'radial-gradient(ellipse at 50% 44%, rgba(255,235,175,0.36) 0%, rgba(255,142,234,0.12) 38%, rgba(8,4,18,0.96) 70%)',
+    'radial-gradient(ellipse at 50% 44%, rgba(220,249,168,0.34) 0%, rgba(193,240,251,0.14) 38%, rgba(5,10,20,0.96) 70%)',
+  ];
   let i = 0;
   overlay.classList.add('show');
   // Wait for the overlay fade-in (350ms transition) before showing the first number
@@ -5449,15 +5462,24 @@ function playCountdown(callback) {
     const isPlay = val === 'PLAY!';
     const color = STEP_COLORS[i] || '#dcf9a8';
 
+    // Shift background glow to match the step color
+    overlay.style.background = STEP_BGS[i] || STEP_BGS[3];
+
     // Snap arc back to full without transition (reflow required to flush transition:none)
     if (arcEl) {
       arcEl.style.transition = 'none';
-      void arcEl.offsetWidth; // flush so transition:none is applied before offset changes
+      void arcEl.offsetWidth;
       arcEl.style.strokeDashoffset = isPlay ? String(CIRCUMFERENCE) : '0';
       arcEl.className = isPlay ? 'countdown-arc play-arc' : 'countdown-arc';
       if (!isPlay) {
         arcEl.style.stroke = color;
-        arcEl.style.filter = `drop-shadow(0 0 12px ${color}cc)`;
+        arcEl.style.filter = `drop-shadow(0 0 14px ${color}dd)`;
+        // Tint the track ring subtly with the step color
+        const trackEl = arcEl.closest('svg').querySelector('.countdown-track');
+        if (trackEl) trackEl.style.stroke = color + '28';
+      } else {
+        const trackEl = arcEl.closest('svg').querySelector('.countdown-track');
+        if (trackEl) trackEl.style.stroke = '#dcf9a828';
       }
     }
 
@@ -5466,13 +5488,18 @@ function playCountdown(callback) {
     numEl.className = isPlay ? 'countdown-number play' : 'countdown-number';
     if (!isPlay) {
       numEl.style.color = color;
-      numEl.style.textShadow = `0 0 70px ${color}, 0 0 30px ${color}99, 0 4px 16px rgba(0,0,0,0.6)`;
+      numEl.style.textShadow = `0 0 80px ${color}, 0 0 32px ${color}aa, 0 4px 16px rgba(0,0,0,0.6)`;
     } else {
       numEl.style.color = '';
       numEl.style.textShadow = '';
     }
     numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
+
+    // Sub-label pill — tinted to match step color
     subEl.textContent = isPlay ? "🐣  Let's Hunt!  🥚" : 'Get Ready!';
+    subEl.style.color = color;
+    subEl.style.borderColor = color + '60';
+    subEl.style.background = color + '20';
 
     if (isPlay) {
       sfxFanfare();
