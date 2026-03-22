@@ -8,7 +8,7 @@ No build step or server required. Open `index.html` directly in any modern brows
 
 ## Project Overview
 
-This is a single-file browser game (`index.html`) — no build step, no package manager, no external dependencies (except PeerJS loaded from CDN for online mode). Open the file directly in a browser to run it. All CSS, JavaScript, and HTML live inline in that one file (~5060 lines).
+This is a single-file browser game (`index.html`) — no build step, no package manager, no external dependencies (except PeerJS loaded from CDN for online mode). Open the file directly in a browser to run it. All CSS, JavaScript, and HTML live inline in that one file (~4700 lines).
 
 ## File Structure
 
@@ -36,24 +36,22 @@ The script is organized into clearly labeled sections (`// ===...===` comments):
 | TIMER | ~3351 | `startTimer()`, `onTimerExpired()` — setInterval countdown (offline only) |
 | SHUFFLE | ~3410 | `doShuffle()` — burrow-out → reorder → pop-in sequence; `startShuffleTimer()` / `onShuffleComplete()` |
 | EGG CLICK & GAME LOGIC | ~3519 | `onEggClick()`, `revealCard()`, `openEgg()`, `checkMatch()`, `updateBaskets()` |
-| AI | ~3841 | `doAITurn()`, `updateAIMemory()` — memory-based AI with difficulty scaling |
-| PAUSE | ~3901 | `togglePause()` — freezes timer and dims BGM gain |
-| EXIT / GAME OVER | ~3941 | `confirmExit()`, `onGameComplete()`, `restartGame()` |
+| PAUSE | ~3900 | `togglePause()` — freezes timer and dims BGM gain |
+| EXIT / GAME OVER | ~3940 | `confirmExit()`, `onGameComplete()`, `restartGame()` |
 | ONLINE MULTIPLAYER | ~3960 | PeerJS peer-to-peer — host/join lobby, move sync, chat, disconnect handling |
 | ONLINE READY LOBBY | ~3973 | `showReadyLobby()`, ready countdown, `_startBothReady()` |
 | ONLINE GAME OVER & REMATCH | ~4048 | `showOnlineGameOver()`, `offerRematch()`, `declineRematch()`, `startRematch()` |
-| HIGH SCORE | ~4586 | `localStorage`-backed per-mode/diff high scores |
-| SETTINGS SCREEN | ~4601 | `showSettings()`, `closeSettings()`, `goHome()` |
-| UTILS | ~4772 | `launchMatchFireworks()`, `fireFirework()`, `showGameMessage()`, `escHtml()` |
-| INIT | ~4962 | One-time startup — default selections, toggle sync, volume slider init, `?join=` URL param handling |
+| HIGH SCORE | ~4500 | `localStorage`-backed per-mode/diff high scores |
+| SETTINGS SCREEN | ~4520 | `showSettings()`, `closeSettings()`, `goHome()` |
+| UTILS | ~4680 | `launchMatchFireworks()`, `fireFirework()`, `showGameMessage()`, `escHtml()` |
+| INIT | ~4850 | One-time startup — default selections, toggle sync, volume slider init, `?join=` URL param handling |
 
 ## Key State Objects
 
 ```js
 cfg = {
-  mode,        // '1p' | '2p' | 'ai' | 'online'
+  mode,        // '1p' | 'online'
   diff,        // 'easy' | 'medium' | 'hard'
-  aiDiff,      // 'easy' | 'medium' | 'hard'  (AI memory usage: 0% / 50% / 80%)
   p1, p2,      // { name, avatar, photo }
   musicOn, sfxOn, customMusic,
   musicVolume, sfxVolume
@@ -62,14 +60,13 @@ cfg = {
 game = {
   cards[],              // [{id, emoji, colorIdx, matched, revealed, el, wrapEl}]
   current[],            // indices of currently revealed (unmatched) cards (max 2)
-  currentPlayer,        // 0 = p1, 1 = p2/AI
+  currentPlayer,        // 0 = p1, 1 = p2 (online only)
   scores[],             // [p1Score, p2Score]
   items[],              // [p1MatchedEmojis[], p2MatchedEmojis[]] — for basket display
-  timer,                // seconds remaining (offline modes)
+  timer,                // seconds remaining (1p mode only)
   maxTime,              // starting seconds (set from difficulty constants)
   paused,               // true when game is paused
   locked,               // true during animations — blocks all clicks
-  aiMemory,             // { emoji: [cardId, cardId] } — AI's seen-card map
   totalPairs,           // total pairs in this round
   matchedPairs,         // pairs found so far
   shuffling,            // true during the post-timer shuffle sequence
@@ -99,7 +96,7 @@ _autoLeaveTimer         // setTimeout handle for auto-return-to-home after decli
 3. → `openEgg(card)` — sets `.open` class (top half rises), fires `burstConfetti()`
 4. After 2nd card revealed → `checkMatch()`:
    - **Match**: burst + fade eggs out, add to basket, same player continues
-   - **No match**: 1.5 s delay, `closeCard()` on both, turn switches
+   - **No match**: 1.5 s delay, `closeCard()` on both, turn switches (online only)
 
 ## Online Multiplayer
 
@@ -132,7 +129,7 @@ All sound is procedural Web Audio API — no audio files required. `audioCtx` is
 - Shuffle sequence is entirely CSS animation driven: `.burrow` → DOM reorder → `.popin` keyframes, gated by `animationend` events.
 - The home screen decorative eggs are built by `buildDecoEggs()` using the first 5 entries of `EGG_COLORS`.
 - Online game over overlay (`#onlineGameOverOverlay`) uses variant classes: `.ogo-winner` (gold shimmer, bouncing trophy), `.ogo-loser` (shake animation), `.ogo-tie` (pulse). Rematch UI lives in `.ogo-rematch-section`.
-- Match/no-match feedback uses `showGameMessage(text, cls, duration)` — it populates `#gameMessage` and shows `#screenBlurOverlay`. There is no flash message system — do not re-add `setFlash`/`clearFlash`.
+- Match/no-match feedback uses `showMatchReveal(emojiA, emojiB, isMatch, duration, callback)` — shows a mid-screen overlay with the two emojis. There is no flash message system — do not re-add `setFlash`/`clearFlash`.
 - Fireworks on match: `launchMatchFireworks()` spawns `.fw-particle` DOM elements at fixed screen positions and removes them after their CSS animation completes.
 
 ## Difficulty Constants
@@ -141,11 +138,11 @@ Defined in `DIFF_CONFIG`. Odd egg counts produce one unpaired `__LUCKY__` bonus 
 
 | Level | Eggs | Pairs | Bonus egg | Timer | Shuffle interval |
 |---|---|---|---|---|---|
-| easy   | 15 | 7  | yes | 2:15 (135 s) | 40 s |
+| easy   | 20 | 10 | no  | 2:15 (135 s) | 40 s |
 | medium | 20 | 10 | no  | 3:15 (195 s) | 30 s |
 | hard   | 20 | 10 | no  | 4:15 (255 s) | 20 s |
 
-The shuffle loop runs in all modes. Offline modes use per-difficulty shuffle intervals (above); online mode always uses a fixed 20 s shuffle interval. The in-game countdown clock (`.clock-face`) is hidden in online mode; only the shuffle clock (`.shuffle-clock-face`) is shown. In offline modes both clocks are visible.
+The shuffle loop runs in all modes. The 1p timer counts down and expires; online mode has no main timer. Online mode always uses a fixed 20 s shuffle interval. The in-game countdown clock (`.clock-face`) is hidden in online mode; only the shuffle clock (`.shuffle-clock-face`) is shown. In 1p mode both clocks are visible.
 
 ## Bonus Egg
 
@@ -157,7 +154,7 @@ Stored in `localStorage` keyed by `eggHunt_hs_{mode}_{diff}` (e.g. `eggHunt_hs_1
 
 ## UI Layout Notes
 
-- **Home screen** (`#homeScreen`): mode selector (`#sectionMode`) which expands `#aiDiffRow` for AI mode or `#onlineLobby` for online mode; difficulty selector (`#sectionDiff`); settings gear button routes to `#settingsScreen`.
+- **Home screen** (`#homeScreen`): mode selector (`#sectionMode`) which expands `#onlineLobby` for online mode; difficulty selector (`#sectionDiff`); settings gear button routes to `#settingsScreen`.
 - **Settings screen** (`#settingsScreen`): third top-level screen (hidden by default) containing avatar/name pickers and all audio controls. `showSettings(from)` records the originating screen so `closeSettings()` can return to it.
 - **Game header** (`.game-header`) has three columns: `.header-left` (home/exit egg button), `.header-center` (dual timer clocks), `.header-right` (`.mini-scores` — compact in-game score display, `#miniScores`). The exit button is a pink egg shape (`.home-egg-btn`).
 - The header center contains a `.timers-row` with two clocks: `.timer-display` / `.clock-face` (game countdown, `#timerDisplay`, hidden in online mode) and `.shuffle-timer-display` / `.shuffle-clock-face` (shuffle countdown, `#shuffleTimerDisplay`, shown only in online mode).

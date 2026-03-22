@@ -125,7 +125,6 @@ html, body {
 }
 /* Per-section colors — fully opaque Easter palette */
 #sectionMode   { background: #e0cdff; }
-#sectionDiff   { background: #c1f0fb; }
 #avatarSection { background: #dcf9a8; }
 #sectionAudio  { background: #ffebaf; padding-bottom: 8px; }
 /* Polkadots on section widgets — two independent layers, each with its own flicker */
@@ -210,9 +209,14 @@ html, body {
 .mode-card:hover::before { opacity: 1; }
 .mode-card.mode-1p { background: linear-gradient(135deg, #ff6b9d, #ff326e); border-color: #ff6b9d; }
 .mode-card.mode-2p { background: linear-gradient(135deg, #4ecdc4, #14aaa0); border-color: #4ecdc4; }
+.mode-card.mode-ai { background: linear-gradient(135deg, #a78bfa, #7c3aed); border-color: #a78bfa; }
 .mode-card.selected { animation: selectedPulse 1.6s ease-in-out infinite; }
 .mode-card.mode-1p.selected { border: 4px solid #ffffff; box-shadow: none; }
 .mode-card.mode-2p.selected { border: 4px solid #ffffff; box-shadow: none; }
+.mode-card.mode-ai.selected { border: 4px solid #ffffff; box-shadow: none; }
+.ai-score-row { display:flex; justify-content:space-between; align-items:center; font-size:1.1rem; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.15); }
+.ai-score-row:last-child { border-bottom:none; }
+.ai-score-val { font-family:'Fredoka One','Fredoka',sans-serif; font-size:1.4rem; font-weight:700; }
 .mode-card .mode-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
 .mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
@@ -753,6 +757,24 @@ html, body {
 .home-egg-btn:hover {
   background: radial-gradient(ellipse at 35% 30%, #ffc8e8 0%, #ff9ccc 45%, #d9205f 100%);
   transform: scale(1.08);
+}
+
+/* Turn indicator (AI / online modes) */
+.turn-indicator {
+  text-align: center;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 16px 6px;
+  min-height: 1.6rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  letter-spacing: 0.5px;
+}
+@keyframes turnPop {
+  0%   { transform: scale(0.7) translateY(6px); opacity: 0; }
+  70%  { transform: scale(1.08) translateY(-2px); opacity: 1; }
+  100% { transform: scale(1)   translateY(0);    opacity: 1; }
 }
 
 /* Baskets */
@@ -2256,9 +2278,49 @@ html, body {
         <span class="mode-icon">🐣</span>
         <span class="mode-name">1 Player</span>
       </div>
+      <div class="mode-card mode-ai" data-mode="ai" onclick="selectMode('ai',this)">
+        <span class="mode-icon">🤖</span>
+        <span class="mode-name">vs AI</span>
+      </div>
       <div class="mode-card mode-online" data-mode="online" onclick="selectMode('online',this)">
         <span class="mode-icon">🌐</span>
         <span class="mode-name">Online</span>
+      </div>
+    </div>
+    <!-- 1P difficulty (default) -->
+    <div id="diffLobby" style="margin-top:12px;">
+      <div class="section-label" style="width:100%;margin-bottom:10px;">Difficulty</div>
+      <div class="diff-cards">
+        <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectDiff('easy',this)">
+          <span class="diff-name">Easy</span>
+          <span class="diff-info">20 eggs</span>
+        </div>
+        <div class="diff-card diff-med" data-diff="medium" onclick="selectDiff('medium',this)">
+          <span class="diff-name">Medium</span>
+          <span class="diff-info">20 eggs</span>
+        </div>
+        <div class="diff-card diff-hard" data-diff="hard" onclick="selectDiff('hard',this)">
+          <span class="diff-name">Hard</span>
+          <span class="diff-info">20 eggs</span>
+        </div>
+      </div>
+    </div>
+    <!-- AI difficulty lobby -->
+    <div id="aiLobby" class="hidden" style="margin-top:12px;">
+      <div class="section-label" style="width:100%;margin-bottom:10px;">AI Difficulty</div>
+      <div class="diff-cards">
+        <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectAiDiff('easy',this)">
+          <span class="diff-name">Easy</span>
+          <span class="diff-info">Forgetful AI</span>
+        </div>
+        <div class="diff-card diff-med" data-diff="medium" onclick="selectAiDiff('medium',this)">
+          <span class="diff-name">Medium</span>
+          <span class="diff-info">Smart AI</span>
+        </div>
+        <div class="diff-card diff-hard" data-diff="hard" onclick="selectAiDiff('hard',this)">
+          <span class="diff-name">Hard</span>
+          <span class="diff-info">Relentless AI</span>
+        </div>
       </div>
     </div>
     <!-- Online lobby -->
@@ -2287,25 +2349,6 @@ html, body {
         <input class="room-code-input" id="joinCodeInput" placeholder="Paste room code here…" maxlength="40">
         <button class="online-action-btn" onclick="joinOnlineRoom()">Join Game</button>
         <div class="online-status" id="joinStatus"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Difficulty -->
-  <div class="home-section" id="sectionDiff">
-    <div class="section-label">Difficulty</div>
-    <div class="diff-cards">
-      <div class="diff-card diff-easy selected" data-diff="easy" onclick="selectDiff('easy',this)">
-        <span class="diff-name">Easy</span>
-        <span class="diff-info">15 eggs</span>
-      </div>
-      <div class="diff-card diff-med" data-diff="medium" onclick="selectDiff('medium',this)">
-        <span class="diff-name">Medium</span>
-        <span class="diff-info">20 eggs</span>
-      </div>
-      <div class="diff-card diff-hard" data-diff="hard" onclick="selectDiff('hard',this)">
-        <span class="diff-name">Hard</span>
-        <span class="diff-info">20 eggs</span>
       </div>
     </div>
   </div>
@@ -2410,6 +2453,9 @@ html, body {
   <!-- Baskets -->
   <div class="baskets-row" id="basketsRow"></div>
 
+  <!-- Turn indicator (shown in AI / online modes) -->
+  <div id="turnIndicator" class="turn-indicator"></div>
+
   <!-- Egg grid -->
   <div class="egg-grid-container">
     <div class="egg-grid" id="eggGrid"></div>
@@ -2496,15 +2542,17 @@ const EGG_COLORS = [
   { light:'#DCEDC8', mid:'#AED581', dark:'#558B2F', accent:'#689F38' }, // Sage
 ];
 const ITEMS_BY_DIFF = {
-  easy:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋'],                               // 7 pairs = 14 eggs + 1 lucky egg = 15
+  easy:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],               // 10 pairs = 20 eggs
   medium: ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
   hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
 };
 const DIFF_CONFIG = {
-  easy:   { eggs: 15, time: 135, shuffleTime: 40 },
+  easy:   { eggs: 20, time: 135, shuffleTime: 40 },
   medium: { eggs: 20, time: 195, shuffleTime: 30 },
   hard:   { eggs: 20, time: 255, shuffleTime: 20 },
 };
+// Probability (0–1) that AI remembers a revealed egg, per difficulty
+const AI_MEMORY_PROB = { easy: 0.30, medium: 0.65, hard: 0.95 };
 
 let cfg = {
   mode: '1p',
@@ -2532,7 +2580,6 @@ let game = {
   shuffleTimerInterval: null,
   paused: false,
   locked: false,     // prevent clicks during animation
-  aiMemory: {},      // emoji -> [cardId, cardId]
   totalPairs: 0,
   matchedPairs: 0,
   shuffling: false,
@@ -3150,15 +3197,33 @@ function selectMode(mode, el) {
   document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   document.getElementById('onlineLobby').classList.add('hidden');
+  document.getElementById('aiLobby').classList.add('hidden');
+  document.getElementById('diffLobby').classList.add('hidden');
   document.getElementById('p2AvatarBlock').classList.add('hidden');
   if (mode === 'online') {
     document.getElementById('onlineLobby').classList.remove('hidden');
+  } else if (mode === 'ai') {
+    document.getElementById('aiLobby').classList.remove('hidden');
+    document.querySelectorAll('#aiLobby .diff-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.diff === cfg.diff);
+    });
+  } else {
+    document.getElementById('diffLobby').classList.remove('hidden');
+    document.querySelectorAll('#diffLobby .diff-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.diff === cfg.diff);
+    });
   }
 }
 
 function selectDiff(diff, el) {
   cfg.diff = diff;
-  document.querySelectorAll('.diff-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('#diffLobby .diff-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectAiDiff(diff, el) {
+  cfg.diff = diff;
+  document.querySelectorAll('#aiLobby .diff-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
 }
 
@@ -3187,7 +3252,12 @@ function startGame() {
 
   // Read names
   cfg.p1.name = document.getElementById('p1Name').value.trim() || 'Player 1';
-
+  if (cfg.mode === 'ai') {
+    cfg.p2 = { name: 'AI', avatar: '🤖', photo: null };
+    _aiMemory = new Map();
+    _aiMemoryProb = AI_MEMORY_PROB[cfg.diff];
+    _aiPick2 = null;
+  }
   // Start BGM
   if (cfg.musicOn && cfg.customMusic) {
     startCustomBGM();
@@ -3209,7 +3279,6 @@ function startGame() {
   game.paused = false;
   game.shuffling = false;
   game.matchedPairs = 0;
-
   // Create card data (pairs of each item); odd egg counts get one lucky bonus egg
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
@@ -3235,11 +3304,11 @@ function startGame() {
   buildGameHeader();
   buildEggGrid();
 
-  // Game clock only shown in 1p mode; hidden for 2p and ai
+  // Clocks: game clock only in 1p; shuffle clock in 1p only (hidden for ai)
   const clockFace = document.querySelector('.clock-face');
   if (clockFace) clockFace.style.display = cfg.mode === '1p' ? '' : 'none';
   const shuffleClockFace = document.querySelector('.shuffle-clock-face');
-  if (shuffleClockFace) shuffleClockFace.style.display = '';
+  if (shuffleClockFace) shuffleClockFace.style.display = cfg.mode === 'ai' ? 'none' : '';
 
   // Switch screens
   document.getElementById('homeScreen').classList.add('hidden');
@@ -3253,7 +3322,7 @@ function startGame() {
   // Animate eggs sliding in
   animateEggsIn(() => {
     if (cfg.mode === '1p') startTimer();
-    startShuffleTimer();
+    if (cfg.mode !== 'ai') startShuffleTimer();
     updateTurnIndicator();
   });
 }
@@ -3465,6 +3534,10 @@ function startShuffleTimer() {
     if (game.paused || game.shuffling) return;
     game.shuffleTimer--;
     updateShuffleTimerDisplay();
+    if (game.shuffleTimer === 1) {
+      // Lock out clicks one second before shuffle fires
+      game.locked = true;
+    }
     if (game.shuffleTimer <= 0) {
       clearInterval(game.shuffleTimerInterval);
       // Close every revealed unmatched egg the moment the clock hits zero,
@@ -3523,8 +3596,7 @@ function doShuffle(providedOrder) {
     const shuffledIndices = providedOrder ? [...providedOrder] : [...unmatchedIndices];
     if (!providedOrder) {
       shuffle(shuffledIndices);
-      // Host sends the shuffle order to guest so both boards match
-      if (isOnlineHost) sendOnline({ type: 'shuffle', order: shuffledIndices });
+      if (onlineConn && isOnlineHost) sendOnline({ type: 'shuffle', order: shuffledIndices });
     }
 
     // Rearrange DOM: swap eggs in cells
@@ -3575,18 +3647,7 @@ function doShuffle(providedOrder) {
       if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
       game.shuffling = false;
 
-      if (onlineConn && isOnlineHost) {
-        // Stay locked — verify guest is in sync before resuming play
-        syncOnlineState();
-        _syncRetryCount = 0;
-        _startSyncCheck();
-        return;
-      }
-      if (onlineConn && !isOnlineHost) {
-        // Stay locked — wait for host's sync_resume signal
-        return;
-      }
-      // Offline modes: resume immediately
+      // Resume immediately (online shuffle removed)
       resumeAfterShuffle();
     }
     // Safety fallback: if animationend events don't all fire (can happen on mobile),
@@ -3623,6 +3684,8 @@ function onEggClick(idx, fromRemote) {
     sendOnline({ type: 'click', idx }); // mirror to remote device
     // fall through — execute locally too so both see animations
   }
+  // AI mode: block human clicks when it's the AI's turn
+  if (cfg.mode === 'ai' && game.currentPlayer === 1 && !fromRemote) return;
   if (game.locked || game.paused || game.shuffling) return;
   const card = game.cards[idx];
   if (!card || card.matched || card.revealed) return;
@@ -3637,11 +3700,23 @@ function onEggClick(idx, fromRemote) {
       handleBonusEgg(idx);
       return;
     }
+    // AI memory: record what was just revealed (applies to both player's and AI's turns)
+    if (cfg.mode === 'ai' && !card.bonus && Math.random() < _aiMemoryProb) {
+      _aiMemory.set(idx, card.emoji);
+    }
     if (game.current.length === 2) {
       checkMatch();
     } else {
       // First card done — unlock for second pick
       game.locked = false;
+      // AI second pick: optionally upgrade to a smarter choice now that pick1 is visible
+      if (cfg.mode === 'ai' && game.currentPlayer === 1 && _aiPick2 !== null) {
+        const knownMatch = [..._aiMemory.entries()]
+          .find(([ki, ke]) => ke === card.emoji && ki !== idx && !game.cards[ki].matched && !game.cards[ki].revealed);
+        if (knownMatch) _aiPick2 = knownMatch[0];
+        const p2 = _aiPick2; _aiPick2 = null;
+        setTimeout(() => onEggClick(p2, true), 650);
+      }
     }
   });
 }
@@ -3687,12 +3762,16 @@ function handleBonusEgg(idx) {
     game.matchedPairs++;
     game.current = [];
     game.locked = false;
-    updateTurnIndicator();
-    syncOnlineState();
+    _aiPick2 = null;
     if (game.matchedPairs >= game.totalPairs) {
+      updateTurnIndicator();
+      syncOnlineState();
       if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
       return;
     }
+    updateTurnIndicator();
+    syncOnlineState();
+    if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAiTurn, 900);
   }, 1800);
 }
 
@@ -3850,12 +3929,15 @@ function checkMatch() {
       game.matchedPairs++;
       game.current = [];
       game.locked = false;
-      updateTurnIndicator();
-      syncOnlineState();
       if (game.matchedPairs >= game.totalPairs) {
+        syncOnlineState();
         if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
         return;
       }
+      updateTurnIndicator();
+      updateBaskets();
+      syncOnlineState();
+      if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAiTurn, 800);
     }, 450);
   } else {
     sfxNoMatch();
@@ -3870,6 +3952,7 @@ function checkMatch() {
         updateBaskets();
         updateTurnIndicator();
         syncOnlineState();
+        if (cfg.mode === 'ai' && game.currentPlayer === 1) doAiTurn();
       } else {
         updateTurnIndicator();
       }
@@ -3927,8 +4010,10 @@ function updateBaskets() {
 
 function updateTurnIndicator() {
   const el = document.getElementById('turnIndicator');
+  if (!el) return;
   if (cfg.mode === '1p') {
-    el.innerHTML = `<span>${escHtml(cfg.p1.name)}'s turn</span>`;
+    el.innerHTML = '';
+    return;
   } else {
     const p = game.currentPlayer === 0 ? cfg.p1 : cfg.p2;
     el.innerHTML = `${p.avatar} <span>${escHtml(p.name)}'s turn</span>`;
@@ -3993,6 +4078,55 @@ function cancelExit() {
 }
 
 // ============================================================
+//  AI OPPONENT
+// ============================================================
+function doAiTurn() {
+  if (cfg.mode !== 'ai' || game.currentPlayer !== 1) return;
+  if (game.locked || game.paused || game.shuffling) return;
+  if (game.matchedPairs >= game.totalPairs) return;
+
+  // All unmatched, face-down, non-bonus cards
+  const unmatched = game.cards
+    .map((c, i) => ({ ...c, idx: i }))
+    .filter(c => !c.matched && !c.revealed && !c.bonus);
+  if (unmatched.length < 2) return;
+
+  let pick1Idx, pick2Idx;
+
+  // Search for a known matching pair in memory
+  const knownPairs = [];
+  for (const [idxA, emojiA] of _aiMemory) {
+    const cA = game.cards[idxA];
+    if (!cA || cA.matched || cA.revealed) continue;
+    for (const [idxB, emojiB] of _aiMemory) {
+      if (idxA >= idxB) continue;
+      const cB = game.cards[idxB];
+      if (!cB || cB.matched || cB.revealed) continue;
+      if (emojiA === emojiB) knownPairs.push([idxA, idxB]);
+    }
+  }
+
+  if (knownPairs.length > 0) {
+    // Pick a known pair → guaranteed match
+    const pair = knownPairs[Math.floor(Math.random() * knownPairs.length)];
+    pick1Idx = pair[0];
+    pick2Idx = pair[1];
+  } else {
+    // Explore: prefer cards not yet in memory
+    const unknowns = unmatched.filter(c => !_aiMemory.has(c.idx));
+    const pool1 = unknowns.length > 0 ? unknowns : unmatched;
+    const pick1 = pool1[Math.floor(Math.random() * pool1.length)];
+    pick1Idx = pick1.idx;
+    // Second pick: random from remaining (may be upgraded after pick1 is revealed)
+    const remaining = unmatched.filter(c => c.idx !== pick1Idx);
+    pick2Idx = remaining[Math.floor(Math.random() * remaining.length)].idx;
+  }
+
+  _aiPick2 = pick2Idx;
+  setTimeout(() => onEggClick(pick1Idx, true), 700);
+}
+
+// ============================================================
 //  ONLINE MULTIPLAYER (PeerJS)
 // ============================================================
 let peer = null;
@@ -4004,8 +4138,11 @@ let _pendingCountdown = null; // set when countdown message arrives before eggs 
 let _isOnlineGame = false;    // true while an online game is active
 let _rematchOffered = false;  // this player clicked Rematch
 let _rematchOpponentOffered = false; // opponent sent rematch_offer
-let _syncRetryCount = 0;      // how many post-shuffle sync retries attempted
-let _syncCheckTimer = null;   // setTimeout handle waiting for sync_ack
+
+// AI mode globals
+let _aiMemory = new Map(); // cardIdx → emoji, cards the AI has "seen"
+let _aiMemoryProb = 0.3;   // probability AI remembers a revealed card (set per difficulty)
+let _aiPick2 = null;       // AI's planned second card index
 
 // ============================================================
 //  ONLINE READY LOBBY
@@ -4282,7 +4419,6 @@ function syncErrorGoHome() {
 function showOpponentLeftOverlay(reason) {
   clearInterval(game.timerInterval);
   clearInterval(game.shuffleTimerInterval);
-  if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
   game.paused = true;
   onlineConn = null;
   const overlay = document.getElementById('onlineDisconnectOverlay');
@@ -4473,13 +4609,10 @@ function handleOnlineData(data) {
       }
     }
   }
-  else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'shuffle') {
-    if (!isOnlineHost) {
-      clearInterval(game.shuffleTimerInterval); // stop guest's own countdown before shuffle
-      doShuffle(data.order);
-    }
+    if (!isOnlineHost) doShuffle(data.order);
   }
+  else if (data.type === 'click') { onEggClick(data.idx, true); } // both sides execute
   else if (data.type === 'state') { if (!isOnlineHost) applyOnlineState(data.state); }
   else if (data.type === 'chat') { addChatMsg(data.avatar, data.from, data.text, false); }
   else if (data.type === 'player_ready') { handlePlayerReady(); }
@@ -4495,7 +4628,6 @@ function handleOnlineData(data) {
     if (!isOnlineHost) {
       clearInterval(game.timerInterval);
       clearInterval(game.shuffleTimerInterval);
-      if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
       game.scores = data.scores;
       game.matchedPairs = data.matchedPairs;
       sfxFanfare();
@@ -4505,41 +4637,6 @@ function handleOnlineData(data) {
   else if (data.type === 'leaving') { showOpponentLeftOverlay('😢 Opponent left the game'); }
   else if (data.type === 'rematch_offer') { handleRematchOffer(); }
   else if (data.type === 'rematch_decline') { handleRematchDecline(); }
-  else if (data.type === 'sync_check') {
-    // Guest: verify our state matches what host sent
-    if (!isOnlineHost) {
-      const ok = game.matchedPairs === data.matchedPairs &&
-                 game.scores[0] === data.scores[0] &&
-                 game.scores[1] === data.scores[1];
-      sendOnline({ type: 'sync_ack', ok });
-    }
-  }
-  else if (data.type === 'sync_ack') {
-    if (isOnlineHost) {
-      if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
-      if (data.ok) {
-        // Confirmed in sync — tell both sides to resume
-        sendOnline({ type: 'sync_resume' });
-        resumeAfterShuffle();
-      } else if (_syncRetryCount === 0) {
-        // Guest reported mismatch — apply full state and retry check
-        _syncRetryCount = 1;
-        syncOnlineState();
-        _startSyncCheck();
-      } else {
-        // Retry also reported mismatch — unrecoverable
-        sendOnline({ type: 'sync_error' });
-        showSyncErrorOverlay();
-      }
-    }
-  }
-  else if (data.type === 'sync_resume') {
-    // Guest: host confirmed sync is good, resume play
-    resumeAfterShuffle();
-  }
-  else if (data.type === 'sync_error') {
-    showSyncErrorOverlay();
-  }
 }
 
 function startOnlineGameAsHost() {
@@ -4550,10 +4647,8 @@ function startOnlineGameAsHost() {
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   const diffCfg = DIFF_CONFIG[cfg.diff];
   const items = ITEMS_BY_DIFF[cfg.diff];
-  const onlineShuffleTime = 30; // online uses 30s shuffle, no main timer
   game.maxTime = 0; game.timer = 0;
-  game.shuffleMaxTime = onlineShuffleTime; game.shuffleTimer = onlineShuffleTime;
-  updateShuffleTimerDisplay();
+  game.shuffleMaxTime = 30; game.shuffleTimer = 30;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0;
@@ -4570,13 +4665,14 @@ function startOnlineGameAsHost() {
   sendOnline({
     type: 'init',
     cards: game.cards.map(c => ({ emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus })),
-    diff: cfg.diff, shuffleMaxTime: onlineShuffleTime,
+    diff: cfg.diff,
     totalPairs: game.totalPairs,
+    shuffleMaxTime: game.shuffleMaxTime,
     p1: { name: cfg.p1.name, avatar: cfg.p1.avatar },
     p2: { name: 'Opponent', avatar: cfg.p2.avatar },
   });
   buildGameHeader(); buildEggGrid();
-  // Hide game clock, show shuffle clock — online uses shuffle timer only
+  // Hide main clock; show shuffle clock for online mode
   const clockFace = document.querySelector('.clock-face');
   if (clockFace) clockFace.style.display = 'none';
   const shuffleClockFace = document.querySelector('.shuffle-clock-face');
@@ -4594,10 +4690,6 @@ function startOnlineGameAsHost() {
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  // Start the shuffle timer immediately — do NOT wait for animateEggsIn callback.
-  // On iOS Safari / mobile, animationend events and setTimeout fallbacks can be
-  // throttled or dropped, so gating the timer on the animation is unreliable.
-  // The egg slide-in is purely visual and must never block game logic.
   startShuffleTimer();
   animateEggsIn(() => {
     updateTurnIndicator(); updateMiniScores();
@@ -4606,12 +4698,9 @@ function startOnlineGameAsHost() {
       _skipInGameCountdown = false;
       syncOnlineState();
     } else {
-      // Rematch path: play 3-2-1-PLAY! then reset timer to a fresh 20 s
+      // Rematch path: play 3-2-1-PLAY!
       sendOnline({ type: 'countdown' });
-      playCountdown(() => {
-        startShuffleTimer();
-        syncOnlineState();
-      });
+      playCountdown(() => { syncOnlineState(); });
     }
   });
 }
@@ -4624,8 +4713,7 @@ function applyOnlineInit(data) {
   getAudioCtx(); // unlock audio on user gesture (joining counts as gesture)
   if (cfg.musicOn && cfg.customMusic) startCustomBGM();
   game.maxTime = 0; game.timer = 0;
-  game.shuffleMaxTime = data.shuffleMaxTime; game.shuffleTimer = data.shuffleMaxTime;
-  updateShuffleTimerDisplay();
+  game.shuffleMaxTime = data.shuffleMaxTime || 30; game.shuffleTimer = game.shuffleMaxTime;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0;
@@ -4634,7 +4722,7 @@ function applyOnlineInit(data) {
   game.totalPairs = data.totalPairs;
   game.cards = data.cards.map((c,idx) => ({ id:idx, emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus, matched:false, revealed:false, el:null, wrapEl:null }));
   buildGameHeader(); buildEggGrid();
-  // Hide game clock, show shuffle clock — online uses shuffle timer only
+  // Hide main clock; show shuffle clock for online mode
   const clockFace = document.querySelector('.clock-face');
   if (clockFace) clockFace.style.display = 'none';
   const shuffleClockFace = document.querySelector('.shuffle-clock-face');
@@ -4652,9 +4740,6 @@ function applyOnlineInit(data) {
   document.getElementById('pauseOverlay').classList.add('hidden');
   document.getElementById('exitOverlay').classList.add('hidden');
   document.getElementById('gameOverOverlay').classList.add('hidden');
-  // Start the shuffle timer immediately — do NOT wait for animateEggsIn callback.
-  // On iOS Safari / mobile, animationend events and setTimeout fallbacks can be
-  // throttled or dropped, so gating the timer on the animation is unreliable.
   startShuffleTimer();
   animateEggsIn(() => {
     updateTurnIndicator(); updateMiniScores();
@@ -4662,14 +4747,12 @@ function applyOnlineInit(data) {
       // First game: PLAY! countdown already played in the ready lobby
       _skipInGameCountdown = false;
     } else {
-      // Rematch path: countdown message will reset timer to fresh 20 s after PLAY!
+      // Rematch path: play countdown if queued
       if (_pendingCountdown) {
         const cb = _pendingCountdown;
         _pendingCountdown = null;
         cb();
       }
-      // If _pendingCountdown is null: {type:'countdown'} arrives later via
-      // handleOnlineData which calls startShuffleTimer() after PLAY! directly.
     }
   });
 }
@@ -4680,23 +4763,6 @@ function resumeAfterShuffle() {
   updateTurnIndicator();
 }
 
-function _startSyncCheck() {
-  if (_syncCheckTimer) clearTimeout(_syncCheckTimer);
-  sendOnline({ type: 'sync_check', matchedPairs: game.matchedPairs, scores: [...game.scores] });
-  _syncCheckTimer = setTimeout(() => {
-    _syncCheckTimer = null;
-    if (_syncRetryCount === 0) {
-      // Retry: re-send full state + another check
-      _syncRetryCount = 1;
-      syncOnlineState();
-      _startSyncCheck();
-    } else {
-      // Both attempts timed out — unrecoverable
-      sendOnline({ type: 'sync_error' });
-      showSyncErrorOverlay();
-    }
-  }, 3000);
-}
 
 function syncOnlineState() {
   if (!isOnlineHost || !onlineConn || !onlineConn.open) return;
@@ -4709,7 +4775,6 @@ function syncOnlineState() {
       scores: [...game.scores],
       items: [game.items[0].slice(), game.items[1].slice()],
       timer: game.timer,
-      shuffleTimer: game.shuffleTimer,
       matchedPairs: game.matchedPairs,
       locked: game.locked,
       shuffling: game.shuffling,
@@ -4723,10 +4788,6 @@ function applyOnlineState(state) {
   game.scores = state.scores;
   game.items = state.items;
   game.timer = state.timer;
-  if (state.shuffleTimer !== undefined) {
-    game.shuffleTimer = state.shuffleTimer;
-    updateShuffleTimerDisplay();
-  }
   game.matchedPairs = state.matchedPairs;
   game.currentPlayer = state.currentPlayer;
   game.current = state.current || [];
@@ -4815,8 +4876,6 @@ function goHome() {
   document.getElementById('readyLobbyOverlay').classList.add('hidden');
   const _seOverlay = document.getElementById('syncErrorOverlay');
   if (_seOverlay) _seOverlay.classList.add('hidden');
-  if (_syncCheckTimer) { clearTimeout(_syncCheckTimer); _syncCheckTimer = null; }
-  _syncRetryCount = 0;
   _isOnlineGame = false; _rematchOffered = false; _rematchOpponentOffered = false;
   _myReady = false; _opponentReady = false; _skipInGameCountdown = false;
   if (cfg.musicOn && cfg.customMusic) {
@@ -4904,6 +4963,34 @@ function onGameComplete(timeUp) {
             `<span class="p1-win-item" style="animation-delay:${0.35 + i * 0.08}s">${e}</span>`
           ).join('')}
         </div>`;
+    } else if (cfg.mode === 'ai') {
+      const p1Score = game.scores[0];
+      const aiScore = game.scores[1];
+      const diffLabel = cfg.diff.charAt(0).toUpperCase() + cfg.diff.slice(1);
+      if (p1Score > aiScore) {
+        title.textContent = '🎉 You Win!';
+        badge.textContent = '🏆';
+        sub.textContent = 'You outsmarted the AI!';
+        badge.classList.add('bouncing');
+        title.classList.add('winner-shimmer');
+      } else if (aiScore > p1Score) {
+        title.textContent = '🤖 AI Wins!';
+        badge.textContent = '🤖';
+        sub.textContent = 'The AI remembered more pairs!';
+      } else {
+        title.textContent = "🤝 It's a Tie!";
+        badge.textContent = '🤝';
+        sub.textContent = 'You matched the AI perfectly!';
+      }
+      scores.innerHTML = `
+        <div class="ai-score-row">
+          <span>${cfg.p1.photo ? `<img src="${escHtml(cfg.p1.photo)}" style="width:1.3rem;height:1.3rem;border-radius:50%;vertical-align:middle;margin-right:4px;">` : cfg.p1.avatar} ${escHtml(cfg.p1.name)}</span>
+          <span class="ai-score-val">${p1Score}</span>
+        </div>
+        <div class="ai-score-row">
+          <span>🤖 AI (${diffLabel})</span>
+          <span class="ai-score-val">${aiScore}</span>
+        </div>`;
     }
 
     // 1p: high score appended
@@ -4918,7 +5005,7 @@ function onGameComplete(timeUp) {
 
     overlay.classList.remove('hidden');
 
-    if (cfg.mode === '1p') {
+    if (cfg.mode === '1p' || (cfg.mode === 'ai' && game.scores[0] > game.scores[1])) {
       // Gold screen flash
       const _f = document.createElement('div');
       _f.style.cssText = 'position:fixed;inset:0;background:rgba(255,217,61,0.2);pointer-events:none;z-index:9000;animation:ogoWinFlash 0.65s ease-out forwards;';
