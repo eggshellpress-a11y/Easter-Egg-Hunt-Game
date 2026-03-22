@@ -3330,6 +3330,7 @@ function startGame() {
   game.paused = false;
   game.shuffling = false;
   game.matchedPairs = 0;
+  _shufflePending = false;
   // Create card data (pairs of each item); odd egg counts get one lucky bonus egg
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
@@ -3585,41 +3586,19 @@ function startShuffleTimer() {
     if (game.paused || game.shuffling) return;
     game.shuffleTimer--;
     updateShuffleTimerDisplay();
-    if (game.shuffleTimer === 2) {
-      // At :02 tick, wait 500 ms (→ 1.5 s remaining) then show overlay.
-      // Wait for any in-progress match/no-match animation to fully finish:
-      // - game.locked covers no-match (cleared in callback after 1500 ms)
-      // - matchRevealOverlay.show covers match (game.locked clears at 450 ms
-      //   but the overlay stays visible for the full 1000 ms duration)
-      setTimeout(() => {
-        if (game.matchedPairs >= game.totalPairs) return;
-        const showWhenFree = () => {
-          const mro = document.getElementById('matchRevealOverlay');
-          if (game.locked || (mro && mro.classList.contains('show'))) {
-            setTimeout(showWhenFree, 80); return;
-          }
-          game.locked = true;
-          showShuffleOverlay();
-        };
-        showWhenFree();
-      }, 500);
-    }
     if (game.shuffleTimer <= 0) {
       clearInterval(game.shuffleTimerInterval);
-      game.cards.forEach((card, idx) => {
-        if (!card.matched && card.revealed) closeCard(idx);
-      });
-      game.current = [];
-      // Host/offline: safety-net poll in case reveal overlay is still fading
-      // (shouldn't normally happen since showWhenFree already waited, but
-      // guards against edge cases like rapid timer ticks after tab wakeup).
+      // Only host/offline triggers the shuffle; guest waits for the network message.
       if (!onlineConn || isOnlineHost) {
-        const runShuffle = () => {
-          const mro = document.getElementById('matchRevealOverlay');
-          if (mro && mro.classList.contains('show')) { setTimeout(runShuffle, 80); return; }
-          doShuffle();
-        };
-        runShuffle();
+        const mro = document.getElementById('matchRevealOverlay');
+        const animPlaying = game.locked || (mro && mro.classList.contains('show'));
+        if (animPlaying) {
+          // Pause here — animation is still running.  _shufflePending = true means
+          // the animation's own completion callback will call executePendingShuffle().
+          _shufflePending = true;
+        } else {
+          executePendingShuffle();
+        }
       }
     }
   }, 1000);
@@ -3980,7 +3959,9 @@ function checkMatch() {
     cardA.el.classList.remove('egg-opened', 'egg-cracking');
     cardB.el.classList.remove('egg-opened', 'egg-cracking');
 
-    showMatchReveal(cardA.emoji, cardB.emoji, true, 1000);
+    showMatchReveal(cardA.emoji, cardB.emoji, true, 1000, () => {
+      if (_shufflePending && (!onlineConn || isOnlineHost)) executePendingShuffle();
+    });
     launchMatchFireworks();
     const p = game.currentPlayer;
     game.scores[p]++;
@@ -4019,6 +4000,12 @@ function checkMatch() {
       updateTurnIndicator();
       updateBaskets();
       syncOnlineState();
+      if (_shufflePending && (!onlineConn || isOnlineHost)) {
+        // Re-lock so no clicks happen during the remaining 550ms of the match overlay.
+        // The showMatchReveal callback (at 1000ms total) will call executePendingShuffle.
+        game.locked = true;
+        return;
+      }
       if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAiTurn, 800);
     }, 450);
   } else {
@@ -4029,6 +4016,9 @@ function checkMatch() {
     showMatchReveal(cardA.emoji, cardB.emoji, false, 1500, () => {
       game.current = [];
       game.locked = false;
+      if (_shufflePending && (!onlineConn || isOnlineHost)) {
+        executePendingShuffle(); return;
+      }
       if (cfg.mode !== '1p') {
         game.currentPlayer = 1 - game.currentPlayer;
         updateBaskets();
@@ -4220,6 +4210,7 @@ let _pendingCountdown = null; // set when countdown message arrives before eggs 
 let _isOnlineGame = false;    // true while an online game is active
 let _rematchOffered = false;  // this player clicked Rematch
 let _rematchOpponentOffered = false; // opponent sent rematch_offer
+let _shufflePending = false;  // timer hit 0 mid-animation; shuffle fires when animation ends
 
 // AI mode globals
 let _aiMemory = new Map(); // cardIdx → emoji, cards the AI has "seen"
@@ -4749,7 +4740,7 @@ function startOnlineGameAsHost() {
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0;
-  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
+  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false; _shufflePending = false;
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
   if (hasBonus) cardItems.push('__LUCKY__');
@@ -4814,7 +4805,7 @@ function applyOnlineInit(data) {
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
   game.current = []; game.locked = false; game.paused = false;
   game.shuffling = false; game.matchedPairs = 0;
-  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false;
+  _isOnlineGame = true; _rematchOffered = false; _rematchOpponentOffered = false; _shufflePending = false;
   document.getElementById('onlineGameOverOverlay').classList.add('hidden');
   game.totalPairs = data.totalPairs;
   game.cards = data.cards.map((c,idx) => ({ id:idx, emoji:c.emoji, colorIdx:c.colorIdx, bonus:c.bonus, matched:false, revealed:false, el:null, wrapEl:null }));
@@ -4862,6 +4853,19 @@ function showShuffleOverlay() {
 function hideShuffleOverlay() {
   const el = document.getElementById('shuffleOverlay');
   if (el) el.classList.remove('visible');
+}
+
+// Called when the shuffle clock hits 0 and no animation is playing, OR when
+// _shufflePending was set and the in-progress animation just finished.
+// Closes any still-revealed cards, shows the overlay, and runs doShuffle().
+function executePendingShuffle() {
+  _shufflePending = false;
+  if (game.matchedPairs >= game.totalPairs) return; // game ended while we were waiting
+  game.cards.forEach((c, i) => { if (!c.matched && c.revealed) closeCard(i); });
+  game.current = [];
+  game.locked = true;
+  showShuffleOverlay();
+  doShuffle();
 }
 
 function resumeAfterShuffle() {
