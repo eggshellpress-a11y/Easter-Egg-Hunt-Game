@@ -1853,7 +1853,10 @@ html, body {
   position: fixed; inset: 0; z-index: 820;
   backdrop-filter: blur(26px);
   -webkit-backdrop-filter: blur(26px);
-  background: rgba(0,0,0,0.68);
+  background: radial-gradient(ellipse at 50% 44%,
+    rgba(255,142,234,0.22) 0%,
+    rgba(193,240,251,0.14) 38%,
+    rgba(10,3,28,0.94) 72%);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 22px;
@@ -1864,7 +1867,7 @@ html, body {
 .countdown-sub {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
   font-size: clamp(1rem, 4vw, 1.3rem);
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.82);
   letter-spacing: 5px; text-transform: uppercase;
 }
 /* SVG clock face */
@@ -1881,22 +1884,21 @@ html, body {
 }
 .countdown-track {
   fill: none;
-  stroke: rgba(255,255,255,0.1);
+  stroke: rgba(255,255,255,0.12);
   stroke-width: 9;
 }
 .countdown-arc {
   fill: none;
-  stroke: #ffd93d;
+  stroke: #ff8eea; /* overridden per-step in JS */
   stroke-width: 9;
   stroke-linecap: round;
   /* circumference of r=54: 2π×54 ≈ 339.3 */
   stroke-dasharray: 339.3;
   stroke-dashoffset: 0;
-  filter: drop-shadow(0 0 10px rgba(255,217,61,0.8));
 }
 .countdown-arc.play-arc {
-  stroke: #6bcb77;
-  filter: drop-shadow(0 0 14px rgba(107,203,119,0.9));
+  stroke: #dcf9a8;
+  filter: drop-shadow(0 0 14px rgba(220,249,168,0.9));
   stroke-dashoffset: 0;
 }
 /* Clock inner face */
@@ -1904,19 +1906,18 @@ html, body {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   border-radius: 50%;
-  background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.07) 0%, rgba(0,0,0,0.2) 100%);
+  background: radial-gradient(ellipse at 40% 35%, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.25) 100%);
 }
 .countdown-number {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
   font-size: clamp(7rem, 24vw, 11rem); font-weight: 900; line-height: 1;
-  color: #fff;
-  text-shadow: 0 0 60px rgba(255,217,61,0.85), 0 4px 16px rgba(0,0,0,0.6);
+  color: #ff8eea; /* overridden per-step in JS */
   animation: countPop 0.38s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .countdown-number.play {
-  color: #6bcb77;
+  color: #dcf9a8;
   font-size: clamp(5rem, 18vw, 9rem);
-  text-shadow: 0 0 100px rgba(107,203,119,1), 0 0 40px rgba(107,203,119,0.8), 0 4px 16px rgba(0,0,0,0.6);
+  text-shadow: 0 0 100px rgba(220,249,168,1), 0 0 40px rgba(220,249,168,0.8), 0 4px 16px rgba(0,0,0,0.6);
   animation: playPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes countPop {
@@ -4290,12 +4291,10 @@ function _startBothReady() {
   _skipInGameCountdown = true;
   // Play the countdown immediately over the ready lobby (z-index 820 covers everything).
   // Host also sends ready_countdown so the guest plays it in sync.
+  document.getElementById('readyLobbyOverlay').classList.add('hidden');
   if (isOnlineHost) {
     sendOnline({ type: 'ready_countdown' });
-    playCountdown(() => {
-      document.getElementById('readyLobbyOverlay').classList.add('hidden');
-      startOnlineGameAsHost();
-    });
+    playCountdown(() => { startOnlineGameAsHost(); });
   }
   // Guest: waits for {type:'ready_countdown'} message to play its own countdown
 }
@@ -4726,8 +4725,8 @@ function handleOnlineData(data) {
   else if (data.type === 'player_ready') { handlePlayerReady(); }
   else if (data.type === 'ready_countdown') {
     if (!isOnlineHost) {
+      document.getElementById('readyLobbyOverlay').classList.add('hidden');
       playCountdown(() => {
-        document.getElementById('readyLobbyOverlay').classList.add('hidden');
         // Game setup arrives via {type:'init'} sent by host after its countdown
       });
     }
@@ -5437,6 +5436,8 @@ function playCountdown(callback) {
   const SWEEP_MS = 850;        // arc sweep duration
 
   const steps = ['3', '2', '1', 'PLAY!'];
+  // Palette: pink → sky → cream → lime
+  const STEP_COLORS = ['#ff8eea', '#c1f0fb', '#ffebaf', '#dcf9a8'];
   let i = 0;
   overlay.classList.add('show');
   // Wait for the overlay fade-in (350ms transition) before showing the first number
@@ -5446,6 +5447,7 @@ function playCountdown(callback) {
   function showStep() {
     const val = steps[i];
     const isPlay = val === 'PLAY!';
+    const color = STEP_COLORS[i] || '#dcf9a8';
 
     // Snap arc back to full without transition (reflow required to flush transition:none)
     if (arcEl) {
@@ -5453,11 +5455,22 @@ function playCountdown(callback) {
       void arcEl.offsetWidth; // flush so transition:none is applied before offset changes
       arcEl.style.strokeDashoffset = isPlay ? String(CIRCUMFERENCE) : '0';
       arcEl.className = isPlay ? 'countdown-arc play-arc' : 'countdown-arc';
+      if (!isPlay) {
+        arcEl.style.stroke = color;
+        arcEl.style.filter = `drop-shadow(0 0 12px ${color}cc)`;
+      }
     }
 
     // Pop the number in
     numEl.textContent = val;
     numEl.className = isPlay ? 'countdown-number play' : 'countdown-number';
+    if (!isPlay) {
+      numEl.style.color = color;
+      numEl.style.textShadow = `0 0 70px ${color}, 0 0 30px ${color}99, 0 4px 16px rgba(0,0,0,0.6)`;
+    } else {
+      numEl.style.color = '';
+      numEl.style.textShadow = '';
+    }
     numEl.style.animation = 'none'; void numEl.offsetWidth; numEl.style.animation = '';
     subEl.textContent = isPlay ? "🐣  Let's Hunt!  🥚" : 'Get Ready!';
 
