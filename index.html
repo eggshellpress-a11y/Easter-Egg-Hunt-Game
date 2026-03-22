@@ -1083,6 +1083,68 @@ html, body {
   to   { box-shadow: 0 0 28px #ffd93d, 0 0 60px #ffb300cc, 0 0 90px #ffd93d55, inset -5px -8px 20px rgba(0,0,0,0.18), inset 4px 6px 15px rgba(255,255,255,0.4); }
 }
 
+/* ========== SHUFFLE OVERLAY ========== */
+#shuffleOverlay {
+  position: fixed; inset: 0;
+  background: radial-gradient(ellipse at center, #2d0a6e 0%, #1a0040 45%, rgba(10,0,30,0.96) 100%);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 650;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+  overflow: hidden;
+}
+#shuffleOverlay.visible { opacity: 1; pointer-events: auto; }
+#shuffleOverlay::before {
+  content: '';
+  position: absolute; inset: -50%;
+  background: conic-gradient(from 0deg,
+    transparent 0%, rgba(167,139,250,0.12) 8%, transparent 18%,
+    transparent 35%, rgba(255,217,61,0.08) 43%, transparent 53%,
+    transparent 68%, rgba(167,139,250,0.10) 76%, transparent 86%,
+    transparent 93%, rgba(255,217,61,0.07) 98%, transparent 100%);
+  animation: shuffleShineRotate 3s linear infinite;
+}
+@keyframes shuffleShineRotate { to { transform: rotate(360deg); } }
+.shuffle-center {
+  position: relative;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 18px;
+  z-index: 1;
+}
+.shuffle-icon {
+  font-size: 4.5rem;
+  animation: shuffleIconSpin 0.9s linear infinite;
+  filter: drop-shadow(0 0 18px rgba(167,139,250,0.9));
+}
+@keyframes shuffleIconSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.shuffle-label {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 2.4rem; font-weight: 900;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 30px rgba(167,139,250,0.8), 0 3px 14px rgba(0,0,0,0.6);
+  animation: shuffleLabelPulse 0.75s ease-in-out infinite alternate;
+}
+@keyframes shuffleLabelPulse {
+  from { transform: scale(1);    opacity: 0.9; }
+  to   { transform: scale(1.06); opacity: 1;   }
+}
+.shuffle-orbit-egg {
+  position: absolute;
+  font-size: 1.9rem;
+  top: 50%; left: 50%;
+  margin: -1rem 0 0 -1rem;
+  animation: shuffleOrbit linear infinite;
+}
+@keyframes shuffleOrbit {
+  from { transform: rotate(0deg)   translateX(var(--r)) rotate(0deg);   }
+  to   { transform: rotate(360deg) translateX(var(--r)) rotate(-360deg); }
+}
+
 /* ========== BONUS EGG OVERLAY ========== */
 #bonusEggOverlay {
   position: fixed; inset: 0;
@@ -2520,6 +2582,20 @@ html, body {
   </div>
 </div>
 
+<!-- ========== SHUFFLE OVERLAY ========== -->
+<div id="shuffleOverlay">
+  <div class="shuffle-center">
+    <div class="shuffle-icon">🔀</div>
+    <div class="shuffle-label">Shuffling!</div>
+    <div class="shuffle-orbit-egg" style="--r:90px;animation-duration:1.1s;animation-delay:0s">🥚</div>
+    <div class="shuffle-orbit-egg" style="--r:90px;animation-duration:1.1s;animation-delay:-0.18s">🐣</div>
+    <div class="shuffle-orbit-egg" style="--r:90px;animation-duration:1.1s;animation-delay:-0.37s">🌸</div>
+    <div class="shuffle-orbit-egg" style="--r:90px;animation-duration:1.1s;animation-delay:-0.55s">🌷</div>
+    <div class="shuffle-orbit-egg" style="--r:90px;animation-duration:1.1s;animation-delay:-0.73s">🌼</div>
+    <div class="shuffle-orbit-egg" style="--r:90px;animation-duration:1.1s;animation-delay:-0.92s">🐰</div>
+  </div>
+</div>
+
 <!-- ========== BONUS EGG OVERLAY ========== -->
 <div id="bonusEggOverlay">
   <div class="bonus-egg-giant"></div>
@@ -3534,9 +3610,10 @@ function startShuffleTimer() {
     if (game.paused || game.shuffling) return;
     game.shuffleTimer--;
     updateShuffleTimerDisplay();
-    if (game.shuffleTimer === 1) {
-      // Lock out clicks one second before shuffle fires
+    if (game.shuffleTimer === 2) {
+      // Lock out clicks 2 seconds before shuffle fires and show overlay
       game.locked = true;
+      showShuffleOverlay();
     }
     if (game.shuffleTimer <= 0) {
       clearInterval(game.shuffleTimerInterval);
@@ -3547,7 +3624,6 @@ function startShuffleTimer() {
         if (!card.matched && card.revealed) closeCard(idx);
       });
       game.current = [];
-      game.locked = false;
       // Guest waits for host's shuffle message; only host/offline triggers shuffle
       if (!onlineConn || isOnlineHost) doShuffle();
     }
@@ -4757,7 +4833,18 @@ function applyOnlineInit(data) {
   });
 }
 
+function showShuffleOverlay() {
+  const el = document.getElementById('shuffleOverlay');
+  if (el) el.classList.add('visible');
+}
+
+function hideShuffleOverlay() {
+  const el = document.getElementById('shuffleOverlay');
+  if (el) el.classList.remove('visible');
+}
+
 function resumeAfterShuffle() {
+  hideShuffleOverlay();
   game.locked = false;
   startShuffleTimer();
   updateTurnIndicator();
