@@ -3587,11 +3587,17 @@ function startShuffleTimer() {
     updateShuffleTimerDisplay();
     if (game.shuffleTimer === 2) {
       // At :02 tick, wait 500 ms (→ 1.5 s remaining) then show overlay.
-      // Defer until any in-progress match animation finishes first.
+      // Wait for any in-progress match/no-match animation to fully finish:
+      // - game.locked covers no-match (cleared in callback after 1500 ms)
+      // - matchRevealOverlay.show covers match (game.locked clears at 450 ms
+      //   but the overlay stays visible for the full 1000 ms duration)
       setTimeout(() => {
         if (game.matchedPairs >= game.totalPairs) return;
         const showWhenFree = () => {
-          if (game.locked) { setTimeout(showWhenFree, 80); return; }
+          const mro = document.getElementById('matchRevealOverlay');
+          if (game.locked || (mro && mro.classList.contains('show'))) {
+            setTimeout(showWhenFree, 80); return;
+          }
           game.locked = true;
           showShuffleOverlay();
         };
@@ -3600,15 +3606,21 @@ function startShuffleTimer() {
     }
     if (game.shuffleTimer <= 0) {
       clearInterval(game.shuffleTimerInterval);
-      // Close every revealed unmatched egg the moment the clock hits zero,
-      // on all devices — the guest may not call doShuffle() until the host's
-      // network message arrives, so eggs must close here rather than waiting.
       game.cards.forEach((card, idx) => {
         if (!card.matched && card.revealed) closeCard(idx);
       });
       game.current = [];
-      // Guest waits for host's shuffle message; only host/offline triggers shuffle
-      if (!onlineConn || isOnlineHost) doShuffle();
+      // Host/offline: safety-net poll in case reveal overlay is still fading
+      // (shouldn't normally happen since showWhenFree already waited, but
+      // guards against edge cases like rapid timer ticks after tab wakeup).
+      if (!onlineConn || isOnlineHost) {
+        const runShuffle = () => {
+          const mro = document.getElementById('matchRevealOverlay');
+          if (mro && mro.classList.contains('show')) { setTimeout(runShuffle, 80); return; }
+          doShuffle();
+        };
+        runShuffle();
+      }
     }
   }, 1000);
 }
@@ -4683,7 +4695,15 @@ function handleOnlineData(data) {
     if (!isOnlineHost) {
       // Apply pre-shuffle sync to correct any state drift before animating
       if (data.sync) applyPreShuffleSync(data.sync);
-      doShuffle(data.order);
+      // Wait for any in-progress match/no-match reveal overlay to finish
+      // before starting the shuffle animation (network latency means the
+      // shuffle message can arrive while an animation is still playing).
+      const runGuestShuffle = () => {
+        const mro = document.getElementById('matchRevealOverlay');
+        if (mro && mro.classList.contains('show')) { setTimeout(runGuestShuffle, 80); return; }
+        doShuffle(data.order);
+      };
+      runGuestShuffle();
     }
   }
   else if (data.type === 'post_shuffle_verify') {
