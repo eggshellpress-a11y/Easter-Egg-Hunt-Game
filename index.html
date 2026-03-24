@@ -837,7 +837,7 @@ html, body {
   border-radius: 32px;
   border: 3px solid #ffffff;
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 1.6rem; font-weight: 400;
+  font-size: 2rem; font-weight: 400;
   letter-spacing: 4px;
   text-transform: uppercase;
   cursor: pointer;
@@ -1025,6 +1025,15 @@ html, body {
 .home-egg-btn:hover {
   background: radial-gradient(ellipse at 35% 30%, #ffc8e8 0%, #ff9ccc 45%, #d9205f 100%);
   transform: scale(1.08);
+}
+/* Wide pill mode used when back button holds text (e.g. "✅ Done") */
+.home-egg-btn.home-egg-btn--wide {
+  width: auto; height: 40px;
+  border-radius: 20px;
+  padding: 0 16px;
+  font-size: 0.92rem;
+  overflow: visible;
+  white-space: nowrap;
 }
 
 /* Turn indicator (AI / online modes) */
@@ -2721,7 +2730,7 @@ html, body {
   </div>
 
   <!-- Start button -->
-  <button class="start-btn" onclick="startGame()">🌸 START GAME 🌸</button>
+  <button class="start-btn" onclick="startGame()">START GAME</button>
 
 </div><!-- /homeScreen -->
 
@@ -5709,7 +5718,7 @@ function setupOnlineConn() {
   });
   onlineConn.on('close', () => {
     document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
-    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; document.getElementById('settingsBackBtn').textContent = '←'; document.getElementById('settingsTitleEl').textContent = 'Settings'; }
+    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; const _bk=document.getElementById('settingsBackBtn'); if(_bk){_bk.textContent='←';_bk.classList.remove('home-egg-btn--wide');} document.getElementById('settingsTitleEl').textContent = 'Settings'; }
     const gs = document.getElementById('gameScreen');
     const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
@@ -5722,7 +5731,7 @@ function setupOnlineConn() {
   });
   onlineConn.on('error', () => {
     document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
-    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; document.getElementById('settingsBackBtn').textContent = '←'; document.getElementById('settingsTitleEl').textContent = 'Settings'; }
+    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; const _bk=document.getElementById('settingsBackBtn'); if(_bk){_bk.textContent='←';_bk.classList.remove('home-egg-btn--wide');} document.getElementById('settingsTitleEl').textContent = 'Settings'; }
     const gs = document.getElementById('gameScreen');
     const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
@@ -6158,16 +6167,17 @@ function showSettings(from) {
   const backBtn = document.getElementById('settingsBackBtn');
   const titleEl = document.getElementById('settingsTitleEl');
   if (from === 'onlineSetup') {
-    if (backBtn) backBtn.textContent = '✅ Done';
+    if (backBtn) { backBtn.textContent = '✅ Done'; backBtn.classList.add('home-egg-btn--wide'); }
     if (titleEl) titleEl.textContent = 'Choose Avatar';
     setTimeout(() => { const el = document.getElementById('avatarSection'); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }, 80);
   } else {
-    if (backBtn) backBtn.textContent = '←';
+    if (backBtn) { backBtn.textContent = '←'; backBtn.classList.remove('home-egg-btn--wide'); }
     if (titleEl) titleEl.textContent = 'Settings';
   }
 }
 function closeSettings() {
-  document.getElementById('settingsBackBtn').textContent = '←';
+  const _sb = document.getElementById('settingsBackBtn');
+  if (_sb) { _sb.textContent = '←'; _sb.classList.remove('home-egg-btn--wide'); }
   document.getElementById('settingsTitleEl').textContent = 'Settings';
   document.getElementById('settingsScreen').classList.add('hidden');
   if (settingsPrevScreen === 'onlineSetup') {
