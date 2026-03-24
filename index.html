@@ -456,6 +456,59 @@ html, body {
 }
 .ac-save-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,58,237,0.42); }
 
+/* ===================== ONLINE AVATAR PROMPT ===================== */
+#onlineAvatarPromptOverlay {
+  position: fixed; inset: 0; z-index: 900;
+  background: rgba(30,0,60,0.65);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+#onlineAvatarPromptOverlay.hidden { display: none; }
+.oap-card {
+  background: linear-gradient(160deg, #fff9fe 0%, #f0feff 100%);
+  border-radius: 28px;
+  border: 3px solid #c084fc;
+  box-shadow: 0 12px 48px rgba(124,58,237,0.28);
+  padding: 30px 26px 24px;
+  max-width: 330px; width: 90%;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.oap-avatar-ring {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  border: 4px solid #ffd93d;
+  background: #fff8e1;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.8rem;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.18);
+  flex-shrink: 0;
+}
+.oap-avatar-ring img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.oap-player-name {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.35rem; color: #7c3aed;
+  letter-spacing: 0.3px;
+}
+.oap-question {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.02rem; color: #444;
+  line-height: 1.45; max-width: 260px;
+}
+.oap-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 4px; }
+.oap-btn {
+  padding: 13px 20px;
+  border-radius: 14px; border: none;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.05rem;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.oap-btn:hover { transform: scale(1.03); }
+.oap-yes { background: linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; box-shadow: 0 4px 14px rgba(124,58,237,0.3); }
+.oap-no  { background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff; box-shadow: 0 4px 14px rgba(22,163,74,0.25); }
+
 /* Eggs row — hamburger absolutely positioned so eggs center across full width */
 .home-eggs-row {
   position: relative;
@@ -2677,8 +2730,8 @@ html, body {
 
   <!-- Topbar -->
   <div class="settings-topbar">
-    <button class="ctrl-btn home-egg-btn" onclick="closeSettings()" title="Back">←</button>
-    <span class="settings-title">Settings</span>
+    <button class="ctrl-btn home-egg-btn" id="settingsBackBtn" onclick="closeSettings()" title="Back">←</button>
+    <span class="settings-title" id="settingsTitleEl">Settings</span>
   </div>
 
   <!-- Avatars -->
@@ -5209,6 +5262,36 @@ let _myReady              = false;
 let _opponentReady        = false;
 let _skipInGameCountdown  = false; // true when ready-lobby countdown already played
 
+function showOnlineAvatarPrompt() {
+  // Sync name from input in case user typed but didn't blur
+  const nameInput = document.getElementById('p1Name');
+  if (nameInput && nameInput.value.trim()) cfg.p1.name = nameInput.value.trim();
+  const name = cfg.p1.name || 'Player 1';
+  // Render avatar (photo or emoji)
+  const avatarEl = document.getElementById('oapAvatarEl');
+  if (avatarEl) {
+    if (cfg.p1.photo) {
+      avatarEl.innerHTML = `<img src="${cfg.p1.photo}" alt="avatar">`;
+    } else {
+      avatarEl.innerHTML = '';
+      avatarEl.textContent = cfg.p1.avatar || '🐣';
+    }
+  }
+  const nameEl = document.getElementById('oapNameEl');
+  if (nameEl) nameEl.textContent = name;
+  document.getElementById('onlineAvatarPromptOverlay').classList.remove('hidden');
+}
+
+function onlineSetupYes() {
+  document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
+  showSettings('onlineSetup');
+}
+
+function onlineSetupNo() {
+  document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
+  showReadyLobby();
+}
+
 function showReadyLobby() {
   _myReady = false;
   _opponentReady = false;
@@ -5622,9 +5705,11 @@ function setupOnlineConn() {
     } else {
       document.getElementById('joinStatus').textContent = '✅ Connected!';
     }
-    showReadyLobby();
+    showOnlineAvatarPrompt();
   });
   onlineConn.on('close', () => {
+    document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
+    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; document.getElementById('settingsBackBtn').textContent = '←'; document.getElementById('settingsTitleEl').textContent = 'Settings'; }
     const gs = document.getElementById('gameScreen');
     const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
@@ -5636,6 +5721,8 @@ function setupOnlineConn() {
     }
   });
   onlineConn.on('error', () => {
+    document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
+    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; document.getElementById('settingsBackBtn').textContent = '←'; document.getElementById('settingsTitleEl').textContent = 'Settings'; }
     const gs = document.getElementById('gameScreen');
     const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
@@ -6068,10 +6155,26 @@ function showSettings(from) {
   document.getElementById('homeScreen').classList.add('hidden');
   document.getElementById('gameScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.remove('hidden');
+  const backBtn = document.getElementById('settingsBackBtn');
+  const titleEl = document.getElementById('settingsTitleEl');
+  if (from === 'onlineSetup') {
+    if (backBtn) backBtn.textContent = '✅ Done';
+    if (titleEl) titleEl.textContent = 'Choose Avatar';
+    setTimeout(() => { const el = document.getElementById('avatarSection'); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }, 80);
+  } else {
+    if (backBtn) backBtn.textContent = '←';
+    if (titleEl) titleEl.textContent = 'Settings';
+  }
 }
 function closeSettings() {
+  document.getElementById('settingsBackBtn').textContent = '←';
+  document.getElementById('settingsTitleEl').textContent = 'Settings';
   document.getElementById('settingsScreen').classList.add('hidden');
-  document.getElementById(settingsPrevScreen + 'Screen').classList.remove('hidden');
+  if (settingsPrevScreen === 'onlineSetup') {
+    showReadyLobby();
+  } else {
+    document.getElementById(settingsPrevScreen + 'Screen').classList.remove('hidden');
+  }
 }
 
 function goHome() {
@@ -6093,6 +6196,7 @@ function goHome() {
   document.getElementById('onlineDisconnectOverlay').classList.add('hidden');
   document.getElementById('onlineGameOverOverlay').classList.add('hidden');
   document.getElementById('readyLobbyOverlay').classList.add('hidden');
+  document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
   const _seOverlay = document.getElementById('syncErrorOverlay');
   if (_seOverlay) _seOverlay.classList.add('hidden');
   _isOnlineGame = false; _rematchOffered = false; _rematchOpponentOffered = false;
@@ -6606,6 +6710,19 @@ syncMusicPlayBtns();
     </div>
   </div>
   <div class="countdown-sub" id="countdownSub">Get Ready!</div>
+</div>
+
+<!-- Online avatar prompt (shown when connection opens, before ready lobby) -->
+<div class="hidden" id="onlineAvatarPromptOverlay">
+  <div class="oap-card">
+    <div class="oap-avatar-ring" id="oapAvatarEl">🐣</div>
+    <div class="oap-player-name" id="oapNameEl">Player 1</div>
+    <div class="oap-question">Want to update your name or avatar before playing?</div>
+    <div class="oap-buttons">
+      <button class="oap-btn oap-yes" onclick="onlineSetupYes()">🎨 Yes, update</button>
+      <button class="oap-btn oap-no"  onclick="onlineSetupNo()">▶ No, I'm ready!</button>
+    </div>
+  </div>
 </div>
 
 <!-- Ready lobby overlay (shown when both players are connected, before game starts) -->
