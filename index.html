@@ -218,7 +218,7 @@ html, body {
 .ai-score-row:last-child { border-bottom:none; }
 .ai-score-val { font-family:'Fredoka One','Fredoka',sans-serif; font-size:1.4rem; font-weight:700; }
 .mode-card .mode-icon { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-.mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.mode-card .mode-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 0.85rem; font-weight: 400; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
 /* Difficulty */
 .diff-cards {
@@ -241,8 +241,43 @@ html, body {
 .diff-card.diff-easy.selected { border: 4px solid #ffffff; box-shadow: none; }
 .diff-card.diff-med.selected  { border: 4px solid #ffffff; box-shadow: none; }
 .diff-card.diff-hard.selected { border: 4px solid #ffffff; box-shadow: none; }
-.diff-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
+.diff-name { font-family: 'Fredoka One', 'Fredoka', sans-serif; font-size: 1.25rem; font-weight: 400; color: #fff; display: block; text-shadow: 0 1px 3px rgba(0,0,0,0.35); }
 .diff-info { font-size: 0.88rem; font-weight: 600; color: rgba(255,255,255,0.95); display: block; margin-top: 3px; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+/* Spawn mode toggle */
+.spawn-row {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  margin-top: 12px;
+}
+.spawn-toggle-btn {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.9rem; font-weight: 400;
+  background: #c1f0fb;
+  border: 2px solid #7c3aed;
+  color: #7c3aed;
+  text-shadow: none;
+  border-radius: 999px;
+  padding: 6px 22px;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.spawn-toggle-btn:hover { background: #a8e8f6; }
+.spawn-toggle-btn.spawn-on {
+  background: #7c3aed;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  text-shadow: none;
+}
+.spawn-desc {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.88rem; font-weight: 400;
+  color: #ffffff;
+  background: #7c3aed;
+  border-radius: 999px;
+  padding: 3px 14px;
+  margin-top: 5px;
+  letter-spacing: 0.3px;
+}
 
 /* Avatar picker */
 .avatar-section { display: flex; flex-direction: column; gap: 14px; }
@@ -296,16 +331,16 @@ html, body {
 .player-name-input:focus { border-color: #888; }
 .player-name-input::placeholder { color: #aaa; }
 
-/* Eggs row — hamburger + deco eggs on the same horizontal line */
+/* Eggs row — hamburger absolutely positioned so eggs center across full width */
 .home-eggs-row {
-  display: flex; align-items: center;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
   width: 100%; max-width: 440px;
-  gap: 12px;
 }
-.home-eggs-row .deco-eggs { flex: 1; }
+.home-eggs-row .deco-eggs { flex: 0 0 auto; }
 .home-topbar {
+  position: absolute; left: 0;
   display: flex; align-items: center;
-  flex-shrink: 0;
   padding: 0;
 }
 /* Hamburger menu button */
@@ -331,11 +366,11 @@ html, body {
 }
 .settings-nav-btn {
   flex: 1;
-  padding: 14px 10px;
+  padding: 18px 10px;
   border-radius: 18px;
   border: 3px solid #ffffff;
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: #fff;
   cursor: pointer;
@@ -380,7 +415,7 @@ html, body {
   border:2px solid rgba(255,255,255,0.6);
   background:rgba(255,255,255,0.2); color:#fff;
   font-family:'Fredoka','Fredoka One',sans-serif;
-  font-size:0.9rem; font-weight:700; cursor:pointer; transition:background 0.2s;
+  font-size:0.9rem; font-weight:400; cursor:pointer; transition:background 0.2s;
 }
 .online-tab.selected { background:rgba(255,255,255,0.55); color:#333; }
 .room-code-box {
@@ -504,12 +539,17 @@ html, body {
   width: clamp(20px,6vw,26px); height: clamp(20px,6vw,26px);
   font-size: clamp(0.78rem,2.8vw,0.95rem);
 }
-/* Online turn badge — smaller than AI mode */
-#gameScreen.chat-visible .turn-badge,
-#turnIndicator.mode-ai .turn-badge {
-  font-size: 0.88rem;
-  padding: 3px 14px 5px;
-  border-width: 3px;
+/* AI/Online turn indicator — nudge up */
+#turnIndicator.mode-ai,
+#turnIndicator.mode-online {
+  margin-top: -10px;
+}
+/* AI/Online turn badge — compact */
+#turnIndicator.mode-ai .turn-badge,
+#turnIndicator.mode-online .turn-badge {
+  font-size: 0.78rem;
+  padding: 2px 12px 4px;
+  border-width: 2px;
 }
 
 .mini-score-row {
@@ -613,13 +653,13 @@ html, body {
 
 /* START button */
 .start-btn {
-  width: 100%; max-width: 440px;
-  min-height: 52px;
-  padding: 14px 18px;
-  border-radius: 28px;
+  width: 80%; max-width: 360px;
+  min-height: 62px;
+  padding: 16px 24px;
+  border-radius: 32px;
   border: 3px solid #ffffff;
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 1.8rem; font-weight: 900;
+  font-size: 1.6rem; font-weight: 400;
   letter-spacing: 4px;
   text-transform: uppercase;
   cursor: pointer;
@@ -829,6 +869,11 @@ html, body {
   padding: 5px 20px 7px;
   text-shadow: 0 1px 4px rgba(180,0,100,0.3);
   box-shadow: 0 3px 12px rgba(255,142,234,0.4);
+  animation: turnBadgePulse 1.6s ease-in-out 0.4s infinite;
+}
+@keyframes turnBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.1); }
 }
 @keyframes turnPop {
   0%   { transform: scale(0.7) translateY(6px); opacity: 0; }
@@ -867,11 +912,11 @@ html, body {
 }
 @keyframes basketPulse {
   0%, 100% {
-    box-shadow: 0 0 14px rgba(255,217,61,0.5), 0 4px 14px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 44px rgba(255,217,61,1), 0 6px 18px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
     transform: scale(1.04);
   }
 }
@@ -938,6 +983,9 @@ html, body {
   padding: 8px 12px 16px;
   display: flex; align-items: flex-start; justify-content: center;
   overflow: visible;
+}
+#gameScreen.mode-1p .egg-grid-container {
+  margin-top: -30px;
 }
 .egg-grid {
   display: flex;
@@ -1136,8 +1184,8 @@ html, body {
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start;
-  padding-top: 14vh;
+  align-items: center; justify-content: center;
+  padding-top: 0;
   z-index: 650;
   opacity: 0; pointer-events: none;
   transition: opacity 0.28s ease;
@@ -1161,7 +1209,7 @@ html, body {
 }
 .shuffle-label {
   font-family: 'Fredoka One', 'Fredoka', sans-serif;
-  font-size: 2rem; font-weight: 900;
+  font-size: 1.2rem; font-weight: 900;
   color: #fff;
   letter-spacing: 1px;
   text-shadow: 0 0 20px rgba(167,139,250,0.9), 0 2px 8px rgba(0,0,0,0.5);
@@ -1892,18 +1940,14 @@ html, body {
 /* ========== COUNTDOWN OVERLAY ========== */
 #countdownOverlay {
   position: fixed; inset: 0; z-index: 820;
-  backdrop-filter: blur(26px);
-  -webkit-backdrop-filter: blur(26px);
-  /* base bg — overridden per-step in JS */
-  background: radial-gradient(ellipse at 50% 44%,
-    rgba(255,142,234,0.30) 0%,
-    rgba(224,205,255,0.14) 38%,
-    rgba(8,2,22,0.96) 70%);
+  backdrop-filter: blur(20px) brightness(0.75);
+  -webkit-backdrop-filter: blur(20px) brightness(0.75);
+  background: rgba(0, 15, 55, 0.80);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   gap: 18px;
   opacity: 0; pointer-events: none;
-  transition: opacity 0.35s ease, background 0.45s ease;
+  transition: opacity 0.35s ease;
 }
 #countdownOverlay.show { opacity: 1; pointer-events: all; }
 /* Sub-label styled as a colored pill — color/border set per-step in JS */
@@ -1945,7 +1989,6 @@ html, body {
 }
 .countdown-arc.play-arc {
   stroke: #dcf9a8;
-  filter: drop-shadow(0 0 16px rgba(220,249,168,0.95));
   stroke-dashoffset: 0;
 }
 /* Clock inner face */
@@ -1964,7 +2007,6 @@ html, body {
 .countdown-number.play {
   color: #dcf9a8;
   font-size: clamp(4rem, 13vw, 7.5rem);
-  text-shadow: 0 0 90px rgba(220,249,168,1), 0 0 36px rgba(220,249,168,0.85), 0 4px 16px rgba(0,0,0,0.6);
   animation: playPop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 @keyframes countPop {
@@ -2281,7 +2323,54 @@ html, body {
 .chat-toggle:hover { background: rgba(255,255,255,0.4); color: #fff; }
 #chatBar.collapsed .chat-messages,
 #chatBar.collapsed .chat-input-row { display: none; }
-#chatBar.collapsed .chat-toggle { margin-bottom: 0; }
+/* Collapsed: shrink to tab size, anchor to bottom-right */
+#chatBar.collapsed {
+  left: auto;
+  right: 16px;
+  width: auto;
+  border-radius: 14px 14px 0 0;
+  border-top: none;
+  padding: 0;
+}
+#chatBar.collapsed .chat-toggle {
+  margin-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  padding: 8px 16px 8px 14px;
+}
+/* Unread badge on collapsed chat tab */
+.chat-toggle { position: relative; }
+.chat-unread-badge {
+  display: none;
+  position: absolute;
+  top: -10px; right: -10px;
+  background: #e0cdff;
+  color: #4169e1;
+  font-size: 0.78rem; font-weight: 900;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  border-radius: 50%;
+  min-width: 24px; height: 24px;
+  align-items: center; justify-content: center;
+  padding: 0 4px;
+  border: 2px solid rgba(255,255,255,0.95);
+  box-sizing: border-box;
+  pointer-events: none;
+}
+.chat-unread-badge.show {
+  display: flex;
+  animation: badgeScalePulse 1.1s ease-in-out infinite;
+}
+@keyframes badgeScalePulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.3); }
+}
+/* Pulse glow on tab when there are unread messages */
+@keyframes chatTabPulse {
+  0%, 100% { box-shadow: 0 0 0 0 #ff8eea, 0 2px 6px rgba(0,0,0,0.2); }
+  50%       { box-shadow: 0 0 0 9px rgba(255,142,234,0), 0 2px 6px rgba(0,0,0,0.2); }
+}
+#chatBar.collapsed.has-unread .chat-toggle {
+  animation: chatTabPulse 1.4s ease-in-out infinite;
+}
 
 /* ========== EASTER START ANIMATION ========== */
 .easter-eggs-row {
@@ -2397,6 +2486,10 @@ html, body {
           <span class="diff-name">Hard</span>
         </div>
       </div>
+      <div class="spawn-row">
+        <button class="spawn-toggle-btn" id="spawnToggleBtn" onclick="toggleSpawn()">🥚 Spawn: Off</button>
+        <span class="spawn-desc">Match a pair → 2 new eggs appear</span>
+      </div>
     </div>
     <!-- AI difficulty lobby -->
     <div id="aiLobby" class="hidden" style="margin-top:12px;">
@@ -2445,7 +2538,7 @@ html, body {
 
   <!-- Settings nav buttons -->
   <div class="settings-nav-row">
-    <button class="settings-nav-btn btn-avatar" onclick="showSettings('home')">🐣 Avatars &amp; Names</button>
+    <button class="settings-nav-btn btn-avatar" onclick="showSettings('home')">🐣 Avatars</button>
     <button class="settings-nav-btn btn-audio" onclick="showSettings('home')">🎵 Audio</button>
   </div>
 
@@ -2555,7 +2648,7 @@ html, body {
 
 <!-- Trash-talk chat bar (online mode only) -->
 <div id="chatBar" class="hidden">
-  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()">💬 Hide Chat ▼</button>
+  <button class="chat-toggle" id="chatToggle" onclick="toggleChat()"><span id="chatToggleText">💬 Hide Chat ▼</span><span id="chatUnreadBadge" class="chat-unread-badge"></span></button>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-row">
     <input type="text" class="chat-input" id="chatInput"
@@ -2644,6 +2737,8 @@ const ITEMS_BY_DIFF = {
   medium: ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
   hard:   ['🐰','🐣','🌸','🌈','⭐','💖','🦋','🥕','🌷','🎀'],                // 10 pairs = 20 eggs
 };
+// Spawn-mode emoji pool — distinct from starting items, cycles as pairs are added
+const SPAWN_POOL = ['🎪','🌻','🍭','🎈','🏆','💫','🎨','🎭','🍰','🌺','🦄','🐸','🦊','🐧','🍀','🎯','🌙','⚡','🎊','🎁','🌴','🍇','🦩','🦚','🎶','🔮','🧁','🍩','🐝','🎠'];
 const DIFF_CONFIG = {
   easy:   { eggs: 20, time: 135, shuffleTime: 40 },
   medium: { eggs: 20, time: 195, shuffleTime: 30 },
@@ -2655,6 +2750,7 @@ const AI_MEMORY_PROB = { easy: 0.30, medium: 0.65, hard: 0.95 };
 let cfg = {
   mode: '1p',
   diff: 'easy',
+  spawn: false,   // 1p spawn mode: new pair added after each match
   p1: { name: 'Player 1', avatar: '🐣', photo: null },
   p2: { name: 'Player 2', avatar: '🐰', photo: null },
   musicOn: true,
@@ -3231,7 +3327,7 @@ function playCasinoCelebration() {
 function buildDecoEggs() {
   const container = document.getElementById('decoEggs');
   container.innerHTML = '';
-  EGG_COLORS.slice(0, 5).forEach((c, i) => {
+  EGG_COLORS.slice(0, 4).forEach((c, i) => {
     const el = document.createElement('div');
     el.className = 'deco-egg';
     el.style.cssText = `
@@ -3319,6 +3415,107 @@ function selectDiff(diff, el) {
   el.classList.add('selected');
 }
 
+function toggleSpawn() {
+  cfg.spawn = !cfg.spawn;
+  const btn = document.getElementById('spawnToggleBtn');
+  if (!btn) return;
+  btn.textContent = cfg.spawn ? '🥚 Spawn: On' : '🥚 Spawn: Off';
+  btn.classList.toggle('spawn-on', cfg.spawn);
+}
+
+function spawnNewPair() {
+  const emoji = SPAWN_POOL[_spawnEmojiIdx % SPAWN_POOL.length];
+  _spawnEmojiIdx++;
+  const grid = document.getElementById('eggGrid');
+  if (!grid) return;
+
+  // Use same cell width as existing cells (grid is always 5-column in 1p)
+  const existingCell = grid.querySelector('.egg-cell');
+  const cellWidth = existingCell ? existingCell.style.width : 'calc(20%)';
+
+  // Pick two distinct colors
+  const colorIdx1 = Math.floor(Math.random() * EGG_COLORS.length);
+  let colorIdx2 = Math.floor(Math.random() * EGG_COLORS.length);
+  while (colorIdx2 === colorIdx1) colorIdx2 = Math.floor(Math.random() * EGG_COLORS.length);
+  const colorIndices = [colorIdx1, colorIdx2];
+
+  // Pick two non-adjacent insertion positions among visible cells
+  const visibleCells = Array.from(grid.querySelectorAll('.egg-cell'))
+    .filter(c => c.style.display !== 'none');
+  const n = visibleCells.length;
+  let p1, p2;
+  if (n < 4) {
+    p1 = 0; p2 = Math.max(2, n);
+  } else {
+    p1 = Math.floor(Math.random() * (n + 1));
+    let tries = 0;
+    do { p2 = Math.floor(Math.random() * (n + 1)); tries++; }
+    while (Math.abs(p1 - p2) < 3 && tries < 30);
+  }
+  // Reference DOM nodes to insert before (null = append)
+  const insertRefs = [p1, p2].map(p => (p < n ? visibleCells[p] : null));
+
+  for (let i = 0; i < 2; i++) {
+    const id = game.cards.length;
+    const colorIdx = colorIndices[i];
+    const card = { id, emoji, colorIdx, matched: false, revealed: false, bonus: false, el: null, wrapEl: null };
+    game.cards.push(card);
+
+    const cell = document.createElement('div');
+    cell.className = 'egg-cell';
+    cell.style.width = cellWidth;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'egg-wrapper';
+    wrapper.style.setProperty('--dance-dur', (1.6 + (id % 7) * 0.12) + 's');
+    wrapper.style.setProperty('--dance-delay', (id * 0.11 % 1.2) + 's');
+    wrapper.dataset.id = id;
+    wrapper.onclick = () => onEggClick(id);
+
+    const c = EGG_COLORS[colorIdx];
+    wrapper.innerHTML = `
+      <div class="egg-body"
+        style="--egg-light:${c.light};--egg-mid:${c.mid};--egg-dark:${c.dark};--egg-accent:${c.accent}">
+        <div class="egg-top"
+          style="--egg-light:${c.light};--egg-mid:${c.mid};--egg-dark:${c.dark};--egg-accent:${c.accent}"></div>
+        <div class="egg-crack-line"></div>
+        <div class="egg-bottom"
+          style="--egg-light:${c.light};--egg-mid:${c.mid};--egg-dark:${c.dark};--egg-accent:${c.accent}"></div>
+        <div class="egg-dots">
+          <div class="egg-dot" style="--egg-accent:${c.accent}"></div>
+          <div class="egg-dot" style="--egg-accent:${c.accent}"></div>
+          <div class="egg-dot" style="--egg-accent:${c.accent}"></div>
+        </div>
+        <div class="egg-item">${card.emoji}</div>
+      </div>`;
+
+    card.wrapEl = wrapper;
+    card.el = wrapper.querySelector('.egg-body');
+
+    wrapper.style.opacity = '0';
+    wrapper.style.transform = 'translateY(120px) scale(0.7)';
+    cell.appendChild(wrapper);
+    // Insert at the pre-chosen non-adjacent position
+    const ref = insertRefs[i];
+    if (ref) grid.insertBefore(cell, ref);
+    else grid.appendChild(cell);
+
+    const delay = i * 120 + 80;
+    setTimeout(() => {
+      wrapper.classList.add('slide-in');
+      wrapper.addEventListener('animationend', function onEnd() {
+        wrapper.removeEventListener('animationend', onEnd);
+        wrapper.classList.remove('slide-in');
+        wrapper.style.opacity = '';
+        wrapper.style.transform = '';
+        wrapper.classList.add('dancing');
+      }, { once: true });
+    }, delay);
+  }
+
+  game.totalPairs++;
+}
+
 function selectAiDiff(diff, el) {
   cfg.diff = diff;
   document.querySelectorAll('#aiLobby .diff-card').forEach(c => c.classList.remove('selected'));
@@ -3378,6 +3575,7 @@ function startGame() {
   game.shuffling = false;
   game.matchedPairs = 0;
   _shufflePending = false;
+  _spawnEmojiIdx = 0;
   // Create card data (pairs of each item); odd egg counts get one lucky bonus egg
   let cardItems = [...items, ...items];
   const hasBonus = diffCfg.eggs % 2 === 1;
@@ -3411,7 +3609,9 @@ function startGame() {
 
   // Switch screens
   document.getElementById('homeScreen').classList.add('hidden');
-  document.getElementById('gameScreen').classList.remove('hidden');
+  const _gs = document.getElementById('gameScreen');
+  _gs.classList.remove('hidden');
+  _gs.classList.toggle('mode-1p', cfg.mode === '1p');
 
   // Overlay cleanup
   document.getElementById('pauseOverlay').classList.add('hidden');
@@ -3463,8 +3663,9 @@ function buildGameHeader() {
   const basketsRow = document.getElementById('basketsRow');
   basketsRow.innerHTML = '';
 
-  // Always build 2 baskets — in 1p mode basket 1 shows "Pairs Left" countdown
-  for (let i = 0; i < 2; i++) {
+  // 1p: only build the player's basket (centered); other modes get 2 baskets
+  const basketCount = cfg.mode === '1p' ? 1 : 2;
+  for (let i = 0; i < basketCount; i++) {
     const basket = document.createElement('div');
     basket.className = 'basket' + (i === 0 ? ' active' : '');
     basket.id = `basket${i}`;
@@ -4069,6 +4270,8 @@ function checkMatch() {
       game.matchedPairs++;
       game.current = [];
       game.locked = false;
+      // Spawn mode: add a new pair before the game-over check so play continues
+      if (cfg.spawn && cfg.mode === '1p') spawnNewPair();
       if (game.matchedPairs >= game.totalPairs) {
         syncOnlineState();
         if (!_isOnlineGame || isOnlineHost) onGameComplete(false);
@@ -4092,23 +4295,25 @@ function checkMatch() {
     closeCard(b);
     showMatchReveal(cardA.emoji, cardB.emoji, false, 1500, () => {
       game.current = [];
-      game.locked = false;
       if (_shufflePending && (!onlineConn || isOnlineHost)) {
+        game.locked = false;
         executePendingShuffle(); return;
       }
       if (cfg.mode !== '1p') {
         // Only the host switches turns authoritatively in online mode.
-        // The guest gets the updated currentPlayer via applyOnlineState.
-        // If both sides switched independently their 1500ms timers fire at
-        // different times (network lag), causing the guest to double-switch.
+        // The guest stays locked here and waits for applyOnlineState to
+        // deliver the correct currentPlayer and unlock (locked:false) from host.
         if (!onlineConn || isOnlineHost) {
+          game.locked = false;
           game.currentPlayer = 1 - game.currentPlayer;
           syncOnlineState();
         }
+        // Guest: game.locked stays true until applyOnlineState unlocks it
         updateBaskets();
         updateTurnIndicator();
         if (cfg.mode === 'ai' && game.currentPlayer === 1) doAiTurn();
       } else {
+        game.locked = false;
         updateTurnIndicator();
       }
     });
@@ -4169,6 +4374,7 @@ function updateTurnIndicator() {
   if (cfg.mode === '1p') {
     el.innerHTML = '';
     el.classList.remove('mode-ai');
+    el.classList.remove('mode-online');
     return;
   } else {
     const p = game.currentPlayer === 0 ? cfg.p1 : cfg.p2;
@@ -4179,6 +4385,7 @@ function updateTurnIndicator() {
     }
   }
   el.classList.toggle('mode-ai', cfg.mode === 'ai');
+  el.classList.toggle('mode-online', !!onlineConn);
   // Retrigger pop animation
   el.style.animation = 'none';
   void el.offsetWidth;
@@ -4302,6 +4509,10 @@ let _rematchOpponentOffered = false; // opponent sent rematch_offer
 let _shufflePending = false;  // timer hit 0 mid-animation; shuffle fires when animation ends
 let _hostShuffleDone = false; // host's shuffle animation has completed
 let _guestShuffleDone = false; // guest signalled its shuffle animation is done
+let _chatUnread = 0;          // unread messages while chat tab is collapsed
+
+// Spawn mode
+let _spawnEmojiIdx = 0; // cycles through SPAWN_POOL across a session
 
 // AI mode globals
 let _aiMemory = new Map(); // cardIdx → emoji, cards the AI has "seen"
@@ -4781,6 +4992,8 @@ function handleOnlineData(data) {
       const runGuestShuffle = () => {
         const mro = document.getElementById('matchRevealOverlay');
         if (mro && mro.classList.contains('show')) { setTimeout(runGuestShuffle, 80); return; }
+        game.locked = true;
+        showShuffleOverlay();
         doShuffle(data.order);
       };
       runGuestShuffle();
@@ -4871,7 +5084,11 @@ function startOnlineGameAsHost() {
   const chatBar = document.getElementById('chatBar');
   chatBar.classList.remove('hidden');
   chatBar.classList.add('collapsed');
-  document.getElementById('chatToggle').textContent = '💬 Show Chat ▲';
+  document.getElementById('chatToggleText').textContent = 'Talk Trash 💬';
+  _chatUnread = 0;
+  const unreadBadge = document.getElementById('chatUnreadBadge');
+  if (unreadBadge) { unreadBadge.textContent = ''; unreadBadge.classList.remove('show'); }
+  document.getElementById('chatBar').classList.remove('has-unread');
   document.getElementById('gameScreen').classList.add('chat-visible', 'chat-collapsed');
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('homeScreen').classList.add('hidden');
@@ -4922,7 +5139,11 @@ function applyOnlineInit(data) {
   const chatBar = document.getElementById('chatBar');
   chatBar.classList.remove('hidden');
   chatBar.classList.add('collapsed');
-  document.getElementById('chatToggle').textContent = '💬 Show Chat ▲';
+  document.getElementById('chatToggleText').textContent = 'Talk Trash 💬';
+  _chatUnread = 0;
+  const unreadBadge = document.getElementById('chatUnreadBadge');
+  if (unreadBadge) { unreadBadge.textContent = ''; unreadBadge.classList.remove('show'); }
+  document.getElementById('chatBar').classList.remove('has-unread');
   document.getElementById('gameScreen').classList.add('chat-visible', 'chat-collapsed');
   document.getElementById('chatMessages').innerHTML = '';
   document.getElementById('homeScreen').classList.add('hidden');
@@ -5010,6 +5231,8 @@ function _finalizeShuffleResume() {
   game.locked = false;
   startShuffleTimer();
   updateTurnIndicator();
+  // In AI mode, if it's the AI's turn after the shuffle, kick off its move.
+  if (cfg.mode === 'ai' && game.currentPlayer === 1) setTimeout(doAiTurn, 700);
 }
 
 
@@ -5441,11 +5664,16 @@ function showGameMessage(text, cls, duration) {
 
 function toggleChat() {
   const bar = document.getElementById('chatBar');
-  const btn = document.getElementById('chatToggle');
   const gs  = document.getElementById('gameScreen');
   const collapsed = bar.classList.toggle('collapsed');
-  btn.textContent = collapsed ? '💬 Show Chat ▲' : '💬 Hide Chat ▼';
+  document.getElementById('chatToggleText').textContent = collapsed ? 'Talk Trash 💬' : '💬 Hide Chat ▼';
   gs.classList.toggle('chat-collapsed', collapsed);
+  if (!collapsed) {
+    _chatUnread = 0;
+    const badge = document.getElementById('chatUnreadBadge');
+    if (badge) { badge.textContent = ''; badge.classList.remove('show'); }
+    bar.classList.remove('has-unread');
+  }
 }
 
 function sendChatMsg() {
@@ -5457,6 +5685,11 @@ function sendChatMsg() {
   const from   = isOnlineHost ? cfg.p1.name   : cfg.p2.name;
   sendOnline({ type: 'chat', avatar, from, text });
   addChatMsg(avatar, from, text, true);
+  // Celebration fireworks near the chat bar
+  const W = window.innerWidth, H = window.innerHeight;
+  fireFirework(W * 0.20, H * 0.76);
+  setTimeout(() => fireFirework(W * 0.80, H * 0.74), 90);
+  setTimeout(() => fireFirework(W * 0.50, H * 0.68), 180);
 }
 
 function addChatMsg(avatar, from, text, isSelf) {
@@ -5469,6 +5702,16 @@ function addChatMsg(avatar, from, text, isSelf) {
   // Keep only the last 12 messages
   while (box.children.length > 12) box.removeChild(box.firstChild);
   box.scrollTop = box.scrollHeight;
+  // Track unread messages when opponent sends something and chat is collapsed
+  if (!isSelf) {
+    const bar = document.getElementById('chatBar');
+    if (bar && bar.classList.contains('collapsed')) {
+      _chatUnread++;
+      const badge = document.getElementById('chatUnreadBadge');
+      if (badge) { badge.textContent = _chatUnread; badge.classList.add('show'); }
+      bar.classList.add('has-unread');
+    }
+  }
 }
 
 function showMatchReveal(emojiA, emojiB, isMatch, duration, afterCallback) {
@@ -5518,15 +5761,8 @@ function playCountdown(callback) {
   const SWEEP_MS = 850;        // arc sweep duration
 
   const steps = ['3', '2', '1', 'PLAY!'];
-  // Palette: vivid pink → vivid lavender → vivid yellow → vivid lime — high contrast against dark bg
+  // Palette: vivid pink → vivid lavender → vivid yellow → vivid lime — high contrast against dark blue bg
   const STEP_COLORS = ['#ff4dd2', '#b57bff', '#ffd600', '#7dff6b'];
-  // Per-step background — deep dark center fading to near-black edges
-  const STEP_BGS = [
-    'radial-gradient(ellipse at 50% 44%, rgba(255,77,210,0.45) 0%, rgba(120,0,80,0.18) 40%, rgba(6,0,18,0.98) 68%)',
-    'radial-gradient(ellipse at 50% 44%, rgba(181,123,255,0.48) 0%, rgba(60,0,140,0.18) 40%, rgba(4,0,20,0.98) 68%)',
-    'radial-gradient(ellipse at 50% 44%, rgba(255,214,0,0.46) 0%, rgba(120,80,0,0.18) 40%, rgba(8,5,0,0.98) 68%)',
-    'radial-gradient(ellipse at 50% 44%, rgba(125,255,107,0.46) 0%, rgba(0,100,20,0.18) 40%, rgba(0,8,2,0.98) 68%)',
-  ];
   let i = 0;
   overlay.classList.add('show');
   // Wait for the overlay fade-in (350ms transition) before showing the first number
@@ -5538,9 +5774,6 @@ function playCountdown(callback) {
     const isPlay = val === 'PLAY!';
     const color = STEP_COLORS[i] || '#dcf9a8';
 
-    // Shift background glow to match the step color
-    overlay.style.background = STEP_BGS[i] || STEP_BGS[3];
-
     // Snap arc back to full without transition (reflow required to flush transition:none)
     if (arcEl) {
       arcEl.style.transition = 'none';
@@ -5549,7 +5782,7 @@ function playCountdown(callback) {
       arcEl.className = isPlay ? 'countdown-arc play-arc' : 'countdown-arc';
       if (!isPlay) {
         arcEl.style.stroke = color;
-        arcEl.style.filter = `drop-shadow(0 0 14px ${color}dd)`;
+        arcEl.style.filter = '';
         // Tint the track ring subtly with the step color
         const trackEl = arcEl.closest('svg').querySelector('.countdown-track');
         if (trackEl) trackEl.style.stroke = color + '28';
@@ -5564,7 +5797,7 @@ function playCountdown(callback) {
     numEl.className = isPlay ? 'countdown-number play' : 'countdown-number';
     if (!isPlay) {
       numEl.style.color = color;
-      numEl.style.textShadow = `0 0 80px ${color}, 0 0 32px ${color}aa, 0 4px 16px rgba(0,0,0,0.6)`;
+      numEl.style.textShadow = '';
     } else {
       numEl.style.color = '';
       numEl.style.textShadow = '';
