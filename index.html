@@ -331,6 +331,131 @@ html, body {
 .player-name-input:focus { border-color: #888; }
 .player-name-input::placeholder { color: #aaa; }
 
+/* ===================== AVATAR CREATOR OVERLAY ===================== */
+#avatarCreatorOverlay {
+  position: fixed; inset: 0; z-index: 3000;
+  background: rgba(30,0,60,0.72);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+#avatarCreatorOverlay.hidden { display: none; }
+.ac-modal {
+  background: linear-gradient(160deg, #f0e6ff 0%, #e8f7ff 100%);
+  border-radius: 28px;
+  border: 3px solid #c084fc;
+  box-shadow: 0 12px 48px rgba(124,58,237,0.32);
+  width: 93%; max-width: 480px;
+  max-height: 92vh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.ac-header {
+  background: linear-gradient(135deg, #7c3aed, #c084fc);
+  padding: 14px 18px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.ac-title {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.25rem; color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  letter-spacing: 0.5px;
+}
+.ac-close-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.2);
+  color: #fff; font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.ac-close-btn:hover { background: rgba(255,255,255,0.35); }
+.ac-body {
+  display: flex; flex-direction: column;
+  overflow-y: auto; flex: 1;
+  padding-bottom: 4px;
+}
+.ac-preview-row {
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px 0 8px;
+  flex-shrink: 0;
+}
+.ac-preview-circle {
+  width: 128px; height: 128px;
+  border-radius: 50%;
+  border: 4px solid #c084fc;
+  overflow: hidden;
+  background: #f3e8ff;
+  box-shadow: 0 4px 20px rgba(124,58,237,0.28);
+}
+.ac-preview-circle svg { width: 100%; height: 100%; display: block; }
+.ac-section { padding: 6px 16px 2px; }
+.ac-section-label {
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 0.78rem; color: #7c3aed;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.ac-opts { display: flex; flex-wrap: wrap; gap: 5px; }
+.ac-opt {
+  padding: 5px 13px;
+  border-radius: 999px;
+  border: 2px solid #c4b5fd;
+  background: #fff;
+  color: #5b21b6;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.86rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s;
+  line-height: 1.3;
+}
+.ac-opt:hover { border-color: #7c3aed; background: #f3e8ff; }
+.ac-opt.selected { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+.ac-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.ac-swatch {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+.ac-swatch:hover { transform: scale(1.18); }
+.ac-swatch.selected { border-color: #7c3aed; transform: scale(1.18); box-shadow: 0 0 0 2px #fff inset; }
+.ac-mini-swatches { display: flex; gap: 7px; flex-wrap: wrap; }
+.ac-mini-swatch {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+.ac-mini-swatch:hover { transform: scale(1.2); }
+.ac-mini-swatch.selected { border-color: #7c3aed; transform: scale(1.2); box-shadow: 0 0 0 2px #fff inset; }
+.ac-divider { height: 1px; background: #e9d5ff; margin: 5px 16px; }
+.ac-save-btn {
+  margin: 10px 16px 14px;
+  padding: 13px;
+  border-radius: 16px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #fff;
+  font-family: 'Fredoka One', 'Fredoka', sans-serif;
+  font-size: 1.15rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+}
+.ac-save-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,58,237,0.42); }
+
 /* Eggs row — hamburger absolutely positioned so eggs center across full width */
 .home-eggs-row {
   position: relative;
@@ -2610,6 +2735,93 @@ html, body {
 
 </div><!-- /settingsScreen -->
 
+<!-- ========== AVATAR CREATOR OVERLAY ========== -->
+<div class="hidden" id="avatarCreatorOverlay">
+  <div class="ac-modal">
+    <div class="ac-header">
+      <span class="ac-title">🎨 Avatar Creator</span>
+      <button class="ac-close-btn" onclick="closeAvatarCreator()">✕</button>
+    </div>
+    <div class="ac-body">
+      <!-- Live preview -->
+      <div class="ac-preview-row">
+        <div class="ac-preview-circle">
+          <svg id="acPreviewSVG" viewBox="0 0 200 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+      <!-- Gender -->
+      <div class="ac-section">
+        <div class="ac-section-label">Gender</div>
+        <div class="ac-opts" id="acOptGender"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Skin tone -->
+      <div class="ac-section">
+        <div class="ac-section-label">Skin Tone</div>
+        <div class="ac-swatches" id="acOptSkin"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Hair style -->
+      <div class="ac-section">
+        <div class="ac-section-label">Hair Style</div>
+        <div class="ac-opts" id="acOptHair"></div>
+      </div>
+      <!-- Hair color -->
+      <div class="ac-section">
+        <div class="ac-section-label">Hair Color</div>
+        <div class="ac-mini-swatches" id="acOptHairColor"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Eye color -->
+      <div class="ac-section">
+        <div class="ac-section-label">Eye Color</div>
+        <div class="ac-mini-swatches" id="acOptEyeColor"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Expression -->
+      <div class="ac-section">
+        <div class="ac-section-label">Expression</div>
+        <div class="ac-opts" id="acOptExpression"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Facial hair (hidden for female) -->
+      <div class="ac-section" id="acFacialHairSection">
+        <div class="ac-section-label">Facial Hair</div>
+        <div class="ac-opts" id="acOptFacialHair"></div>
+      </div>
+      <div class="ac-divider" id="acFacialHairDivider"></div>
+      <!-- Glasses -->
+      <div class="ac-section">
+        <div class="ac-section-label">Glasses</div>
+        <div class="ac-opts" id="acOptGlasses"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Piercings -->
+      <div class="ac-section">
+        <div class="ac-section-label">Piercings</div>
+        <div class="ac-opts" id="acOptPiercings"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Accessories -->
+      <div class="ac-section">
+        <div class="ac-section-label">Accessories</div>
+        <div class="ac-opts" id="acOptAccessories"></div>
+      </div>
+      <div class="ac-divider"></div>
+      <!-- Clothing -->
+      <div class="ac-section">
+        <div class="ac-section-label">Clothing Style</div>
+        <div class="ac-opts" id="acOptClothing"></div>
+      </div>
+      <div class="ac-section">
+        <div class="ac-section-label">Clothing Color</div>
+        <div class="ac-mini-swatches" id="acOptClothingColor"></div>
+      </div>
+    </div>
+    <button class="ac-save-btn" id="acSaveBtn" onclick="saveCustomAvatar()">💾 Save Avatar</button>
+  </div>
+</div>
+
 <!-- ========== GAME SCREEN ========== -->
 <div class="screen hidden" id="gameScreen">
 
@@ -3383,7 +3595,485 @@ function buildAvatarPicker(containerId, playerKey, defaultIdx) {
   row.appendChild(uploadBtn);
   row.appendChild(fileInput);
   row.appendChild(preview);
+  // Custom avatar creator button
+  const createBtn = document.createElement('button');
+  createBtn.className = 'avatar-upload-btn';
+  createBtn.style.cssText = 'background:#f3e8ff;border-color:#a78bfa;color:#7c3aed;';
+  createBtn.textContent = '🎨 Create';
+  createBtn.onclick = () => openAvatarCreator(playerKey);
+  row.appendChild(createBtn);
   cfg[playerKey].avatar = AVATARS[defaultIdx];
+}
+
+// ============================================================
+//  AVATAR CREATOR — data, SVG renderer, UI logic
+// ============================================================
+
+const AC_SKINS = [
+  { id:'s1', color:'#FDDBB4', shadow:'#D4956A' },
+  { id:'s2', color:'#F5C18A', shadow:'#C47840' },
+  { id:'s3', color:'#E8A878', shadow:'#B86030' },
+  { id:'s4', color:'#C4783C', shadow:'#8C4810' },
+  { id:'s5', color:'#8D5524', shadow:'#5A3010' },
+  { id:'s6', color:'#4A2912', shadow:'#280E04' },
+];
+const AC_HAIR_COLORS = [
+  { id:'hc1',  color:'#1a1a1a' }, { id:'hc2',  color:'#3e2214' },
+  { id:'hc3',  color:'#7B4F2E' }, { id:'hc4',  color:'#B8743C' },
+  { id:'hc5',  color:'#D4AA70' }, { id:'hc6',  color:'#F0DC6A' },
+  { id:'hc7',  color:'#B02020' }, { id:'hc8',  color:'#C0C0C0' },
+  { id:'hc9',  color:'#F0F0F0' }, { id:'hc10', color:'#a855f7' },
+  { id:'hc11', color:'#3b82f6' }, { id:'hc12', color:'#06b6d4' },
+  { id:'hc13', color:'#f472b6' },
+];
+const AC_EYE_COLORS = [
+  { id:'ec1', color:'#5C3317' }, { id:'ec2', color:'#2563eb' },
+  { id:'ec3', color:'#16a34a' }, { id:'ec4', color:'#64748b' },
+  { id:'ec5', color:'#7c3aed' }, { id:'ec6', color:'#0f766e' },
+];
+const AC_HAIR_STYLES = [
+  { id:'bald',     label:'🪩 Bald' },     { id:'short',    label:'✂️ Short' },
+  { id:'medium',   label:'〰️ Medium' },   { id:'long',     label:'🌊 Long' },
+  { id:'curly',    label:'🌀 Curly' },    { id:'afro',     label:'☁️ Afro' },
+  { id:'bun',      label:'⬤ Bun' },      { id:'ponytail', label:'🎀 Ponytail' },
+  { id:'mohawk',   label:'⚡ Mohawk' },   { id:'braids',   label:'🪢 Braids' },
+];
+const AC_EXPRESSIONS = [
+  { id:'happy',      label:'😊 Happy' },    { id:'excited',    label:'😄 Excited' },
+  { id:'cool',       label:'😎 Cool' },     { id:'wink',       label:'😉 Wink' },
+  { id:'surprised',  label:'😮 Surprised'},  { id:'thoughtful', label:'🤔 Pensive' },
+];
+const AC_FACIAL_HAIR = [
+  { id:'none',     label:'🚫 None' },     { id:'stubble',  label:'🧔 Stubble' },
+  { id:'mustache', label:'👨 Mustache' }, { id:'goatee',   label:'🧔 Goatee' },
+  { id:'beard',    label:'🧔 Full Beard' },
+];
+const AC_GLASSES = [
+  { id:'none',  label:'🚫 None' },  { id:'round', label:'🔵 Round' },
+  { id:'square',label:'🟦 Square'},  { id:'cat',   label:'🐱 Cat-Eye' },
+  { id:'sun',   label:'😎 Shades' }, { id:'mono',  label:'🔍 Monocle' },
+];
+const AC_PIERCINGS = [
+  { id:'none',  label:'🚫 None' },  { id:'studs', label:'✨ Ear Studs' },
+  { id:'hoops', label:'⭕ Hoops' }, { id:'nose',  label:'💎 Nose Stud' },
+  { id:'all',   label:'💫 All' },
+];
+const AC_ACCESSORIES = [
+  { id:'none',     label:'🚫 None' },     { id:'cap',      label:'🧢 Cap' },
+  { id:'hat',      label:'🎩 Top Hat' },  { id:'crown',    label:'👑 Crown' },
+  { id:'flowers',  label:'🌸 Flowers' },  { id:'bow',      label:'🎀 Bow' },
+  { id:'headband', label:'🎽 Headband' }, { id:'bunny',    label:'🐰 Bunny Ears' },
+];
+const AC_CLOTHING = [
+  { id:'tshirt',     label:'👕 T-Shirt',    colors:['#4a9eda','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#fff'] },
+  { id:'hoodie',     label:'🧥 Hoodie',     colors:['#2c3e50','#7f8c8d','#c0392b','#2980b9','#27ae60','#8e44ad'] },
+  { id:'dress',      label:'👗 Dress',      colors:['#e91e8c','#9b59b6','#3498db','#e74c3c','#2ecc71','#f39c12'] },
+  { id:'suit',       label:'👔 Suit',       colors:['#2c3e50','#34495e','#1a252f','#7f8c8d','#2980b9'] },
+  { id:'turtleneck', label:'🧶 Turtleneck', colors:['#fff','#2c3e50','#c0392b','#27ae60','#2980b9'] },
+];
+
+// Live creator state
+let _acState = {
+  playerKey:'p1', gender:'female',
+  skin:'s1', hair:'medium', hairColor:'hc1', eyeColor:'ec1',
+  expression:'happy', facialHair:'none', glasses:'none',
+  piercings:'none', accessories:'none',
+  clothing:'tshirt', clothingColor:'#4a9eda',
+};
+
+function openAvatarCreator(playerKey) {
+  _acState.playerKey = playerKey;
+  const saved = JSON.parse(localStorage.getItem('eggHunt_' + playerKey + '_ac') || 'null');
+  if (saved) { const pk = _acState.playerKey; Object.assign(_acState, saved); _acState.playerKey = pk; }
+  document.getElementById('avatarCreatorOverlay').classList.remove('hidden');
+  _acBuildUI();
+  _acUpdatePreview();
+}
+
+function closeAvatarCreator() {
+  document.getElementById('avatarCreatorOverlay').classList.add('hidden');
+}
+
+function saveCustomAvatar() {
+  const svgEl = document.getElementById('acPreviewSVG');
+  const svgStr = new XMLSerializer().serializeToString(svgEl);
+  const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr);
+  const pk = _acState.playerKey;
+  cfg[pk].photo = dataUrl;
+  cfg[pk].avatar = null;
+  localStorage.setItem('eggHunt_' + pk + '_ac', JSON.stringify({..._acState, svgUrl: dataUrl}));
+  // Save name from input
+  const nameVal = (document.getElementById(pk + 'Name') || {}).value;
+  if (nameVal) localStorage.setItem('eggHunt_' + pk + '_name', nameVal.trim() || (pk === 'p1' ? 'Player 1' : 'Player 2'));
+  // Update avatar row preview
+  const row = document.getElementById(pk + 'AvatarRow');
+  if (row) {
+    row.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+    let prev = row.querySelector('.avatar-preview');
+    if (!prev) { prev = document.createElement('img'); prev.className = 'avatar-preview'; row.appendChild(prev); }
+    prev.src = dataUrl; prev.style.display = 'block';
+  }
+  const btn = document.getElementById('acSaveBtn');
+  const orig = btn.textContent;
+  btn.textContent = '✅ Saved!';
+  setTimeout(() => { btn.textContent = orig; closeAvatarCreator(); }, 900);
+}
+
+function _acSet(key, val) {
+  _acState[key] = val;
+  if (key === 'gender') {
+    const showFH = val !== 'female';
+    document.getElementById('acFacialHairSection').style.display = showFH ? '' : 'none';
+    document.getElementById('acFacialHairDivider').style.display = showFH ? '' : 'none';
+    if (!showFH) _acState.facialHair = 'none';
+  }
+  if (key === 'clothing') {
+    const item = AC_CLOTHING.find(c => c.id === val);
+    if (item) _acState.clothingColor = item.colors[0];
+    _acRebuildMiniSwatches('acOptClothingColor', AC_CLOTHING.find(c=>c.id===val)?.colors||[], 'clothingColor');
+  }
+  _acUpdatePreview();
+  // Refresh selected state for pill buttons
+  document.querySelectorAll(`.ac-opt[data-ackey="${key}"]`).forEach(b => b.classList.toggle('selected', b.dataset.acval === val));
+  document.querySelectorAll(`.ac-swatch[data-ackey="${key}"]`).forEach(b => b.classList.toggle('selected', b.dataset.acval === val));
+}
+
+function _acBuildUI() {
+  _acBuildOpts('acOptGender', [{id:'female',label:'👩 Female'},{id:'male',label:'👨 Male'},{id:'nb',label:'🌈 Non-binary'}], 'gender');
+  _acBuildSwatches('acOptSkin', AC_SKINS, 'skin');
+  _acBuildOpts('acOptHair', AC_HAIR_STYLES, 'hair');
+  _acRebuildMiniSwatches('acOptHairColor', AC_HAIR_COLORS.map(h=>h.color), 'hairColor', AC_HAIR_COLORS.map(h=>h.id));
+  _acRebuildMiniSwatches('acOptEyeColor', AC_EYE_COLORS.map(e=>e.color), 'eyeColor', AC_EYE_COLORS.map(e=>e.id));
+  _acBuildOpts('acOptExpression', AC_EXPRESSIONS, 'expression');
+  _acBuildOpts('acOptFacialHair', AC_FACIAL_HAIR, 'facialHair');
+  _acBuildOpts('acOptGlasses', AC_GLASSES, 'glasses');
+  _acBuildOpts('acOptPiercings', AC_PIERCINGS, 'piercings');
+  _acBuildOpts('acOptAccessories', AC_ACCESSORIES, 'accessories');
+  _acBuildOpts('acOptClothing', AC_CLOTHING, 'clothing');
+  const citem = AC_CLOTHING.find(c=>c.id===_acState.clothing) || AC_CLOTHING[0];
+  _acRebuildMiniSwatches('acOptClothingColor', citem.colors, 'clothingColor');
+  const showFH = _acState.gender !== 'female';
+  document.getElementById('acFacialHairSection').style.display = showFH ? '' : 'none';
+  document.getElementById('acFacialHairDivider').style.display = showFH ? '' : 'none';
+}
+
+function _acBuildOpts(containerId, items, stateKey) {
+  const el = document.getElementById(containerId); if (!el) return; el.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'ac-opt' + (_acState[stateKey] === item.id ? ' selected' : '');
+    btn.textContent = item.label;
+    btn.dataset.ackey = stateKey; btn.dataset.acval = item.id;
+    btn.onclick = () => _acSet(stateKey, item.id);
+    el.appendChild(btn);
+  });
+}
+
+function _acBuildSwatches(containerId, items, stateKey) {
+  const el = document.getElementById(containerId); if (!el) return; el.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'ac-swatch' + (_acState[stateKey] === item.id ? ' selected' : '');
+    btn.style.background = item.color; btn.title = item.id;
+    btn.dataset.ackey = stateKey; btn.dataset.acval = item.id;
+    btn.onclick = () => { _acState[stateKey] = item.id; _acUpdatePreview(); document.querySelectorAll(`.ac-swatch[data-ackey="${stateKey}"]`).forEach(b=>b.classList.toggle('selected',b.dataset.acval===item.id)); };
+    el.appendChild(btn);
+  });
+}
+
+// Mini swatches for hair/eye/clothing colors (stored by value, not id)
+function _acRebuildMiniSwatches(containerId, colors, stateKey, ids) {
+  const el = document.getElementById(containerId); if (!el) return; el.innerHTML = '';
+  colors.forEach((color, i) => {
+    const id = ids ? ids[i] : color;
+    const btn = document.createElement('button');
+    btn.className = 'ac-mini-swatch' + (_acState[stateKey] === id ? ' selected' : '');
+    btn.style.background = color;
+    if (color === '#fff' || color === '#F0F0F0') btn.style.outline = '1px solid #ddd';
+    btn.title = color;
+    btn.onclick = () => {
+      _acState[stateKey] = id; _acUpdatePreview();
+      el.querySelectorAll('.ac-mini-swatch').forEach((b,j) => b.classList.toggle('selected', (ids?ids[j]:colors[j]) === id));
+    };
+    el.appendChild(btn);
+  });
+}
+
+function _acUpdatePreview() {
+  const svg = document.getElementById('acPreviewSVG');
+  if (svg) svg.innerHTML = _buildAvatarSVG(_acState);
+}
+
+// ── Color helpers ──
+function _acLighten(hex, amt) {
+  try {
+    hex = hex.replace('#',''); if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    return '#'+[0,2,4].map(i=>Math.min(255,parseInt(hex.slice(i,i+2),16)+Math.round(255*amt)).toString(16).padStart(2,'0')).join('');
+  } catch(e){return '#'+hex;}
+}
+function _acDarken(hex, amt) {
+  try {
+    hex = hex.replace('#',''); if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    return '#'+[0,2,4].map(i=>Math.max(0,parseInt(hex.slice(i,i+2),16)-Math.round(255*amt)).toString(16).padStart(2,'0')).join('');
+  } catch(e){return '#'+hex;}
+}
+
+// ── Main SVG renderer ──
+function _buildAvatarSVG(s) {
+  const skin = AC_SKINS.find(x=>x.id===s.skin) || AC_SKINS[0];
+  const sc = skin.color, ss = skin.shadow;
+  const hc = (AC_HAIR_COLORS.find(x=>x.id===s.hairColor)||AC_HAIR_COLORS[0]).color;
+  const hcd = _acDarken(hc, 0.18);
+  const ec = (AC_EYE_COLORS.find(x=>x.id===s.eyeColor)||AC_EYE_COLORS[0]).color;
+  const cc = s.clothingColor || '#4a9eda';
+  const p = []; // parts array
+  // ── Defs & Background ──
+  p.push(`<defs>
+    <radialGradient id="bgG" cx="50%" cy="40%" r="65%"><stop offset="0%" stop-color="#f3e8ff"/><stop offset="100%" stop-color="#ddd6fe"/></radialGradient>
+    <radialGradient id="hdG" cx="36%" cy="30%" r="72%"><stop offset="0%" stop-color="${_acLighten(sc,0.14)}"/><stop offset="100%" stop-color="${sc}"/></radialGradient>
+    <radialGradient id="bdG" cx="50%" cy="20%" r="80%"><stop offset="0%" stop-color="${_acLighten(cc,0.18)}"/><stop offset="100%" stop-color="${cc}"/></radialGradient>
+  </defs>
+  <rect width="200" height="240" fill="url(#bgG)"/>`);
+  // ── Clothing / Body ──
+  p.push(_acSVGBody(s.clothing, cc, sc));
+  // ── Hair BACK (long flowing — drawn before head so head is on top) ──
+  if (s.hair !== 'bald') p.push(_acSVGHairBack(s.hair, hc, hcd));
+  // ── Neck ──
+  p.push(`<rect x="84" y="174" width="32" height="34" rx="10" fill="url(#hdG)"/>
+  <rect x="88" y="175" width="7" height="30" rx="3" fill="${ss}" opacity="0.15"/>`);
+  // ── Ears ──
+  p.push(`<ellipse cx="29" cy="112" rx="14" ry="18" fill="url(#hdG)"/>
+  <ellipse cx="29" cy="112" rx="8" ry="11" fill="${ss}" opacity="0.22"/>
+  <ellipse cx="171" cy="112" rx="14" ry="18" fill="url(#hdG)"/>
+  <ellipse cx="171" cy="112" rx="8" ry="11" fill="${ss}" opacity="0.22"/>`);
+  // ── Head ──
+  p.push(`<ellipse cx="100" cy="107" rx="71" ry="79" fill="url(#hdG)"/>
+  <ellipse cx="66" cy="132" rx="13" ry="8" fill="#ffb3c6" opacity="0.28"/>
+  <ellipse cx="134" cy="132" rx="13" ry="8" fill="#ffb3c6" opacity="0.28"/>`);
+  // ── Ear piercings (drawn after head so they're visible) ──
+  if (s.piercings==='studs'||s.piercings==='all') p.push(`<circle cx="19" cy="112" r="4" fill="#FFD700" stroke="#B8860B" stroke-width="1"/><circle cx="181" cy="112" r="4" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>`);
+  if (s.piercings==='hoops'||s.piercings==='all') p.push(`<circle cx="19" cy="122" r="7" fill="none" stroke="#C0C0C0" stroke-width="2.5"/><circle cx="181" cy="122" r="7" fill="none" stroke="#C0C0C0" stroke-width="2.5"/>`);
+  // ── Eyebrows ──
+  p.push(_acSVGEyebrows(s.expression, hc, s.gender));
+  // ── Eyes ──
+  p.push(_acSVGEyes(s.expression, ec));
+  // ── Nose ──
+  p.push(`<path d="M97 126 Q91 137 100 141 Q109 137 103 126" stroke="${ss}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <circle cx="95" cy="138" r="2.5" fill="${ss}" opacity="0.25"/>
+  <circle cx="105" cy="138" r="2.5" fill="${ss}" opacity="0.25"/>`);
+  // ── Mouth ──
+  p.push(_acSVGMouth(s.expression));
+  // ── Facial hair ──
+  if (s.facialHair && s.facialHair!=='none' && s.gender!=='female') p.push(_acSVGFacialHair(s.facialHair, hc));
+  // ── Glasses ──
+  if (s.glasses && s.glasses!=='none') p.push(_acSVGGlasses(s.glasses));
+  // ── Hair FRONT (top & fringe — on top of face) ──
+  if (s.hair !== 'bald') p.push(_acSVGHairFront(s.hair, hc, hcd));
+  // ── Nose stud ──
+  if (s.piercings==='nose'||s.piercings==='all') p.push(`<circle cx="104" cy="141" r="3" fill="#FFD700" stroke="#B8860B" stroke-width="0.8"/>`);
+  // ── Accessories ──
+  p.push(_acSVGAccessory(s.accessories, hc, s.gender));
+  return p.join('\n');
+}
+
+function _acSVGBody(style, cc, sc) {
+  const cl = _acLighten(cc,0.14), cd = _acDarken(cc,0.08);
+  if (style==='dress') return `<path d="M28 240 Q24 200 56 193 Q78 186 100 188 Q122 186 144 193 Q176 200 172 240Z" fill="${cc}" stroke="${cd}" stroke-width="1.5"/>
+  <path d="M56 193 Q78 204 100 204 Q122 204 144 193" fill="${cl}" opacity="0.28"/>`;
+  if (style==='suit') {
+    const lp = _acLighten(cc,0.38);
+    return `<path d="M28 240 Q26 196 64 184 Q80 178 100 180 Q120 178 136 184 Q174 196 172 240Z" fill="${cc}" stroke="${cd}" stroke-width="1.5"/>
+    <path d="M100 180 L80 188 L76 216 L100 205Z" fill="${lp}" opacity="0.85"/>
+    <path d="M100 180 L120 188 L124 216 L100 205Z" fill="${lp}" opacity="0.85"/>
+    <path d="M96 188 L104 188 L106 218 L100 224 L94 218Z" fill="#e74c3c"/>`;
+  }
+  if (style==='hoodie') return `<path d="M28 240 Q26 196 64 184 Q80 178 100 180 Q120 178 136 184 Q174 196 172 240Z" fill="${cc}" stroke="${cd}" stroke-width="1.5"/>
+  <path d="M64 184 Q80 169 100 167 Q120 169 136 184" fill="none" stroke="${cd}" stroke-width="2"/>
+  <path d="M78 213 Q100 217 122 213 L122 228 Q100 232 78 228Z" fill="${cd}"/>`;
+  if (style==='turtleneck') return `<path d="M28 240 Q26 196 64 184 Q80 178 100 180 Q120 178 136 184 Q174 196 172 240Z" fill="${cc}" stroke="${cd}" stroke-width="1.5"/>
+  <path d="M80 180 Q100 173 120 180 L118 200 Q100 207 82 200Z" fill="${_acDarken(cc,0.04)}"/>`;
+  // t-shirt default
+  return `<path d="M28 240 Q26 202 58 192 L64 183 Q80 176 100 178 Q120 176 136 183 L142 192 Q174 202 172 240Z" fill="${cc}" stroke="${cd}" stroke-width="1.5"/>
+  <path d="M58 192 Q40 207 36 226 L54 229 Q54 212 66 200Z" fill="${cd}" opacity="0.5"/>
+  <path d="M142 192 Q160 207 164 226 L146 229 Q146 212 134 200Z" fill="${cd}" opacity="0.5"/>`;
+}
+
+function _acSVGHairBack(style, hc, hcd) {
+  if (style==='long') return `<path d="M38 86 Q20 162 28 222 Q40 217 50 222 Q58 156 58 108Z" fill="${hc}"/>
+  <path d="M162 86 Q180 162 172 222 Q160 217 150 222 Q142 156 142 108Z" fill="${hc}"/>
+  <path d="M28 222 Q40 217 50 222 L46 240 Q34 240 28 235Z" fill="${hcd}"/>
+  <path d="M172 222 Q160 217 150 222 L154 240 Q166 240 172 235Z" fill="${hcd}"/>`;
+  if (style==='ponytail') return `<path d="M154 76 Q184 122 180 172 Q175 192 165 186 Q168 152 160 116 Q152 90 148 80Z" fill="${hc}"/>
+  <path d="M163 170 Q160 186 150 188 Q155 172 152 154Z" fill="${hcd}"/>`;
+  if (style==='braids') return `<path d="M40 102 Q28 162 32 222 Q42 217 48 220 Q44 160 52 102Z" fill="${hc}"/>
+  <path d="M160 102 Q172 162 168 222 Q158 217 152 220 Q156 160 148 102Z" fill="${hc}"/>
+  <path d="M36 122 Q44 124 40 128 Q34 130 36 134" fill="none" stroke="${hcd}" stroke-width="1.5"/>
+  <path d="M36 134 Q44 136 40 140 Q34 142 36 146" fill="none" stroke="${hcd}" stroke-width="1.5"/>
+  <path d="M164 122 Q156 124 160 128 Q166 130 164 134" fill="none" stroke="${hcd}" stroke-width="1.5"/>
+  <path d="M164 134 Q156 136 160 140 Q166 142 164 146" fill="none" stroke="${hcd}" stroke-width="1.5"/>`;
+  return '';
+}
+
+function _acSVGHairFront(style, hc, hcd) {
+  const hl = _acLighten(hc, 0.2);
+  if (style==='short') return `<path d="M30 97 Q32 38 100 27 Q168 38 170 97 Q145 72 100 70 Q55 72 30 97Z" fill="${hc}"/>
+  <path d="M30 97 Q34 80 50 68 Q35 76 31 92Z" fill="${hcd}" opacity="0.4"/>`;
+  if (style==='medium') return `<path d="M29 99 Q29 36 100 26 Q171 36 171 99 Q166 88 160 82 Q144 60 100 58 Q56 60 40 82 Q34 88 29 99Z" fill="${hc}"/>
+  <path d="M29 99 Q27 126 32 147 Q36 162 38 156 Q36 135 36 114 Q33 104 38 99Z" fill="${hc}"/>
+  <path d="M171 99 Q173 126 168 147 Q164 162 162 156 Q164 135 164 114 Q167 104 162 99Z" fill="${hc}"/>`;
+  if (style==='long') return `<path d="M29 99 Q29 36 100 26 Q171 36 171 99 Q166 88 160 82 Q144 60 100 58 Q56 60 40 82 Q34 88 29 99Z" fill="${hc}"/>
+  <path d="M29 99 Q27 132 32 160 L38 158 Q34 128 34 100Z" fill="${hc}"/>
+  <path d="M171 99 Q173 132 168 160 L162 158 Q166 128 166 100Z" fill="${hc}"/>
+  <path d="M30 93 Q32 60 50 42 Q36 52 30 78Z" fill="${hcd}" opacity="0.4"/>`;
+  if (style==='curly') return `<ellipse cx="100" cy="48" rx="73" ry="38" fill="${hc}"/>
+  <circle cx="58" cy="64" r="22" fill="${hc}"/><circle cx="142" cy="64" r="22" fill="${hc}"/>
+  <circle cx="80" cy="42" r="20" fill="${hc}"/><circle cx="120" cy="42" r="20" fill="${hc}"/>
+  <circle cx="100" cy="34" r="22" fill="${hc}"/>
+  <circle cx="30" cy="90" r="19" fill="${hc}"/><circle cx="170" cy="90" r="19" fill="${hc}"/>
+  <path d="M74 38 Q79 28 89 32" fill="none" stroke="${hl}" stroke-width="2" opacity="0.5"/>
+  <path d="M111 38 Q116 28 126 32" fill="none" stroke="${hl}" stroke-width="2" opacity="0.5"/>`;
+  if (style==='afro') return `<ellipse cx="100" cy="52" rx="82" ry="57" fill="${hc}"/>
+  <circle cx="28" cy="90" r="24" fill="${hc}"/><circle cx="172" cy="90" r="24" fill="${hc}"/>
+  <circle cx="70" cy="42" r="3" fill="${hcd}" opacity="0.32"/>
+  <circle cx="100" cy="30" r="3" fill="${hcd}" opacity="0.32"/>
+  <circle cx="130" cy="42" r="3" fill="${hcd}" opacity="0.32"/>
+  <circle cx="55" cy="60" r="3" fill="${hcd}" opacity="0.32"/>
+  <circle cx="145" cy="60" r="3" fill="${hcd}" opacity="0.32"/>`;
+  if (style==='bun') return `<path d="M32 96 Q32 42 100 30 Q168 42 168 96 Q148 72 100 70 Q52 72 32 96Z" fill="${hc}"/>
+  <circle cx="100" cy="22" r="22" fill="${hc}"/>
+  <circle cx="100" cy="22" r="13" fill="${hcd}" opacity="0.38"/>
+  <circle cx="94" cy="16" r="5" fill="${hl}" opacity="0.55"/>`;
+  if (style==='ponytail') return `<path d="M32 96 Q32 42 100 30 Q168 42 168 96 Q148 72 100 70 Q52 72 32 96Z" fill="${hc}"/>
+  <ellipse cx="148" cy="80" rx="10" ry="7" fill="${hcd}"/>`;
+  if (style==='mohawk') return `<path d="M30 88 Q30 62 48 42 L68 52 Q50 66 44 97Z" fill="${hcd}" opacity="0.22"/>
+  <path d="M170 88 Q170 62 152 42 L132 52 Q150 66 156 97Z" fill="${hcd}" opacity="0.22"/>
+  <path d="M76 97 Q78 42 100 20 Q122 42 124 97 Q112 68 100 62 Q88 68 76 97Z" fill="${hc}"/>`;
+  if (style==='braids') return `<path d="M32 96 Q32 42 100 30 Q168 42 168 96 Q148 72 100 70 Q52 72 32 96Z" fill="${hc}"/>`;
+  return '';
+}
+
+function _acSVGEyebrows(expression, hc, gender) {
+  const bh = (hc==='#F0F0F0'||hc==='#fff'||hc==='#ffffff') ? '#888' : _acDarken(hc,0.08);
+  const sw = gender==='female' ? 2.2 : 3.2;
+  if (expression==='surprised') return `<path d="M54 78 Q74 65 94 78" stroke="${bh}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+  <path d="M106 78 Q126 65 146 78" stroke="${bh}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>`;
+  if (expression==='thoughtful') return `<path d="M54 82 Q74 78 94 75" stroke="${bh}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+  <path d="M106 75 Q126 78 146 82" stroke="${bh}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>`;
+  return `<path d="M54 82 Q74 74 94 80" stroke="${bh}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>
+  <path d="M106 80 Q126 74 146 82" stroke="${bh}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>`;
+}
+
+function _acSVGEyes(expression, ec) {
+  if (expression==='wink') return `<path d="M54 100 Q74 88 94 100" stroke="#1a1a1a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="126" cy="100" rx="20" ry="22" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="126" cy="102" r="14" fill="${ec}"/><circle cx="126" cy="102" r="7" fill="#111"/>
+  <circle cx="132" cy="95" r="4.5" fill="white"/><circle cx="120" cy="108" r="2" fill="white" opacity="0.55"/>`;
+  if (expression==='cool') return `<ellipse cx="74" cy="100" rx="20" ry="14" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <ellipse cx="74" cy="102" rx="12" ry="9" fill="${ec}"/><ellipse cx="74" cy="102" rx="6" ry="5" fill="#111"/>
+  <circle cx="80" cy="96" r="3.5" fill="white"/>
+  <ellipse cx="126" cy="100" rx="20" ry="14" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <ellipse cx="126" cy="102" rx="12" ry="9" fill="${ec}"/><ellipse cx="126" cy="102" rx="6" ry="5" fill="#111"/>
+  <circle cx="132" cy="96" r="3.5" fill="white"/>`;
+  if (expression==='surprised') return `<ellipse cx="74" cy="100" rx="22" ry="26" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="74" cy="102" r="16" fill="${ec}"/><circle cx="74" cy="102" r="8" fill="#111"/>
+  <circle cx="80" cy="95" r="5" fill="white"/>
+  <ellipse cx="126" cy="100" rx="22" ry="26" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="126" cy="102" r="16" fill="${ec}"/><circle cx="126" cy="102" r="8" fill="#111"/>
+  <circle cx="132" cy="95" r="5" fill="white"/>`;
+  if (expression==='thoughtful') return `<ellipse cx="74" cy="102" rx="20" ry="20" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="74" cy="104" r="13" fill="${ec}"/><circle cx="74" cy="104" r="7" fill="#111"/>
+  <circle cx="80" cy="98" r="4" fill="white"/>
+  <path d="M54 96 Q74 88 94 96" stroke="#1a1a1a" stroke-width="2.8" fill="${_acDarken(ec,0)}" opacity="0.65"/>
+  <ellipse cx="126" cy="102" rx="20" ry="20" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="126" cy="104" r="13" fill="${ec}"/><circle cx="126" cy="104" r="7" fill="#111"/>
+  <circle cx="132" cy="98" r="4" fill="white"/>
+  <path d="M106 96 Q126 88 146 96" stroke="#1a1a1a" stroke-width="2.8" fill="${_acDarken(ec,0)}" opacity="0.65"/>`;
+  // default happy / excited — large round Pixar eyes
+  return `<ellipse cx="74" cy="100" rx="20" ry="22" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="74" cy="102" r="14" fill="${ec}"/><circle cx="74" cy="102" r="7" fill="#111"/>
+  <circle cx="80" cy="95" r="4.5" fill="white"/><circle cx="68" cy="109" r="2" fill="white" opacity="0.5"/>
+  <ellipse cx="126" cy="100" rx="20" ry="22" fill="white" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="126" cy="102" r="14" fill="${ec}"/><circle cx="126" cy="102" r="7" fill="#111"/>
+  <circle cx="132" cy="95" r="4.5" fill="white"/><circle cx="120" cy="109" r="2" fill="white" opacity="0.5"/>`;
+}
+
+function _acSVGMouth(expression) {
+  if (expression==='excited') return `<path d="M76 152 Q100 175 124 152" stroke="#1a1a1a" stroke-width="2.5" fill="#1a1a1a"/>
+  <path d="M78 154 Q100 173 122 154 Q100 182 78 154Z" fill="#fff" opacity="0.9"/>
+  <path d="M85 154 Q100 162 115 154 L115 159 Q100 168 85 159Z" fill="#ffb3c6" opacity="0.6"/>`;
+  if (expression==='cool') return `<path d="M84 154 Q100 163 116 150" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  if (expression==='wink') return `<path d="M80 152 Q100 168 120 152" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M82 154 Q100 166 118 154 L114 159 Q100 168 86 159Z" fill="#ffb3c6"/>`;
+  if (expression==='surprised') return `<ellipse cx="100" cy="158" rx="13" ry="10" fill="#1a1a1a"/><ellipse cx="100" cy="158" rx="9" ry="7" fill="#ffb3c6"/>`;
+  if (expression==='thoughtful') return `<path d="M86 156 Q100 158 114 156" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  return `<path d="M80 152 Q100 170 120 152" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M82 154 Q100 168 118 154 L114 160 Q100 170 86 160Z" fill="#ffb3c6"/>`;
+}
+
+function _acSVGFacialHair(style, hc) {
+  const fc = _acDarken(hc, 0.04);
+  if (style==='stubble') return `<ellipse cx="100" cy="158" rx="26" ry="13" fill="${fc}" opacity="0.2"/>
+  ${[82,88,78,118,112,122,100,94,106].map((x,i)=>`<circle cx="${x}" cy="${[152,156,158,152,156,158,162,158,158][i]}" r="1.4" fill="${fc}" opacity="0.48"/>`).join('')}`;
+  if (style==='mustache') return `<path d="M82 148 Q90 144 100 148 Q110 144 118 148 Q110 156 100 152 Q90 156 82 148Z" fill="${fc}"/>`;
+  if (style==='goatee') return `<path d="M82 148 Q90 144 100 148 Q110 144 118 148 Q110 156 100 152 Q90 156 82 148Z" fill="${fc}"/>
+  <path d="M90 158 Q100 156 110 158 Q108 175 100 178 Q92 175 90 158Z" fill="${fc}"/>`;
+  if (style==='beard') return `<path d="M82 148 Q90 144 100 148 Q110 144 118 148 Q110 156 100 152 Q90 156 82 148Z" fill="${fc}"/>
+  <path d="M68 155 Q72 148 80 150 Q76 158 72 168 Q66 172 68 155Z" fill="${fc}"/>
+  <path d="M132 155 Q128 148 120 150 Q124 158 128 168 Q134 172 132 155Z" fill="${fc}"/>
+  <path d="M72 165 Q100 162 128 165 Q124 186 100 189 Q76 186 72 165Z" fill="${fc}"/>`;
+  return '';
+}
+
+function _acSVGGlasses(style) {
+  const arm = `<path d="M28 96 L51 100" stroke="#333" stroke-width="2.5"/><path d="M149 100 L172 96" stroke="#333" stroke-width="2.5"/>`;
+  if (style==='round') return `<circle cx="74" cy="100" r="23" fill="none" stroke="#333" stroke-width="2.5"/>
+  <circle cx="126" cy="100" r="23" fill="none" stroke="#333" stroke-width="2.5"/>
+  <path d="M97 100 L103 100" stroke="#333" stroke-width="2.5"/>${arm}`;
+  if (style==='square') return `<rect x="51" y="80" width="46" height="38" rx="5" fill="none" stroke="#333" stroke-width="2.5"/>
+  <rect x="103" y="80" width="46" height="38" rx="5" fill="none" stroke="#333" stroke-width="2.5"/>
+  <path d="M97 99 L103 99" stroke="#333" stroke-width="2.5"/>${arm}`;
+  if (style==='cat') return `<path d="M51 108 Q55 80 80 78 Q98 78 97 99" stroke="#333" stroke-width="2.5" fill="none"/>
+  <path d="M51 108 Q74 118 97 99" stroke="#333" stroke-width="2.5" fill="none"/>
+  <path d="M103 99 Q102 78 120 78 Q145 80 149 108" stroke="#333" stroke-width="2.5" fill="none"/>
+  <path d="M103 99 Q126 118 149 108" stroke="#333" stroke-width="2.5" fill="none"/>
+  <path d="M97 99 L103 99" stroke="#333" stroke-width="2.5"/>${arm}`;
+  if (style==='sun') return `<ellipse cx="74" cy="100" rx="23" ry="18" fill="#111" fill-opacity="0.88"/>
+  <ellipse cx="126" cy="100" rx="23" ry="18" fill="#111" fill-opacity="0.88"/>
+  <path d="M58 88 Q64 84 70 88" stroke="white" stroke-width="2" fill="none" opacity="0.45"/>
+  <path d="M110 88 Q116 84 122 88" stroke="white" stroke-width="2" fill="none" opacity="0.45"/>
+  <path d="M51 98 Q74 85 97 100" stroke="#222" stroke-width="3" fill="none"/>
+  <path d="M103 100 Q126 85 149 98" stroke="#222" stroke-width="3" fill="none"/>
+  <path d="M97 100 L103 100" stroke="#222" stroke-width="3"/>${arm}`;
+  if (style==='mono') return `<circle cx="126" cy="100" r="23" fill="none" stroke="#B8860B" stroke-width="3"/>
+  <path d="M149 100 L165 115" stroke="#B8860B" stroke-width="2"/>`;
+  return '';
+}
+
+function _acSVGAccessory(style, hc, gender) {
+  const hcd = _acDarken(hc, 0.14);
+  if (style==='cap') return `<ellipse cx="100" cy="40" rx="72" ry="20" fill="${hc}"/>
+  <path d="M28 42 Q100 18 172 42 L170 54 Q100 36 30 54Z" fill="${hcd}"/>
+  <path d="M62 54 Q100 47 138 54 L146 66 Q100 57 54 66Z" fill="${hc}"/>`;
+  if (style==='hat') return `<rect x="65" y="-2" width="70" height="52" rx="4" fill="#1a1a1a"/>
+  <rect x="42" y="48" width="116" height="12" rx="6" fill="#1a1a1a"/>
+  <rect x="65" y="40" width="70" height="10" fill="#8B4513"/>`;
+  if (style==='crown') return `<path d="M50 42 L60 8 L80 30 L100 5 L120 30 L140 8 L150 42Z" fill="#FFD700" stroke="#B8860B" stroke-width="1.5"/>
+  <circle cx="100" cy="18" r="6" fill="#e74c3c"/>
+  <circle cx="70" cy="28" r="4" fill="#3498db"/>
+  <circle cx="130" cy="28" r="4" fill="#3498db"/>`;
+  if (style==='flowers') return `${[45,65,85,100,115,135,155].map((x,i)=>{
+    const y=[52,38,28,24,28,38,52][i], fc=['#ff6b9d','#ffb347','#ff6b9d','#ffd93d','#ff6b9d','#ffb347','#ff6b9d'][i];
+    return `<circle cx="${x}" cy="${y}" r="10" fill="${fc}"/><circle cx="${x}" cy="${y}" r="4" fill="#ffd93d"/>`;
+  }).join('')}`;
+  if (style==='bow') return `<path d="M128 42 Q118 28 140 30 Q148 36 140 44 Q134 42 128 42Z" fill="#ff69b4" stroke="#c0005c" stroke-width="1"/>
+  <path d="M128 42 Q138 28 160 30 Q168 36 160 44 Q146 42 128 42Z" fill="#ff69b4" stroke="#c0005c" stroke-width="1"/>
+  <circle cx="128" cy="42" r="6" fill="#ff1493"/>`;
+  if (style==='headband') return `<path d="M30 88 Q100 63 170 88 Q165 96 100 72 Q35 96 30 88Z" fill="${hc}" stroke="${hcd}" stroke-width="1"/>`;
+  if (style==='bunny') return `<ellipse cx="72" cy="10" rx="14" ry="34" fill="white" stroke="#ddd" stroke-width="1.5"/>
+  <ellipse cx="72" cy="10" rx="8" ry="24" fill="#ffb3c6"/>
+  <ellipse cx="128" cy="10" rx="14" ry="34" fill="white" stroke="#ddd" stroke-width="1.5"/>
+  <ellipse cx="128" cy="10" rx="8" ry="24" fill="#ffb3c6"/>`;
+  return '';
 }
 
 function selectMode(mode, el) {
@@ -5853,6 +6543,37 @@ buildAvatarPicker('p2AvatarRow', 'p2', 0); // default 🐰
 // Set default selections visual
 cfg.p1.avatar = AVATARS[1]; // 🐣
 cfg.p2.avatar = AVATARS[0]; // 🐰
+
+// Restore saved custom avatars and names
+['p1','p2'].forEach(pk => {
+  const savedAc = JSON.parse(localStorage.getItem('eggHunt_' + pk + '_ac') || 'null');
+  if (savedAc && savedAc.svgUrl) {
+    cfg[pk].photo = savedAc.svgUrl;
+    cfg[pk].avatar = null;
+    const row = document.getElementById(pk + 'AvatarRow');
+    if (row) {
+      row.querySelectorAll('.avatar-btn').forEach(b => b.classList.remove('selected'));
+      let prev = row.querySelector('.avatar-preview');
+      if (!prev) { prev = document.createElement('img'); prev.className = 'avatar-preview'; row.appendChild(prev); }
+      prev.src = savedAc.svgUrl; prev.style.display = 'block';
+    }
+  }
+  const savedName = localStorage.getItem('eggHunt_' + pk + '_name');
+  if (savedName) {
+    const nameEl = document.getElementById(pk + 'Name');
+    if (nameEl) nameEl.value = savedName;
+    cfg[pk].name = savedName;
+  }
+});
+
+// Auto-save name on blur
+['p1','p2'].forEach(pk => {
+  const el = document.getElementById(pk + 'Name');
+  if (el) el.addEventListener('blur', () => {
+    const v = el.value.trim();
+    if (v) { cfg[pk].name = v; localStorage.setItem('eggHunt_' + pk + '_name', v); }
+  });
+});
 
 // Toggle btn sync
 document.getElementById('musicToggleHome').classList.toggle('on', cfg.musicOn);
