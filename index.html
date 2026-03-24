@@ -508,6 +508,34 @@ html, body {
 .oap-btn:hover { transform: scale(1.03); }
 .oap-yes { background: linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; box-shadow: 0 4px 14px rgba(124,58,237,0.3); }
 .oap-no  { background: linear-gradient(135deg,#22c55e,#16a34a); color:#fff; box-shadow: 0 4px 14px rgba(22,163,74,0.25); }
+.oap-never-label {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.82rem; color: #aaa;
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; margin-top: -4px; user-select: none;
+}
+.oap-never-label input[type="checkbox"] { cursor: pointer; width: 15px; height: 15px; flex-shrink: 0; }
+.settings-return-hint {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.05rem; color: #fff;
+  white-space: nowrap; flex-shrink: 0;
+  background: #ff8eea;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  padding: 4px 12px 4px 10px;
+}
+.settings-return-hint.hidden { display: none; }
+.srh-arrow {
+  display: inline-block;
+  font-size: 1.3rem; font-weight: 700;
+  animation: srh-slide 1.15s ease-in-out infinite;
+}
+@keyframes srh-slide {
+  0%   { transform: translateX(8px); opacity: 0.25; }
+  55%  { transform: translateX(-2px); opacity: 1; }
+  100% { transform: translateX(8px); opacity: 0.25; }
+}
 
 /* Eggs row — hamburger absolutely positioned so eggs center across full width */
 .home-eggs-row {
@@ -628,8 +656,14 @@ html, body {
   border:none; border-radius:12px; cursor:pointer;
   font-family:'Fredoka One','Fredoka',sans-serif; font-size:1rem; font-weight:700;
   transition:background 0.15s;
+  animation: btn-scale-pulse 1.6s ease-in-out infinite;
 }
 .online-action-btn:hover { background:#fff; }
+@keyframes btn-scale-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.07); }
+}
+.home-egg-btn--pulse { animation: btn-scale-pulse 1.6s ease-in-out infinite; }
 
 /* SMS consent widget */
 .sms-overlay {
@@ -2740,6 +2774,10 @@ html, body {
   <!-- Topbar -->
   <div class="settings-topbar">
     <button class="ctrl-btn home-egg-btn" id="settingsBackBtn" onclick="closeSettings()" title="Back">←</button>
+    <div class="settings-return-hint hidden" id="settingsReturnHint">
+      <span class="srh-arrow">←</span>
+      <span class="srh-text">Press to return to the game</span>
+    </div>
     <span class="settings-title" id="settingsTitleEl">Settings</span>
   </div>
 
@@ -5272,6 +5310,13 @@ let _opponentReady        = false;
 let _skipInGameCountdown  = false; // true when ready-lobby countdown already played
 
 function showOnlineAvatarPrompt() {
+  if (localStorage.getItem('oap_neverShow') === '1') {
+    showReadyLobby();
+    return;
+  }
+  // Reset checkbox each time prompt is shown
+  const neverChk = document.getElementById('oapNeverCheck');
+  if (neverChk) neverChk.checked = false;
   // Sync name from input in case user typed but didn't blur
   const nameInput = document.getElementById('p1Name');
   if (nameInput && nameInput.value.trim()) cfg.p1.name = nameInput.value.trim();
@@ -5292,13 +5337,36 @@ function showOnlineAvatarPrompt() {
 }
 
 function onlineSetupYes() {
+  const neverChk = document.getElementById('oapNeverCheck');
+  if (neverChk && neverChk.checked) localStorage.setItem('oap_neverShow', '1');
   document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
   showSettings('onlineSetup');
 }
 
 function onlineSetupNo() {
+  const neverChk = document.getElementById('oapNeverCheck');
+  if (neverChk && neverChk.checked) localStorage.setItem('oap_neverShow', '1');
   document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
   showReadyLobby();
+}
+
+function readyLobbyToAvatar() {
+  document.getElementById('readyLobbyOverlay').classList.add('hidden');
+  showSettings('onlineSetup');
+}
+
+function readyLobbyGoHome() {
+  document.getElementById('readyLobbyExitOverlay').classList.remove('hidden');
+}
+
+function readyLobbyConfirmExit() {
+  document.getElementById('readyLobbyExitOverlay').classList.add('hidden');
+  document.getElementById('readyLobbyOverlay').classList.add('hidden');
+  goHome();
+}
+
+function readyLobbyCancelExit() {
+  document.getElementById('readyLobbyExitOverlay').classList.add('hidden');
 }
 
 function showReadyLobby() {
@@ -5718,7 +5786,7 @@ function setupOnlineConn() {
   });
   onlineConn.on('close', () => {
     document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
-    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; const _bk=document.getElementById('settingsBackBtn'); if(_bk){_bk.textContent='←';_bk.classList.remove('home-egg-btn--wide');} document.getElementById('settingsTitleEl').textContent = 'Settings'; }
+    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; const _bk=document.getElementById('settingsBackBtn'); if(_bk){_bk.textContent='←';_bk.classList.remove('home-egg-btn--wide','home-egg-btn--pulse');} document.getElementById('settingsTitleEl').textContent = 'Settings'; const _srh=document.getElementById('settingsReturnHint');if(_srh)_srh.classList.add('hidden'); }
     const gs = document.getElementById('gameScreen');
     const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
@@ -5731,7 +5799,7 @@ function setupOnlineConn() {
   });
   onlineConn.on('error', () => {
     document.getElementById('onlineAvatarPromptOverlay').classList.add('hidden');
-    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; const _bk=document.getElementById('settingsBackBtn'); if(_bk){_bk.textContent='←';_bk.classList.remove('home-egg-btn--wide');} document.getElementById('settingsTitleEl').textContent = 'Settings'; }
+    if (settingsPrevScreen === 'onlineSetup') { document.getElementById('settingsScreen').classList.add('hidden'); document.getElementById('homeScreen').classList.remove('hidden'); settingsPrevScreen = 'home'; const _bk=document.getElementById('settingsBackBtn'); if(_bk){_bk.textContent='←';_bk.classList.remove('home-egg-btn--wide','home-egg-btn--pulse');} document.getElementById('settingsTitleEl').textContent = 'Settings'; const _srh=document.getElementById('settingsReturnHint');if(_srh)_srh.classList.add('hidden'); }
     const gs = document.getElementById('gameScreen');
     const rl = document.getElementById('readyLobbyOverlay');
     if (gs && !gs.classList.contains('hidden')) {
@@ -6166,19 +6234,24 @@ function showSettings(from) {
   document.getElementById('settingsScreen').classList.remove('hidden');
   const backBtn = document.getElementById('settingsBackBtn');
   const titleEl = document.getElementById('settingsTitleEl');
+  const returnHint = document.getElementById('settingsReturnHint');
   if (from === 'onlineSetup') {
-    if (backBtn) { backBtn.textContent = '✅ Done'; backBtn.classList.add('home-egg-btn--wide'); }
-    if (titleEl) titleEl.textContent = 'Choose Avatar';
+    if (backBtn) { backBtn.textContent = '✅ Done'; backBtn.classList.add('home-egg-btn--wide', 'home-egg-btn--pulse'); backBtn.style.fontWeight = '900'; }
+    if (titleEl) titleEl.textContent = '';
+    if (returnHint) returnHint.classList.remove('hidden');
     setTimeout(() => { const el = document.getElementById('avatarSection'); if (el) el.scrollIntoView({ behavior:'smooth', block:'start' }); }, 80);
   } else {
-    if (backBtn) { backBtn.textContent = '←'; backBtn.classList.remove('home-egg-btn--wide'); }
+    if (backBtn) { backBtn.textContent = '←'; backBtn.classList.remove('home-egg-btn--wide', 'home-egg-btn--pulse'); backBtn.style.fontWeight = ''; }
     if (titleEl) titleEl.textContent = 'Settings';
+    if (returnHint) returnHint.classList.add('hidden');
   }
 }
 function closeSettings() {
   const _sb = document.getElementById('settingsBackBtn');
-  if (_sb) { _sb.textContent = '←'; _sb.classList.remove('home-egg-btn--wide'); }
+  if (_sb) { _sb.textContent = '←'; _sb.classList.remove('home-egg-btn--wide', 'home-egg-btn--pulse'); _sb.style.fontWeight = ''; }
   document.getElementById('settingsTitleEl').textContent = 'Settings';
+  const _srh = document.getElementById('settingsReturnHint');
+  if (_srh) _srh.classList.add('hidden');
   document.getElementById('settingsScreen').classList.add('hidden');
   if (settingsPrevScreen === 'onlineSetup') {
     showReadyLobby();
@@ -6732,6 +6805,19 @@ syncMusicPlayBtns();
       <button class="oap-btn oap-yes" onclick="onlineSetupYes()">🎨 Yes, update</button>
       <button class="oap-btn oap-no"  onclick="onlineSetupNo()">▶ No, I'm ready!</button>
     </div>
+    <label class="oap-never-label">
+      <input type="checkbox" id="oapNeverCheck"> Never show this again
+    </label>
+  </div>
+</div>
+
+<!-- Ready lobby home-confirm overlay -->
+<div class="overlay hidden" id="readyLobbyExitOverlay" style="z-index:950">
+  <div class="overlay-card" style="text-align:center">
+    <div class="overlay-title">Leave Game?</div>
+    <div class="overlay-subtitle">You will be disconnected from this game and will have to create a new game.</div>
+    <button class="overlay-btn primary" onclick="readyLobbyConfirmExit()">🏠 Exit to Home</button>
+    <button class="overlay-btn secondary" onclick="readyLobbyCancelExit()">← Stay</button>
   </div>
 </div>
 
@@ -6743,6 +6829,8 @@ syncMusicPlayBtns();
     <div class="ready-players" id="readyPlayers"></div>
     <div class="ready-opp-msg" id="readyOppMsg">Press Play when you're ready!</div>
     <button class="overlay-btn primary" id="readyPlayBtn" onclick="pressReady()">▶ Play!</button>
+    <button class="overlay-btn secondary" onclick="readyLobbyToAvatar()">🎨 Update Avatar</button>
+    <button class="overlay-btn secondary" onclick="readyLobbyGoHome()">🏠 Home</button>
   </div>
 </div>
 
