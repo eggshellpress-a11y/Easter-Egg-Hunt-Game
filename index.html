@@ -3595,13 +3595,6 @@ function buildAvatarPicker(containerId, playerKey, defaultIdx) {
   row.appendChild(uploadBtn);
   row.appendChild(fileInput);
   row.appendChild(preview);
-  // Custom avatar creator button
-  const createBtn = document.createElement('button');
-  createBtn.className = 'avatar-upload-btn';
-  createBtn.style.cssText = 'background:#f3e8ff;border-color:#a78bfa;color:#7c3aed;';
-  createBtn.textContent = '🎨 Create';
-  createBtn.onclick = () => openAvatarCreator(playerKey);
-  row.appendChild(createBtn);
   cfg[playerKey].avatar = AVATARS[defaultIdx];
 }
 
