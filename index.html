@@ -6780,10 +6780,6 @@ document.addEventListener('pointerdown', function _firstGesture() {
   }
 }, { capture: true });
 
-// Play pop sound on any button press (excluding egg wrappers which have their own timing).
-document.addEventListener('pointerdown', function(e) {
-  if (e.target.closest('button') && !e.target.closest('.egg-wrapper')) sfxPop();
-}, { capture: true });
 
 // Play intro video if configured (hides home screen until video ends)
 if (INTRO_VIDEO_FILE) playIntroVideo();
