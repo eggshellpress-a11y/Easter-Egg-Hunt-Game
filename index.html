@@ -3079,16 +3079,16 @@ const AI_MEMORY_PROB = { easy: 0.30, medium: 0.65, hard: 0.95 };
 // ============================================================
 
 // Background music — set to your .mp3 / .ogg file path
-const GAME_MUSIC_FILE = 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/music/Cartoon Character Gifts Loop.mp3';
+const GAME_MUSIC_FILE = 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/music/Cartoon%20Character%20Gifts%20Loop.mp3';
 
 // Sound effects — set individual paths to override each built-in procedural sound
 const CUSTOM_SFX_FILES = {
   match:   'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Match.mp3',
-  noMatch: 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/No Match.mp3',
+  noMatch: 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/No%20Match.mp3',
   pop:     'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Pop.wav',
-  fanfare: 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Fanfare 1.mp3',
+  fanfare: 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Fanfare%201.mp3',
   tick:    'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Tick.wav',
-  whoosh:  'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Whoosh 02.mp3',
+  whoosh:  'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Whoosh%2002.mp3',
 };
 
 // Intro video — plays fullscreen before the home screen; set to your .mp4 / .webm path
@@ -3103,7 +3103,7 @@ let cfg = {
   musicOn: true,
   sfxOn: true,
   customMusic: null,
-  musicVolume: 0.5,
+  musicVolume: 0.3,
   sfxVolume: 0.5,
 };
 
@@ -3424,8 +3424,8 @@ function resizeConfettiCanvas() {
 resizeConfettiCanvas();
 window.addEventListener('resize', resizeConfettiCanvas);
 
-function burstConfetti(x, y, count = 50) {
-  sfxConfettiBurst();
+function burstConfetti(x, y, count = 50, silent = false) {
+  if (!silent) sfxConfettiBurst();
   for (let i = 0; i < count; i++) {
     const angle = (Math.random() * Math.PI * 2);
     const speed = 4 + Math.random() * 12;
@@ -4967,7 +4967,7 @@ function revealCard(idx, callback) {
 
       // Small confetti burst
       const pos = getEggCenter(card.wrapEl);
-      burstConfetti(pos.x, pos.y, 35);
+      burstConfetti(pos.x, pos.y, 35, true);
 
       // Brief pause then mid-screen popup
       setTimeout(() => {
