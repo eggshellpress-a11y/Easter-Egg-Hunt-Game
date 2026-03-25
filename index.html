@@ -3158,100 +3158,32 @@ function playTone(freq, type, startTime, duration, gainVal, ctx) {
 
 function sfxPop() {
   if (!cfg.sfxOn) return;
-  if (CUSTOM_SFX_FILES.pop) { playCustomSFX(CUSTOM_SFX_FILES.pop); return; }
-  const ctx = getAudioCtx();
-  const t = ctx.currentTime;
-  // Punchy layered pop: thump + chirp + sparkle
-  const osc1 = ctx.createOscillator(), g1 = ctx.createGain();
-  osc1.type = 'sine'; osc1.frequency.setValueAtTime(180, t);
-  osc1.frequency.exponentialRampToValueAtTime(60, t + 0.12);
-  g1.gain.setValueAtTime(0.7, t); g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.15);
-  osc1.connect(g1); g1.connect(getSFXDestination()); osc1.start(t); osc1.stop(t + 0.15);
-
-  const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
-  osc2.type = 'triangle'; osc2.frequency.setValueAtTime(1400, t + 0.02);
-  osc2.frequency.exponentialRampToValueAtTime(600, t + 0.1);
-  g2.gain.setValueAtTime(0.35, t + 0.02); g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-  osc2.connect(g2); g2.connect(getSFXDestination()); osc2.start(t + 0.02); osc2.stop(t + 0.15);
-
-  playTone(2400, 'sine', t + 0.04, 0.06, 0.2, ctx);
-  playTone(3200, 'sine', t + 0.06, 0.04, 0.12, ctx);
+  playCustomSFX(CUSTOM_SFX_FILES.pop);
 }
 
 function sfxMatch() {
   if (!cfg.sfxOn) return;
-  if (CUSTOM_SFX_FILES.match) { playCustomSFX(CUSTOM_SFX_FILES.match); return; }
-  const ctx = getAudioCtx();
-  const t = ctx.currentTime;
-  // Bright ascending chord + sparkle shimmer
-  [[523.25,0],[659.25,0.12],[783.99,0.24],[1046.5,0.38]].forEach(([f, dt]) => {
-    playTone(f, 'sine', t + dt, 0.35, 0.55, ctx);
-    playTone(f * 2, 'sine', t + dt + 0.02, 0.15, 0.18, ctx); // octave sparkle
-  });
-  // Final shimmer burst
-  [1318.5, 1568, 2093].forEach((f, i) => playTone(f, 'sine', t + 0.55 + i * 0.07, 0.2, 0.3, ctx));
+  playCustomSFX(CUSTOM_SFX_FILES.match);
 }
 
 function sfxNoMatch() {
   if (!cfg.sfxOn) return;
-  if (CUSTOM_SFX_FILES.noMatch) { playCustomSFX(CUSTOM_SFX_FILES.noMatch); return; }
-  const ctx = getAudioCtx();
-  const t = ctx.currentTime;
-  // Warbly sad descend
-  [[280, 0],[210, 0.18],[160, 0.36]].forEach(([f, dt]) => {
-    playTone(f, 'sawtooth', t + dt, 0.25, 0.32, ctx);
-    playTone(f * 1.5, 'square', t + dt, 0.12, 0.12, ctx);
-  });
-  playTone(100, 'sine', t + 0.5, 0.3, 0.28, ctx);
+  playCustomSFX(CUSTOM_SFX_FILES.noMatch);
 }
 
 function sfxTick() {
   if (!cfg.sfxOn) return;
-  if (CUSTOM_SFX_FILES.tick) { playCustomSFX(CUSTOM_SFX_FILES.tick); return; }
-  const ctx = getAudioCtx();
-  const t = ctx.currentTime;
-  // Sharp mechanical click + high ping
-  playTone(1800, 'square', t, 0.03, 0.4, ctx);
-  playTone(900, 'square', t + 0.01, 0.04, 0.25, ctx);
-  playTone(3600, 'sine', t, 0.025, 0.2, ctx);
+  playCustomSFX(CUSTOM_SFX_FILES.tick);
 }
 
 function sfxWhoosh() {
   if (!cfg.sfxOn) return;
-  if (CUSTOM_SFX_FILES.whoosh) { playCustomSFX(CUSTOM_SFX_FILES.whoosh); return; }
-  const ctx = getAudioCtx();
-  const t = ctx.currentTime;
-  // Filtered noise with rising then falling sweep
-  const dur = 0.7;
-  const buf = ctx.createBuffer(1, ctx.sampleRate * dur, ctx.sampleRate);
-  const data = buf.getChannelData(0);
-  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-  const src = ctx.createBufferSource();
-  const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.5;
-  f.frequency.setValueAtTime(200, t);
-  f.frequency.exponentialRampToValueAtTime(2400, t + dur * 0.35);
-  f.frequency.exponentialRampToValueAtTime(180, t + dur);
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, t);
-  g.gain.linearRampToValueAtTime(0.6, t + dur * 0.2);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-  src.buffer = buf; src.connect(f); f.connect(g); g.connect(getSFXDestination());
-  src.start(t);
+  playCustomSFX(CUSTOM_SFX_FILES.whoosh);
 }
 
 function sfxFanfare() {
   if (!cfg.sfxOn) return;
-  if (CUSTOM_SFX_FILES.fanfare) { playCustomSFX(CUSTOM_SFX_FILES.fanfare); return; }
-  const ctx = getAudioCtx();
-  const t = ctx.currentTime;
-  // Triumphant ascending fanfare with harmonics
-  const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5, 2093];
-  notes.forEach((f, i) => {
-    playTone(f, 'sine', t + i * 0.13, 0.45, 0.5, ctx);
-    playTone(f * 1.5, 'sine', t + i * 0.13 + 0.03, 0.2, 0.2, ctx);
-  });
-  // Final chord stab
-  [523.25, 659.25, 783.99].forEach(f => playTone(f, 'triangle', t + 0.9, 0.6, 0.4, ctx));
+  playCustomSFX(CUSTOM_SFX_FILES.fanfare);
 }
 
 function sfxConfettiBurst() {
