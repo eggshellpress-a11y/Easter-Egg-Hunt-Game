@@ -564,7 +564,7 @@ html, body {
   flex-shrink: 0;
   line-height: 1;
 }
-.menu-btn:hover { background: rgba(255,255,255,0.55); }
+.menu-btn:hover { background: #ff74e1; }
 /* Settings nav buttons on home screen */
 .settings-nav-row {
   display: flex; gap: 12px;
@@ -862,7 +862,6 @@ html, body {
 .music-status {
   font-size: 0.8rem; color: #888; margin-top: 3px; min-height: 14px;
 }
-
 /* START button */
 .start-btn {
   width: 80%; max-width: 360px;
@@ -2665,6 +2664,12 @@ html, body {
   </div>
 </div>
 
+<!-- ========== INTRO VIDEO OVERLAY ========== -->
+<div id="introVideoOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;flex-direction:column;align-items:center;justify-content:center;">
+  <video id="introVideo" style="width:100%;height:100%;object-fit:cover;" playsinline muted></video>
+  <div id="introSkipBtn" style="position:absolute;bottom:28px;right:24px;font-family:'Fredoka',sans-serif;font-size:1rem;color:rgba(255,255,255,0.55);cursor:pointer;padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,0.25);">Skip ›</div>
+</div>
+
 <!-- ========== HOME SCREEN ========== -->
 <div class="screen" id="homeScreen">
 
@@ -2811,7 +2816,6 @@ html, body {
       <button class="toggle-btn on" id="musicToggleHome" onclick="toggleMusic()">
         <span class="tog-dot"></span> 🎵 Music
       </button>
-      <button class="music-play-btn" id="musicPlayBtnHome" onclick="playPauseMusic()" title="Play / Pause music">▶</button>
       <button class="toggle-btn on" id="sfxToggleHome" onclick="toggleSFX()">
         <span class="tog-dot"></span> 🔊 SFX
       </button>
@@ -2822,12 +2826,12 @@ html, body {
     </div>
     <div class="volume-row">
       <span class="vol-label">🎵</span>
-      <input type="range" class="vol-slider" id="musicVolHome" min="0" max="1" step="0.01" value="0.7"
+      <input type="range" class="vol-slider" id="musicVolHome" min="0" max="1" step="0.01" value="0.5"
         oninput="setMusicVolume(+this.value)">
     </div>
     <div class="volume-row">
       <span class="vol-label">🔊</span>
-      <input type="range" class="vol-slider sfx-vol" id="sfxVolHome" min="0" max="1" step="0.01" value="1"
+      <input type="range" class="vol-slider sfx-vol" id="sfxVolHome" min="0" max="1" step="0.01" value="0.5"
         oninput="setSFXVolume(+this.value)">
     </div>
     <div class="music-status" id="musicStatus"></div>
@@ -2990,6 +2994,14 @@ html, body {
   <div class="overlay-card">
     <div class="overlay-title">Leave?</div>
     <div class="overlay-subtitle">Your progress will be lost.</div>
+    <div class="audio-row" style="justify-content:center;margin-bottom:12px;">
+      <button class="toggle-btn" id="musicToggleExit" onclick="toggleMusic()">
+        <span class="tog-dot"></span> 🎵 Music
+      </button>
+      <button class="toggle-btn" id="sfxToggleExit" onclick="toggleSFX()">
+        <span class="tog-dot"></span> 🔊 SFX
+      </button>
+    </div>
     <button class="overlay-btn primary" onclick="goHome()">🏠 Yes, Exit</button>
     <button class="overlay-btn secondary" onclick="cancelExit()">← Stay</button>
   </div>
@@ -3059,6 +3071,29 @@ const DIFF_CONFIG = {
 // Probability (0–1) that AI remembers a revealed egg, per difficulty
 const AI_MEMORY_PROB = { easy: 0.30, medium: 0.65, hard: 0.95 };
 
+// ============================================================
+//  DEVELOPER MEDIA CONFIGURATION
+//  Set file paths here to replace built-in audio and add an intro video.
+//  Leave as empty string '' to use the default built-in audio.
+//  Files must be served from a local web server (not file://) for fetch() to work.
+// ============================================================
+
+// Background music — set to your .mp3 / .ogg file path
+const GAME_MUSIC_FILE = 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/music/Cartoon Character Gifts Loop.mp3';
+
+// Sound effects — set individual paths to override each built-in procedural sound
+const CUSTOM_SFX_FILES = {
+  match:   'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Match.mp3',
+  noMatch: 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/No Match.mp3',
+  pop:     'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Pop.wav',
+  fanfare: 'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Fanfare 1.mp3',
+  tick:    'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Tick.wav',
+  whoosh:  'https://raw.githubusercontent.com/eggshellpress-a11y/Easter-Egg-Hunt-Game/main/SFX/Whoosh 02.mp3',
+};
+
+// Intro video — plays fullscreen before the home screen; set to your .mp4 / .webm path
+const INTRO_VIDEO_FILE = '';  // e.g. 'video/intro.mp4'
+
 let cfg = {
   mode: '1p',
   diff: 'easy',
@@ -3068,8 +3103,8 @@ let cfg = {
   musicOn: true,
   sfxOn: true,
   customMusic: null,
-  musicVolume: 0.7,
-  sfxVolume: 1.0,
+  musicVolume: 0.5,
+  sfxVolume: 0.5,
 };
 
 let game = {
@@ -3096,7 +3131,8 @@ let game = {
 // ============================================================
 let audioCtx = null;
 let bgmNode = null, bgmGain = null;
-let bgmSourceNode = null; // custom uploaded audio source
+let bgmSourceNode = null; // Web Audio BufferSource (user-uploaded music)
+let bgmAudio = null;      // HTMLAudioElement (developer GAME_MUSIC_FILE)
 let sfxMasterGain = null;
 let musicPaused = false;
 
@@ -3131,6 +3167,7 @@ function playTone(freq, type, startTime, duration, gainVal, ctx) {
 
 function sfxPop() {
   if (!cfg.sfxOn) return;
+  if (CUSTOM_SFX_FILES.pop) { playCustomSFX(CUSTOM_SFX_FILES.pop); return; }
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
   // Punchy layered pop: thump + chirp + sparkle
@@ -3152,6 +3189,7 @@ function sfxPop() {
 
 function sfxMatch() {
   if (!cfg.sfxOn) return;
+  if (CUSTOM_SFX_FILES.match) { playCustomSFX(CUSTOM_SFX_FILES.match); return; }
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
   // Bright ascending chord + sparkle shimmer
@@ -3165,6 +3203,7 @@ function sfxMatch() {
 
 function sfxNoMatch() {
   if (!cfg.sfxOn) return;
+  if (CUSTOM_SFX_FILES.noMatch) { playCustomSFX(CUSTOM_SFX_FILES.noMatch); return; }
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
   // Warbly sad descend
@@ -3177,6 +3216,7 @@ function sfxNoMatch() {
 
 function sfxTick() {
   if (!cfg.sfxOn) return;
+  if (CUSTOM_SFX_FILES.tick) { playCustomSFX(CUSTOM_SFX_FILES.tick); return; }
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
   // Sharp mechanical click + high ping
@@ -3187,6 +3227,7 @@ function sfxTick() {
 
 function sfxWhoosh() {
   if (!cfg.sfxOn) return;
+  if (CUSTOM_SFX_FILES.whoosh) { playCustomSFX(CUSTOM_SFX_FILES.whoosh); return; }
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
   // Filtered noise with rising then falling sweep
@@ -3209,6 +3250,7 @@ function sfxWhoosh() {
 
 function sfxFanfare() {
   if (!cfg.sfxOn) return;
+  if (CUSTOM_SFX_FILES.fanfare) { playCustomSFX(CUSTOM_SFX_FILES.fanfare); return; }
   const ctx = getAudioCtx();
   const t = ctx.currentTime;
   // Triumphant ascending fanfare with harmonics
@@ -3245,6 +3287,8 @@ function sfxConfettiBurst() {
 // ---- BGM ----
 
 function stopBGM() {
+  if (bgmAudio) { try { bgmAudio.pause(); bgmAudio.src = ''; } catch(e){} bgmAudio = null; }
+  if (bgmSourceNode) { try { bgmSourceNode.stop(); } catch(e){} bgmSourceNode = null; }
   if (bgmGain) {
     try {
       const ctx = getAudioCtx();
@@ -3253,28 +3297,29 @@ function stopBGM() {
     } catch(e){}
     bgmGain = null;
   }
-  if (bgmSourceNode) {
-    try { bgmSourceNode.stop(); } catch(e){}
-    bgmSourceNode = null;
-  }
 }
 
 function startCustomBGM() {
-  const ctx = getAudioCtx();
-  if (bgmGain) {
-    try { bgmGain.gain.setValueAtTime(0.0001, ctx.currentTime); } catch(e){}
-    bgmGain = null;
+  stopBGM();
+  if (cfg.customMusic) {
+    // User-uploaded music — Web Audio API path
+    const ctx = getAudioCtx();
+    bgmGain = ctx.createGain();
+    bgmGain.gain.setValueAtTime(cfg.musicVolume, ctx.currentTime);
+    bgmGain.connect(ctx.destination);
+    const src = ctx.createBufferSource();
+    src.buffer = cfg.customMusic;
+    src.loop = true;
+    src.connect(bgmGain);
+    src.start();
+    bgmSourceNode = src;
+  } else if (GAME_MUSIC_FILE) {
+    // Developer music — HTMLAudioElement (works with file:// protocol)
+    bgmAudio = new Audio(GAME_MUSIC_FILE);
+    bgmAudio.loop = true;
+    bgmAudio.volume = cfg.musicVolume;
+    bgmAudio.play().catch(() => {});
   }
-  bgmGain = ctx.createGain();
-  bgmGain.gain.setValueAtTime(cfg.musicVolume, ctx.currentTime);
-  bgmGain.connect(ctx.destination);
-
-  const src = ctx.createBufferSource();
-  src.buffer = cfg.customMusic;
-  src.loop = true;
-  src.connect(bgmGain);
-  src.start();
-  bgmSourceNode = src;
 }
 
 function setMusicStatus(msg) {
@@ -3284,10 +3329,10 @@ function setMusicStatus(msg) {
 
 function toggleMusic() {
   cfg.musicOn = !cfg.musicOn;
-  document.querySelectorAll('#musicToggleHome, #musicToggleGame').forEach(btn => {
+  document.querySelectorAll('#musicToggleHome, #musicToggleGame, #musicToggleExit').forEach(btn => {
     btn.classList.toggle('on', cfg.musicOn);
   });
-  if (cfg.musicOn && cfg.customMusic) {
+  if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE)) {
     musicPaused = false;
     startCustomBGM();
   } else {
@@ -3298,7 +3343,7 @@ function toggleMusic() {
 
 function toggleSFX() {
   cfg.sfxOn = !cfg.sfxOn;
-  document.querySelectorAll('#sfxToggleHome, #sfxToggleGame').forEach(btn => {
+  document.querySelectorAll('#sfxToggleHome, #sfxToggleGame, #sfxToggleExit').forEach(btn => {
     btn.classList.toggle('on', cfg.sfxOn);
   });
 }
@@ -3306,6 +3351,7 @@ function toggleSFX() {
 function setMusicVolume(v) {
   cfg.musicVolume = v;
   if (bgmGain && !musicPaused) bgmGain.gain.value = v;
+  if (bgmAudio && !musicPaused) bgmAudio.volume = v;
   updateVolSliderStyle();
 }
 
@@ -3316,27 +3362,25 @@ function setSFXVolume(v) {
 }
 
 function playPauseMusic() {
-  if (!cfg.customMusic || !cfg.musicOn) return;
-  const ctx = getAudioCtx();
-  if (!bgmSourceNode) {
-    // Nothing playing yet — start it
+  if (!(cfg.customMusic || GAME_MUSIC_FILE) || !cfg.musicOn) return;
+  if (!bgmSourceNode && !bgmAudio) {
     musicPaused = false;
     startCustomBGM();
   } else {
     musicPaused = !musicPaused;
     if (musicPaused) {
-      bgmGain.gain.setValueAtTime(bgmGain.gain.value, ctx.currentTime);
-      bgmGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.2);
+      if (bgmGain) { const ctx = getAudioCtx(); bgmGain.gain.setValueAtTime(bgmGain.gain.value, ctx.currentTime); bgmGain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.2); }
+      if (bgmAudio) bgmAudio.volume = 0.0001;
     } else {
-      bgmGain.gain.setValueAtTime(bgmGain.gain.value, ctx.currentTime);
-      bgmGain.gain.linearRampToValueAtTime(cfg.musicVolume, ctx.currentTime + 0.2);
+      if (bgmGain) { const ctx = getAudioCtx(); bgmGain.gain.setValueAtTime(bgmGain.gain.value, ctx.currentTime); bgmGain.gain.linearRampToValueAtTime(cfg.musicVolume, ctx.currentTime + 0.2); }
+      if (bgmAudio) bgmAudio.volume = cfg.musicVolume;
     }
   }
   syncMusicPlayBtns();
 }
 
 function syncMusicPlayBtns() {
-  const hasMusic = !!cfg.customMusic && cfg.musicOn;
+  const hasMusic = !!(cfg.customMusic || GAME_MUSIC_FILE) && cfg.musicOn;
   document.querySelectorAll('.music-play-btn').forEach(btn => {
     btn.textContent = musicPaused ? '▶' : '⏸';
     btn.classList.toggle('playing', hasMusic && !musicPaused);
@@ -4336,8 +4380,8 @@ function startGame() {
     _aiMemoryProb = AI_MEMORY_PROB[cfg.diff];
     _aiPick2 = null;
   }
-  // Start BGM
-  if (cfg.musicOn && cfg.customMusic) {
+  // Start BGM (don't restart if already playing from home screen)
+  if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE) && !bgmSourceNode && !bgmAudio) {
     startCustomBGM();
   }
 
@@ -4809,7 +4853,6 @@ function onEggClick(idx, fromRemote) {
   if (game.current.length >= 2) return;
 
   game.locked = true;
-  sfxPop();
   game.current.push(idx);
 
   revealCard(idx, () => {
@@ -4917,6 +4960,7 @@ function revealCard(idx, callback) {
       // Step 3: Full open
       card.el.classList.remove('egg-cracking');
       card.el.classList.add('egg-opened');
+      sfxPop();
 
       // Floating item glow above egg
       showItemGlow(card);
@@ -5197,6 +5241,7 @@ function togglePause() {
         bgmGain.gain.linearRampToValueAtTime(0.03, ctx.currentTime + 0.3);
       } catch(e){}
     }
+    if (bgmAudio) bgmAudio.volume = cfg.musicVolume * 0.08;
   } else {
     if (pauseBtn) pauseBtn.textContent = '⏸';
     overlay.classList.add('hidden');
@@ -5209,6 +5254,7 @@ function togglePause() {
         bgmGain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.3);
       } catch(e){}
     }
+    if (bgmAudio && cfg.musicOn) bgmAudio.volume = cfg.musicVolume;
   }
 }
 
@@ -5893,7 +5939,7 @@ function startOnlineGameAsHost() {
   getAudioCtx();
   cfg.p1.name = document.getElementById('p1Name').value.trim() || 'Player 1';
   cfg.p2.name = 'Opponent';
-  if (cfg.musicOn && cfg.customMusic) startCustomBGM();
+  if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE)) startCustomBGM();
   const diffCfg = DIFF_CONFIG[cfg.diff];
   const items = ITEMS_BY_DIFF[cfg.diff];
   game.maxTime = 0; game.timer = 0;
@@ -5965,7 +6011,7 @@ function applyOnlineInit(data) {
   cfg.p1 = { name: data.p1.name, avatar: data.p1.avatar, photo: null };
   cfg.p2 = { name: data.p2.name, avatar: data.p2.avatar, photo: null };
   getAudioCtx(); // unlock audio on user gesture (joining counts as gesture)
-  if (cfg.musicOn && cfg.customMusic) startCustomBGM();
+  if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE)) startCustomBGM();
   game.maxTime = 0; game.timer = 0;
   game.shuffleMaxTime = data.shuffleMaxTime || 30; game.shuffleTimer = game.shuffleMaxTime;
   game.scores = [0,0]; game.items = [[],[]]; game.currentPlayer = 0;
@@ -6224,6 +6270,51 @@ function saveHighScore(score) {
 }
 
 // ============================================================
+//  CUSTOM AUDIO (developer-configured, not player-facing)
+// ============================================================
+function playCustomSFX(filePath) {
+  if (!cfg.sfxOn) return;
+  const a = new Audio(filePath);
+  a.volume = cfg.sfxVolume;
+  a.play().catch(() => {});
+}
+
+// ============================================================
+//  INTRO VIDEO
+// ============================================================
+function playIntroVideo() {
+  const overlay = document.getElementById('introVideoOverlay');
+  const vid = document.getElementById('introVideo');
+  if (!overlay || !vid) return;
+
+  // Hide home screen until video finishes
+  document.getElementById('homeScreen').classList.add('hidden');
+  overlay.style.display = 'flex';
+  vid.src = INTRO_VIDEO_FILE;
+
+  function dismiss() {
+    if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE) && !bgmSourceNode && !bgmAudio) startCustomBGM();
+    overlay.style.transition = 'opacity 0.7s';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.style.opacity = '';
+      overlay.style.transition = '';
+      document.getElementById('homeScreen').classList.remove('hidden');
+    }, 700);
+  }
+
+  vid.addEventListener('ended', dismiss, { once: true });
+  document.getElementById('introSkipBtn').addEventListener('click', dismiss, { once: true });
+
+  vid.play().catch(() => {
+    // Autoplay blocked — show home screen immediately
+    overlay.style.display = 'none';
+    document.getElementById('homeScreen').classList.remove('hidden');
+  });
+}
+
+// ============================================================
 //  SETTINGS SCREEN NAVIGATION
 // ============================================================
 let settingsPrevScreen = 'home';
@@ -6284,7 +6375,7 @@ function goHome() {
   if (_seOverlay) _seOverlay.classList.add('hidden');
   _isOnlineGame = false; _rematchOffered = false; _rematchOpponentOffered = false;
   _myReady = false; _opponentReady = false; _skipInGameCountdown = false;
-  if (cfg.musicOn && cfg.customMusic) {
+  if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE)) {
     setTimeout(() => startCustomBGM(), 300);
   }
 }
@@ -6694,7 +6785,6 @@ function playCountdown(callback) {
         if (callback) callback();
       }, 1100);
     } else {
-      sfxPop();
       // After a brief pause, sweep the arc away (full → empty)
       setTimeout(() => {
         if (arcEl) {
@@ -6755,9 +6845,23 @@ cfg.p2.avatar = AVATARS[0]; // 🐰
   });
 });
 
+// Start BGM on first user interaction (browser autoplay policy requires a gesture).
+// Uses new Audio() so it works when opening index.html directly (file:// protocol).
+document.addEventListener('pointerdown', function _firstGesture() {
+  document.removeEventListener('pointerdown', _firstGesture);
+  if (cfg.musicOn && (cfg.customMusic || GAME_MUSIC_FILE) && !bgmSourceNode && !bgmAudio) {
+    startCustomBGM();
+  }
+}, { capture: true });
+
+// Play intro video if configured (hides home screen until video ends)
+if (INTRO_VIDEO_FILE) playIntroVideo();
+
 // Toggle btn sync
 document.getElementById('musicToggleHome').classList.toggle('on', cfg.musicOn);
 document.getElementById('sfxToggleHome').classList.toggle('on', cfg.sfxOn);
+document.getElementById('musicToggleExit').classList.toggle('on', cfg.musicOn);
+document.getElementById('sfxToggleExit').classList.toggle('on', cfg.sfxOn);
 
 // Init volume sliders
 updateVolSliderStyle();
